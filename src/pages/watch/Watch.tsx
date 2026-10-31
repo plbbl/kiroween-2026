@@ -53,6 +53,9 @@ export function Watch({ params }: { params: URLSearchParams }) {
   // Back after friends were asked: they are told all is well.
   const relieved = run.status === 'well' && run.events.some((e) => e.kind === 'notify' && e.at < run.lastSign);
   const face = relieved ? { mood: 'happy' as Mood, say: 'Phew! I told your friends you’re okay.' } : MOOD[run.status];
+  // The ghost grows faint as an overdue hello goes unanswered, and is solid again the moment you answer.
+  const overdue = paused ? 0 : Math.max(0, day - (run.lastSign + config.cadenceDays));
+  const presence = 1 - 0.6 * Math.min(1, overdue / config.graceDays);
 
   useEffect(() => {
     if (!playing) return;
@@ -115,7 +118,9 @@ export function Watch({ params }: { params: URLSearchParams }) {
             <div className="speech pop" key={relieved ? 'relieved' : run.status}>
               {face.say}
             </div>
-            <Ghost mood={face.mood} size={130} float shadow />
+            <span className="presence" style={{ opacity: presence }}>
+              <Ghost mood={face.mood} size={130} float shadow />
+            </span>
           </div>
           <p className="tag">watch</p>
           <h1>Still here?</h1>
@@ -189,7 +194,7 @@ export function Watch({ params }: { params: URLSearchParams }) {
                 .map((e, i) => (
                   <span key={i} className={`mark m-${e.kind}${e.at <= day ? ' passed' : ''}`} style={{ left: pct(e.at) }} title={`${e.kind}, day ${e.at.toFixed(1)}`} />
                 ))}
-              <span className="walker" style={{ left: pct(day) } as CSSProperties} aria-hidden="true">
+              <span className="walker" style={{ left: pct(day), opacity: presence } as CSSProperties} aria-hidden="true">
                 <Ghost mood={face.mood} size={54} float />
               </span>
             </div>

@@ -2168,6 +2168,12 @@ textarea.mono-input {
   position: absolute;
   top: -12px;
   transform: translateX(-50%);
+  transition: opacity 500ms var(--soft);
+}
+
+.presence {
+  display: inline-block;
+  transition: opacity 500ms var(--soft);
 }
 
 .legend {
