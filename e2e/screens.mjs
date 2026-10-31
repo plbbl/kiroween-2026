@@ -2,7 +2,7 @@
 // Run after `npm run build`:
 //
 //   npm run screens                 both sizes, every part
-//   npm run screens -- phone seance one size, one part (seal, seance, watch, guides, home, real)
+//   npm run screens -- phone seance one size, one part (seal, update, seance, watch, guides, home, real)
 //
 // Screenshots go to e2e/screens/ (ignored by git). The e2e walk-through
 // checks that things work; this is for looking at them.
@@ -26,6 +26,8 @@ const app = pathToFileURL(join(root, 'dist/index.html')).href;
 const demo = JSON.parse(readFileSync(join(root, 'src/demo/demo.json'), 'utf8'));
 
 const b = await chromium.launch();
+// The owner's key from the seal part, for the update part.
+let keyWords = '';
 for (const which of sizes) {
   const phone = which === 'phone';
   const viewport = phone ? { width: 390, height: 844 } : { width: 1440, height: 900 };
@@ -103,11 +105,41 @@ for (const which of sizes) {
     await p.emulateMedia({ media: 'print' });
     await wait(500);
     await p.screenshot({ path: `${out}/${pre}-s8-print.png`, fullPage: true });
+    keyWords = (await p.locator('.print-key .word-grid').innerText())
+      .split('\n')
+      .map((l) => l.replace(/^\d+\s*/, '').trim())
+      .filter(Boolean)
+      .join(' ');
     await p.emulateMedia({ media: 'screen' });
     if (!phone) {
       const [dl] = await Promise.all([p.waitForEvent('download'), p.getByRole('button', { name: 'Download the jar' }).click()]);
       await dl.saveAs(join(out, 'jar.html'));
     }
+  }
+
+  if ((part === 'all' || part === 'update') && keyWords) {
+    // The owner changes what is inside the jar they just sealed (opened from its jar file).
+    const jarFile = join(out, 'jar.html');
+    const u = await ctx.newPage();
+    await u.goto(`${phone ? app : pathToFileURL(jarFile).href}#/seal?update`);
+    await u.waitForTimeout(800);
+    await u.screenshot({ path: `${out}/${pre}-u1-open.png` });
+    if (!phone) {
+      await u.getByLabel(/The 28 words/).fill(keyWords);
+      await u.getByRole('button', { name: 'Use my key' }).click();
+      await u.getByRole('heading', { name: 'A note for everyone' }).waitFor();
+      await u.waitForTimeout(500);
+      await u.screenshot({ path: `${out}/${pre}-u2-wizard.png` });
+      for (let i = 0; i < 3; i++) await u.getByRole('button', { name: /^Next/ }).click();
+      await u.waitForTimeout(600);
+      await u.screenshot({ path: `${out}/${pre}-u3-circle.png` });
+      await u.getByRole('button', { name: /^Almost done/ }).click();
+      await u.getByRole('button', { name: 'Seal the new words' }).click();
+      await u.getByRole('heading', { name: 'Updated!' }).waitFor({ timeout: 10000 });
+      await u.waitForTimeout(1500);
+      await u.screenshot({ path: `${out}/${pre}-u4-updated.png`, fullPage: true });
+    }
+    await u.close();
   }
 
   if (part === 'all' || part === 'seance') {

@@ -594,6 +594,13 @@ input[aria-invalid='true'] {
   place-items: center;
 }
 
+.person-name {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.15rem;
+  padding-left: 4px;
+}
+
 /* The same width whether it says “+ Letter” or “✓ Letter”, so names line up. */
 .person-row .chip {
   min-width: 96px;

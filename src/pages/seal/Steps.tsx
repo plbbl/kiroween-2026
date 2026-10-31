@@ -216,18 +216,21 @@ export function StepCircle({ draft, setDraft, locked = false, costumes = PREVIEW
               <span className="person-ghost" aria-hidden="true">
                 <Ghost costume={costumes[i]} mood={h.name.trim() ? 'happy' : 'open'} size={46} float phase={i * 0.5} />
               </span>
-              <label className="field">
-                <span className="visually-hidden">Name of person {i + 1}</span>
-                <input
-                  type="text"
-                  value={h.name}
-                  placeholder={`Friend ${i + 1}`}
-                  readOnly={locked}
-                  aria-invalid={twice(h.name) || undefined}
-                  aria-describedby={twice(h.name) ? 'same-name' : undefined}
-                  onChange={(e) => update(i, { name: e.target.value })}
-                />
-              </label>
+              {locked ? (
+                <span className="person-name">{h.name}</span>
+              ) : (
+                <label className="field">
+                  <span className="visually-hidden">Name of person {i + 1}</span>
+                  <input
+                    type="text"
+                    value={h.name}
+                    placeholder={`Friend ${i + 1}`}
+                    aria-invalid={twice(h.name) || undefined}
+                    aria-describedby={twice(h.name) ? 'same-name' : undefined}
+                    onChange={(e) => update(i, { name: e.target.value })}
+                  />
+                </label>
+              )}
               <button type="button" className={`chip${h.writing ? ' on' : ''}`} onClick={() => update(i, { writing: !h.writing })} aria-expanded={h.writing}>
                 {h.writing ? '✓ Letter' : '+ Letter'}
               </button>

@@ -41,6 +41,7 @@ export function OpenForUpdate({ jar: given, onOpen }: { jar: JarFile | null; onO
     try {
       const owned = await openWithKey(jar, card);
       sound.chime();
+      window.scrollTo({ top: 0, behavior: 'instant' });
       onOpen({ jar, key: card, owned });
       return null;
     } catch (e) {
