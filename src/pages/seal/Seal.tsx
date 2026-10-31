@@ -38,7 +38,7 @@ const STEPS: { label: string; title: (d: Draft) => string; sub: string; art: Rea
   {
     label: 'Circle',
     title: () => 'Who keeps the cards?',
-    sub: 'Each friend gets one card. Choose people who would come if you needed them.',
+    sub: 'One card each, for people who would come if you needed them.',
     art: (
       <span className="art-trio">
         <Ghost costume="bat" size={56} float phase={0.3} />
@@ -117,6 +117,7 @@ export function Seal() {
     }
     // The cork drops in, the wax is stamped, the ghost falls asleep.
     setCorked(true);
+    setTimeout(() => sound.cork(), 260);
     const sealing = sealJar(input);
     sealing.catch(() => undefined); // handled below, once the wax is down
     await wait(380);

@@ -143,7 +143,7 @@ export function Guides({ anchor }: { anchor: string }) {
           Before, and after
         </h1>
         <p className="lede rise" style={{ '--d': '200ms' } as CSSProperties}>
-          Your jar holds what only you know. The world has its own doors too. Here is where they are. Ticks aren’t saved anywhere.
+          The doors the world already has, and what to do when the time comes. Ticks stay on this page only.
         </p>
       </section>
       <div className="narrow guides">

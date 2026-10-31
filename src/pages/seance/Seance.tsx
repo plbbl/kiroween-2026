@@ -62,7 +62,7 @@ function Choose({ onChoose }: { onChoose: (jar: JarFile) => void }) {
           Gather around
         </h1>
         <p className="lede rise" style={{ '--d': '200ms' } as CSSProperties}>
-          When the time comes, friends bring their cards. Each card lights a candle. Enough candles, and the little ghost wakes up.
+          Each friend’s card lights a candle. Enough candles, and the little ghost wakes up.
         </p>
       </section>
 
@@ -208,7 +208,8 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
         setOpened(result);
         setPhase('open');
         setBurst((b) => b + 1);
-        sound.chime();
+        sound.pop();
+        setTimeout(() => sound.chime(), 180);
         setAnnounce('The seal is broken. The jar is open.');
         await wait(2600);
         setPhase('revealed');

@@ -1685,7 +1685,8 @@ textarea.mono-input {
 }
 
 .opened .envelope-flap {
-  transform: rotateX(180deg);
+  /* Folded back, and short enough to stay clear of the text above. */
+  transform: rotateX(180deg) scaleY(0.5);
   z-index: 1;
 }
 

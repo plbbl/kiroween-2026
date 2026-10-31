@@ -99,6 +99,42 @@ export const sound = {
     burst(a.ctx, a.out, { dur: 0.12, type: 'lowpass', freq: 500, gain: 0.25 });
   },
 
+  /** A cork pushed into the neck of a jar: a short, hollow knock. */
+  cork() {
+    const a = audio();
+    if (!a) return;
+    const t = a.ctx.currentTime;
+    const o = a.ctx.createOscillator();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(260, t);
+    o.frequency.exponentialRampToValueAtTime(150, t + 0.09);
+    const g = a.ctx.createGain();
+    g.gain.setValueAtTime(0.45, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+    o.connect(g).connect(a.out);
+    o.start(t);
+    o.stop(t + 0.2);
+    burst(a.ctx, a.out, { dur: 0.05, type: 'bandpass', freq: 900, q: 1.2, gain: 0.2 });
+  },
+
+  /** A cork popping out: a bright, rising blip. */
+  pop() {
+    const a = audio();
+    if (!a) return;
+    const t = a.ctx.currentTime;
+    const o = a.ctx.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(380, t);
+    o.frequency.exponentialRampToValueAtTime(1100, t + 0.07);
+    const g = a.ctx.createGain();
+    g.gain.setValueAtTime(0.5, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+    o.connect(g).connect(a.out);
+    o.start(t);
+    o.stop(t + 0.15);
+    burst(a.ctx, a.out, { dur: 0.04, type: 'highpass', freq: 2200, gain: 0.25, attack: 0.001 });
+  },
+
   /** Brittle wax giving way. */
   crack() {
     const a = audio();

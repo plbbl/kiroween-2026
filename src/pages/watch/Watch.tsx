@@ -118,7 +118,7 @@ export function Watch({ params }: { params: URLSearchParams }) {
           <p className="tag">watch</p>
           <h1>Still here?</h1>
           <p className="lede">
-            Every so often, one gentle question. One tap answers it. Go quiet, and we remind you. Only after that are your friends asked to look in on you.
+            One gentle question now and then. Go quiet, and your friends are asked to look in on you.
           </p>
         </section>
       )}
