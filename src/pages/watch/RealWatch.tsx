@@ -9,10 +9,12 @@ import { ApiError, watchApi, type WatchView } from '../../ui/watchApi.ts';
 const day = (iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }) : '';
 
+/** Which emailed link, if any, opened this page. */
+export const linkActionOf = (params: URLSearchParams) => (['confirm', 'here', 'manage', 'optout'] as const).find((a) => params.has(a));
 
 /** Handles the links in watch emails: #/watch?confirm=…, ?here=…, ?manage=…, ?optout=… */
 export function LinkAction({ params }: { params: URLSearchParams }) {
-  const action = (['confirm', 'here', 'manage', 'optout'] as const).find((a) => params.has(a));
+  const action = linkActionOf(params);
   const token = action ? (params.get(action) ?? '') : '';
   const [view, setView] = useState<WatchView | null>(null);
   const [left, setLeft] = useState<string | null>(null);
@@ -89,7 +91,7 @@ export function LinkAction({ params }: { params: URLSearchParams }) {
         <Ghost mood={mood} size={88} float />
         {(action === 'confirm' || action === 'here') && view && <Sparkles burst={`${action}-${view.lastSign}`} radius={90} />}
       </div>
-      <h2>{title}</h2>
+      <h1>{title}</h1>
       {body && <p className="muted">{body}</p>}
       {action === 'manage' && view && !deleted && (
         <>

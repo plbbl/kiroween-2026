@@ -24,7 +24,8 @@ export function useHashRoute(): HashRoute {
   useEffect(() => {
     const on = () => {
       setState(readRoute());
-      window.scrollTo({ top: 0 });
+      // A new page starts at the top at once; the page itself fades in.
+      window.scrollTo({ top: 0, behavior: 'instant' });
     };
     window.addEventListener('hashchange', on);
     return () => window.removeEventListener('hashchange', on);

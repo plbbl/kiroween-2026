@@ -6,7 +6,7 @@ import { numberWord, plural } from '../../ui/text.ts';
 import { useAtmosphere } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
 import { watchAvailable } from '../../ui/watchApi.ts';
-import { LinkAction, StartWatch } from './RealWatch.tsx';
+import { LinkAction, linkActionOf, StartWatch } from './RealWatch.tsx';
 
 const OWNER = DEMO_JAR.owner;
 const FIRST = OWNER.split(' ')[0]!;
@@ -95,25 +95,31 @@ export function Watch({ params }: { params: URLSearchParams }) {
   const pct = (at: number) => `${(Math.min(at, horizon) / horizon) * 100}%`;
   const remindersNow = run.events.filter((e) => e.kind === 'reminder' && e.at > run.lastSign).length;
 
+  // Opened from an emailed link: that link is the page; the preview follows.
+  const linked = !!linkActionOf(params);
+
   return (
     <div className="page watch-page">
-      <section className="narrow center watch-head">
-        <div className="watch-hero">
-          <div className="speech pop" key={run.status}>
-            {face.say}
-          </div>
-          <Ghost mood={face.mood} size={130} float shadow />
+      {linked ? (
+        <div className="narrow">
+          <LinkAction params={params} />
+          <h2 className="center section-title how-it-works">How the watch works</h2>
         </div>
-        <p className="tag">watch</p>
-        <h1>Still here?</h1>
-        <p className="lede">
-          Every so often, one gentle question. One tap answers it. Go quiet, and we remind you. Only after that are your friends asked to look in on you.
-        </p>
-      </section>
-
-      <div className="narrow">
-        <LinkAction params={params} />
-      </div>
+      ) : (
+        <section className="narrow center watch-head">
+          <div className="watch-hero">
+            <div className="speech pop" key={run.status}>
+              {face.say}
+            </div>
+            <Ghost mood={face.mood} size={130} float shadow />
+          </div>
+          <p className="tag">watch</p>
+          <h1>Still here?</h1>
+          <p className="lede">
+            Every so often, one gentle question. One tap answers it. Go quiet, and we remind you. Only after that are your friends asked to look in on you.
+          </p>
+        </section>
+      )}
 
       <section className="wrap watch-grid">
         <div className="card rhythm">

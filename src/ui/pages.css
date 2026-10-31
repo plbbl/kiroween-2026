@@ -2351,9 +2351,17 @@ textarea.mono-input {
   margin-bottom: 8px;
 }
 
-.link-result h2,
+.link-result h1,
 .start-watch h2 {
   margin-bottom: 8px;
+}
+
+.link-result h1 {
+  font-size: clamp(2.2rem, 5vw, 3rem);
+}
+
+.how-it-works {
+  margin-top: 64px;
 }
 
 .watch-facts {
