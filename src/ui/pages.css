@@ -1022,6 +1022,13 @@ textarea.mono-input {
   opacity: 0;
 }
 
+/* The file input is hidden; its card shows the keyboard focus instead. */
+.choose-card:has(input:focus-visible) {
+  border-color: var(--purple);
+  outline: 3px solid var(--purple);
+  outline-offset: 4px;
+}
+
 .choose-art {
   height: 170px;
   display: grid;

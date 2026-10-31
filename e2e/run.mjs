@@ -212,6 +212,60 @@ await p.goto(`${app}#/seal`);
 await p.waitForTimeout(1200);
 await p.screenshot({ path: join(shots, '21-phone-seal.png'), fullPage: true });
 
+// Keyboard only: seal a jar, open June's jar and a letter, with no mouse at all.
+{
+  const kb = await context.newPage();
+  kb.on('pageerror', (e) => errors.push(`keyboard: ${e}`));
+  const k = kb.keyboard;
+  const focused = () =>
+    kb.evaluate(() => {
+      const e = document.activeElement;
+      return `${e.tagName.toLowerCase()} "${(e.getAttribute('aria-label') || e.textContent || e.getAttribute('placeholder') || '').trim()}"`;
+    });
+  const tabTo = async (re) => {
+    for (let i = 0; i < 60; i++) {
+      await k.press('Tab');
+      if (re.test(await focused())) return;
+    }
+    throw new Error(`Tab never reached ${re}`);
+  };
+  const press = async (re, wait = 500) => {
+    await tabTo(re);
+    await k.press('Enter');
+    await kb.waitForTimeout(wait);
+  };
+  try {
+    await kb.goto(`${app}#/seal`);
+    await kb.waitForTimeout(700);
+    await k.type('Ada Lovelace');
+    await press(/Next/);
+    await tabTo(/^textarea/);
+    await k.type('Be kind.');
+    await press(/Next/);
+    await press(/Next/);
+    await press(/Next/);
+    for (const n of ['Charles', 'Mary', 'Augustus']) {
+      await tabTo(/input "Friend/);
+      await k.type(n);
+    }
+    await press(/Almost done/, 700);
+    await press(/Seal the jar/, 0);
+    await kb.getByRole('heading', { name: /Sealed!/ }).waitFor({ timeout: 8000 });
+    await kb.goto(`${app}#/seance`);
+    await kb.waitForTimeout(700);
+    await press(/June’s jar/, 900);
+    for (let i = 0; i < 3; i++) await press(/button "\d\/5/, 900);
+    await kb.getByText(/opened by/).waitFor({ timeout: 15000 });
+    await press(/Open with .*seal/, 400);
+    await press(/from the demo/, 0);
+    await kb.locator('.letter').waitFor({ timeout: 5000 });
+    check(true, 'the keyboard alone seals a jar, opens one and reads a letter');
+  } catch (e) {
+    check(false, `keyboard only: ${e.message}`);
+  }
+  await kb.close();
+}
+
 // The real watch: a local server with the watch service and a temporary outbox
 const dataDir = mkdtempSync(join(tmpdir(), 'phylactery-e2e-'));
 const port = 8700 + Math.floor(Math.random() * 200);

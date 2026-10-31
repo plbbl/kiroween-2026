@@ -118,7 +118,7 @@ Limits worth knowing: this is browser cryptography; the app as a whole has not h
 
 The property tests caught a real bug: the base32 decoder accepted non-canonical padding bits, so a damaged QR code could decode to the same card. Decoding is now strict.
 
-`npm run e2e` seals a jar, checks the self-check, prints the cards, downloads the jar file and opens it from disk with two typed cards, opens a letter with a typed seal, runs June's séance and the watch preview, starts and confirms a real watch against a local server, checks phone layouts, and runs axe-core accessibility audits on eight screens (no serious or critical WCAG 2 A/AA issues allowed).
+`npm run e2e` seals a jar, checks the self-check, prints the cards, downloads the jar file and opens it from disk with two typed cards, opens a letter with a typed seal, runs June's séance and the watch preview, does a whole seal, séance and letter with the keyboard alone, starts and confirms a real watch against a local server, checks phone layouts, and runs axe-core accessibility audits on eight screens (no serious or critical WCAG 2 A/AA issues allowed).
 
 ## Project layout
 
