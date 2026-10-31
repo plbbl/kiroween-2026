@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { MemoryStore, OutboxMailer } from './adapters.ts';
 import { handle } from './http.ts';
+import { mailHtml } from './mail-html.ts';
 import { emptyContent, parseJar, sealJar } from '../core/jar.ts';
 import { DAY, type Deps } from './service.ts';
 
@@ -232,6 +233,28 @@ describe('watch service', () => {
     const res = await t.call('/api/watch/checkin', { token: decodeURIComponent(here) });
     expect(res.body.status).toBe('well');
     expect(t.mailer.sent.filter((m) => m.subject === 'June Alder is okay')).toHaveLength(2);
+  });
+
+  it('each email’s HTML part keeps every link, puts the one action on a button, and escapes names', async () => {
+    const t = setup();
+    const odd = { ...start, owner: { name: 'June <b>Alder</b> & co', email: 'june@example.com' } };
+    await t.call('/api/watch', odd);
+    await t.call('/api/watch/confirm', { token: t.linkIn(0, 'confirm')! });
+    await t.live(12);
+    const subjects = new Set(t.mailer.sent.map((m) => m.subject));
+    expect(subjects.size).toBeGreaterThanOrEqual(6);
+    for (const m of t.mailer.sent) {
+      const html = mailHtml(m);
+      expect(html).not.toMatch(/<b>Alder/);
+      expect(html).not.toMatch(/<img|<script|https?:\/\/(?!phylactery\.test)/);
+      for (const url of m.text.match(/https?:\/\/[^\s),]+/g) ?? []) expect(html).toContain(`href="${url.replace(/&/g, '&amp;')}"`);
+      if (m.action) {
+        expect(m.text.split('\n')).toContain(m.action.url);
+        expect(html).toContain(`>${m.action.label.replace(/&/g, '&amp;')}</a>`);
+      }
+    }
+    expect(t.mailer.sent.filter((m) => m.to === 'june@example.com').every((m) => m.action)).toBe(true);
+    expect(t.mailer.sent.filter((m) => m.to !== 'june@example.com').some((m) => m.action)).toBe(false);
   });
 
   it('never asks friends if the owner keeps checking in', async () => {

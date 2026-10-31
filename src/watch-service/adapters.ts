@@ -1,6 +1,7 @@
 // Stores and mailers that run anywhere. Host-specific ones (Netlify Blobs)
 // live next to their host in netlify/functions.
 
+import { mailHtml } from './mail-html.ts';
 import type { Mail, Mailer, WatchRecord, WatchStore } from './service.ts';
 
 export class MemoryStore implements WatchStore {
@@ -40,7 +41,7 @@ export class ResendMailer implements Mailer {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${this.apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: this.from, to: [mail.to], subject: mail.subject, text: mail.text }),
+      body: JSON.stringify({ from: this.from, to: [mail.to], subject: mail.subject, text: mail.text, html: mailHtml(mail) }),
     });
     if (!res.ok) throw new Error(`Email could not be sent (${res.status}).`);
   }

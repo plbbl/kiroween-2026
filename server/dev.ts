@@ -3,7 +3,7 @@
 //   npm run build && npm run serve        then open http://localhost:8787
 //
 // Mail is not sent: it is printed and kept in .data/outbox.json, and can be
-// read at /api/dev/outbox. Watches are kept in .data/watches.json.
+// read at /api/dev/outbox (and the newest as HTML at /api/dev/mail). Watches are kept in .data/watches.json.
 // With RESEND_API_KEY and MAIL_FROM set, real email is sent instead.
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -11,6 +11,7 @@ import { createServer } from 'node:http';
 import { extname, join, normalize, resolve } from 'node:path';
 import { OutboxMailer, ResendMailer } from '../src/watch-service/adapters.ts';
 import { handle } from '../src/watch-service/http.ts';
+import { mailHtml } from '../src/watch-service/mail-html.ts';
 import { tick, type Mail, type Mailer, type WatchRecord, type WatchStore } from '../src/watch-service/service.ts';
 
 const root = resolve(import.meta.dirname, '..');
@@ -67,6 +68,13 @@ createServer(async (req, res) => {
   if (url.pathname === '/api/dev/outbox') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(local.sent));
+    return;
+  }
+  // The newest mail as the HTML part a mail app would show; ?n=2 for the one before.
+  if (url.pathname === '/api/dev/mail') {
+    const mail = local.sent[local.sent.length - Number(url.searchParams.get('n') ?? 1)];
+    res.writeHead(mail ? 200 : 404, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(mail ? mailHtml(mail) : 'No mail yet.');
     return;
   }
   if (url.pathname.startsWith('/api/')) {

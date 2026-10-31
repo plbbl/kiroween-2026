@@ -92,7 +92,7 @@ Node 22 or later. `npm run serve` keeps watches in `.data/watches.json` and writ
 
 The readable header of a jar is bound to every ciphertext as additional authenticated data, so editing it breaks decryption. Every key in a jar (the master key that the cards share, and each holder's seal) is derived with HKDF from one random seed, which is printed only on your key. That is what lets you reseal new words under the same master key and the same seals; a new jar file carries a higher revision number. Every card carries a SHA-256 checksum, in its QR code and in its words, so a mistyped word is caught.
 
-The watch service sends nothing until the owner confirms their address, stores its tokens only as SHA-256 hashes, rotates check-in links with each batch of questions, gives friends an opt-out link, and allows at most three watches per address. When friends are asked to check on the owner, each email says who else was asked and how the circle would open the jar; if the owner left a locked copy, each friend gets their own link to it, so no one has to keep a file safe for years.
+The watch service sends nothing until the owner confirms their address, stores its tokens only as SHA-256 hashes, rotates check-in links with each batch of questions, gives friends an opt-out link, and allows at most three watches per address. Every email is plain text with an HTML copy that adds one button for the one thing it asks, and no images, tracking pixels or remote styles. When friends are asked to check on the owner, each email says who else was asked and how the circle would open the jar; if the owner left a locked copy, each friend gets their own link to it, so no one has to keep a file safe for years.
 
 Limits worth knowing: this is browser cryptography; the app as a whole has not had an independent audit (the Shamir library has, by Cure53 and Zellic); print spoolers and screenshots can keep copies of cards; a malicious browser extension can read any page. **The wishes in a jar are not a legal will.**
 
@@ -109,7 +109,7 @@ Limits worth knowing: this is browser cryptography; the app as a whole has not h
 
 ### Tests
 
-`npm test` runs 41 tests, most of them property-based (fast-check), among them:
+`npm test` runs 45 tests, most of them property-based (fast-check), among them:
 
 - any set of cards at or above the threshold opens the jar and returns exactly what was sealed; one card short reveals nothing;
 - after the owner changes the jar with their key, any group of the original cards opens the new words, the original seals open the new letters, and the old file still holds only the old words; a key from another jar is refused;

@@ -123,7 +123,7 @@ export function ownerReminder(owner: string, n: number, of: number): { subject: 
   return {
     subject: n === of ? `${owner}, are you still here?` : `${owner}, a small sign, please`,
     body:
-      `Tap the link below to let us know you are well. ` +
+      `One tap below lets us know you are well. ` +
       (n === of
         ? `If we don't hear from you, the people holding your cards will be asked to check on you.`
         : `This is reminder ${n} of ${of}.`),

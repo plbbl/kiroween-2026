@@ -74,6 +74,8 @@ export interface Mail {
   to: string;
   subject: string;
   text: string;
+  /** The one thing the email asks: shown as a button in the HTML part. Its url stands on a line of its own in the text. */
+  action?: { label: string; url: string };
 }
 
 export interface Mailer {
@@ -197,13 +199,15 @@ export async function createWatch(deps: Deps, raw: unknown): Promise<{ id: strin
     ...(input.jar === undefined || input.jar === null ? {} : { jar: cleanJar(input.jar, deps.now()) }),
   };
   await deps.store.put(record);
+  const confirmUrl = link(deps, 'confirm', checkin.token);
   await deps.mailer.send({
     to: owner.email,
     subject: 'Please confirm your watch',
+    action: { label: 'Confirm my watch', url: confirmUrl },
     text:
       `Hi ${owner.name.split(/\s+/)[0]},\n\n` +
       `Someone (hopefully you) asked Phylactery to keep watch over you. Nothing will happen until you confirm:\n\n` +
-      `${link(deps, 'confirm', checkin.token)}\n\n` +
+      `${confirmUrl}\n\n` +
       `After that, about every ${config.cadenceDays} day${config.cadenceDays > 1 ? 's' : ''} we will send a link like the one above. One tap says you are still here.\n\n` +
       `Keep this email. This link is the only way to pause, change or delete the watch:\n${link(deps, 'manage', manage.token)}\n\n` +
       `If this wasn't you, ignore this email and nothing more will be sent.\n`,
@@ -388,13 +392,15 @@ export async function tick(deps: Deps): Promise<{ sent: number }> {
     if (!due.length && !review) continue;
     const first = record.owner.name.split(/\s+/)[0]!;
     if (review) {
+      const updateUrl = `${deps.baseUrl.replace(/\/?$/, '/')}#/seal?update`;
       await deps.mailer.send({
         to: record.owner.email,
         subject: `${first}, a yearly look at your jar`,
+        action: { label: 'Update my jar', url: updateUrl },
         text:
           `Today is the Day of the Dead. Once a year, on this day, we suggest a look at what you left in your jar.\n\n` +
-          `Passwords change, accounts close, people move. If something in your jar is out of date, change it with your key at ` +
-          `${deps.baseUrl.replace(/\/?$/, '/')}#/seal?update. Your friends keep their cards; send them the new jar file` +
+          `Passwords change, accounts close, people move. If something in your jar is out of date, change it with your key:\n${updateUrl}\n\n` +
+          `Your friends keep their cards; send them the new jar file` +
           `${record.jar ? ', and give the watch a copy from your manage link' : ''}.\n\n` +
           `If everything is still right, there is nothing to do. Your watch carries on as before.\n`,
       });
@@ -421,6 +427,7 @@ export async function tick(deps: Deps): Promise<{ sent: number }> {
     const friendsNow = notify && !ask && silence.asked > 0 && now - silence.lastAt >= gap - 1000;
     const toSend = [...(ask ? [ask] : []), ...(friendsNow ? [notify] : [])];
     const checkinToken = await rotateCheckin(deps, record);
+    const hereUrl = link(deps, 'here', checkinToken);
     for (const e of toSend) {
       if (e.kind !== 'notify') {
         silence.asked++;
@@ -430,13 +437,14 @@ export async function tick(deps: Deps): Promise<{ sent: number }> {
         await deps.mailer.send({
           to: record.owner.email,
           subject: `${first}, still here?`,
+          action: { label: 'I’m here', url: hereUrl },
           text:
-            `Just checking in. One tap lets us know you are well:\n\n${link(deps, 'here', checkinToken)}\n\n` +
+            `Just checking in. One tap lets us know you are well:\n\n${hereUrl}\n\n` +
             `Going away for a while? Pause the watch from the manage link in your first email.\n`,
         });
       } else if (e.kind === 'reminder') {
         const m = ownerReminder(first, e.n ?? 1, record.config.reminders);
-        await deps.mailer.send({ to: record.owner.email, subject: m.subject, text: `${m.body}\n\n${link(deps, 'here', checkinToken)}\n` });
+        await deps.mailer.send({ to: record.owner.email, subject: m.subject, action: { label: 'I’m here', url: hereUrl }, text: `${m.body}\n\n${hereUrl}\n` });
       } else {
         const optouts = await rotateOptouts(deps, record);
         const jarLinks = await rotateJarLinks(deps, record);
@@ -455,7 +463,8 @@ export async function tick(deps: Deps): Promise<{ sent: number }> {
         await deps.mailer.send({
           to: record.owner.email,
           subject: 'We asked your friends to check on you',
-          text: `We have not heard from you, so we asked ${list(record.holders.filter((h) => !h.removed).map((h) => h.name))} to look in on you.\n\nIf you are fine, tap here and we will tell them:\n${link(deps, 'here', checkinToken)}\n`,
+          action: { label: 'I’m fine, tell them', url: hereUrl },
+          text: `We have not heard from you, so we asked ${list(record.holders.filter((h) => !h.removed).map((h) => h.name))} to look in on you.\n\nIf you are fine, tap here and we will tell them:\n${hereUrl}\n`,
         });
       }
       sent++;
