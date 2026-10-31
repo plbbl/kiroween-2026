@@ -6,7 +6,9 @@
 // It opens dist/index.html straight from disk, the same way a downloaded
 // jar file is opened, so it also proves the app needs no server.
 
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { spawn } from 'node:child_process';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -44,7 +46,6 @@ const audits = [];
 async function audit(pg, name) {
   await pg.addScriptTag({ content: axeSource });
   const violations = await pg.evaluate(async () => {
-    // eslint-disable-next-line no-undef
     const r = await axe.run(document, { runOnly: ['wcag2a', 'wcag2aa'] });
     return r.violations
       .filter((v) => v.impact === 'serious' || v.impact === 'critical')
@@ -210,6 +211,49 @@ await p.screenshot({ path: join(shots, '20-phone-seance.png'), fullPage: true })
 await p.goto(`${app}#/seal`);
 await p.waitForTimeout(1200);
 await p.screenshot({ path: join(shots, '21-phone-seal.png'), fullPage: true });
+
+// The real watch: a local server with the watch service and a temporary outbox
+const dataDir = mkdtempSync(join(tmpdir(), 'phylactery-e2e-'));
+const port = 8700 + Math.floor(Math.random() * 200);
+const server = spawn(process.execPath, ['--experimental-strip-types', join(root, 'server/dev.ts')], {
+  env: { ...process.env, PORT: String(port), DATA_DIR: dataDir, RESEND_API_KEY: '' },
+  stdio: 'ignore',
+});
+try {
+  const base = `http://localhost:${port}/`;
+  for (let i = 0; i < 50; i++) {
+    try {
+      if ((await fetch(`${base}api/health`)).ok) break;
+    } catch {
+      /* not up yet */
+    }
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  const w = await context.newPage();
+  w.on('pageerror', (e) => errors.push(`watch: ${e}`));
+  await w.goto(`${base}#/watch`);
+  await w.getByRole('button', { name: 'Start the watch' }).waitFor({ timeout: 5000 });
+  await w.getByLabel('Your name').fill('Ada Lovelace');
+  await w.getByLabel('Your email').fill('ada@example.com');
+  await w.getByLabel('Friend 1 name').fill('Charles');
+  await w.getByLabel('Friend 1 email').fill('charles@example.com');
+  await w.getByRole('button', { name: 'Start the watch' }).click();
+  await w.getByText('Check your inbox').waitFor();
+  const outbox = await (await fetch(`${base}api/dev/outbox`)).json();
+  check(outbox.length === 1 && outbox[0].to === 'ada@example.com', 'starting a watch emails only the owner, to confirm');
+  await w.goto(base + /(#\/watch\?confirm=\S+)/.exec(outbox[0].text)[1]);
+  await w.getByText('You’re all set!').waitFor({ timeout: 5000 });
+  await w.screenshot({ path: join(shots, '22-watch-confirmed.png') });
+  await w.goto(base + /(#\/watch\?manage=\S+)/.exec(outbox[0].text)[1]);
+  await w.locator('.link-result').getByRole('button', { name: 'Pause, I’m away' }).click();
+  await w.getByText('Paused. Nothing will be sent until you resume.').waitFor({ timeout: 5000 });
+  check(true, 'the owner confirms and pauses a real watch from the emailed links');
+} catch (e) {
+  check(false, `real watch flow: ${e}`);
+} finally {
+  server.kill();
+  rmSync(dataDir, { recursive: true, force: true });
+}
 
 await browser.close();
 

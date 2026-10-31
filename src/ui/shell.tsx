@@ -5,13 +5,21 @@ export type Route = 'home' | 'seal' | 'watch' | 'seance' | 'guides' | 'gallery';
 
 const ROUTES: Route[] = ['home', 'seal', 'watch', 'seance', 'guides', 'gallery'];
 
-function readRoute(): { route: Route; anchor: string } {
-  const [path = '', anchor = ''] = window.location.hash.replace(/^#\/?/, '').split('#');
-  const route = (ROUTES as string[]).includes(path) ? (path as Route) : 'home';
-  return { route, anchor };
+interface HashRoute {
+  route: Route;
+  anchor: string;
+  /** Query in the hash, e.g. #/watch?here=TOKEN from an email link. */
+  params: URLSearchParams;
 }
 
-export function useHashRoute(): { route: Route; anchor: string } {
+function readRoute(): HashRoute {
+  const [pathAndQuery = '', anchor = ''] = window.location.hash.replace(/^#\/?/, '').split('#');
+  const [path = '', query = ''] = pathAndQuery.split('?');
+  const route = (ROUTES as string[]).includes(path) ? (path as Route) : 'home';
+  return { route, anchor, params: new URLSearchParams(query) };
+}
+
+export function useHashRoute(): HashRoute {
   const [state, setState] = useState(readRoute);
   useEffect(() => {
     const on = () => {

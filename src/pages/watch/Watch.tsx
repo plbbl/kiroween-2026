@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { DEFAULT_WATCH, holderMessage, ownerReminder, runWatch, type OwnerAction, type WatchConfig, type WatchEvent, type WatchStatus } from '../core/watch.ts';
-import { DEMO_JAR } from '../demo/demo.ts';
-import { Ghost, type Mood } from '../ui/art/Ghost.tsx';
-import { numberWord } from '../ui/text.ts';
-import { useAtmosphere } from '../ui/shell.tsx';
-import { sound } from '../ui/sound.ts';
+import { DEFAULT_WATCH, holderMessage, ownerReminder, runWatch, type OwnerAction, type WatchConfig, type WatchEvent, type WatchStatus } from '../../core/watch.ts';
+import { DEMO_JAR } from '../../demo/demo.ts';
+import { Ghost, type Mood } from '../../ui/art/Ghost.tsx';
+import { numberWord } from '../../ui/text.ts';
+import { useAtmosphere } from '../../ui/shell.tsx';
+import { sound } from '../../ui/sound.ts';
+import { watchAvailable } from '../../ui/watchApi.ts';
+import { LinkAction, StartWatch } from './RealWatch.tsx';
 
 const OWNER = DEMO_JAR.owner;
 const FIRST = OWNER.split(' ')[0]!;
@@ -33,8 +35,12 @@ function Segmented<T extends number>({ label, value, options, onChange }: { labe
   );
 }
 
-export function Watch() {
+export function Watch({ params }: { params: URLSearchParams }) {
   useAtmosphere('day');
+  const [service, setService] = useState<boolean | null>(null);
+  useEffect(() => {
+    void watchAvailable().then(setService);
+  }, []);
   const [config, setConfig] = useState<WatchConfig>(DEFAULT_WATCH);
   const [actions, setActions] = useState<OwnerAction[]>([]);
   const [day, setDay] = useState(0);
@@ -99,6 +105,10 @@ export function Watch() {
         </p>
       </section>
 
+      <div className="narrow">
+        <LinkAction params={params} />
+      </div>
+
       <section className="wrap watch-grid">
         <div className="card rhythm">
           <h2 className="card-title">Your rhythm</h2>
@@ -135,7 +145,7 @@ export function Watch() {
         <div className="card timeline">
           <div className="spread">
             <h2 className="card-title">
-              Day <span className="day-num">{Math.floor(day)}</span>
+              <span className="tag try-tag">try it</span> Day <span className="day-num">{Math.floor(day)}</span>
             </h2>
             <span className={`status-pill s-${run.status}`}>
               {run.status === 'reminding' ? `reminder ${remindersNow} of ${config.reminders}` : run.status === 'notified' ? 'friends asked' : run.status}
@@ -180,10 +190,10 @@ export function Watch() {
               {playing ? 'Pause time' : day >= horizon ? 'That’s all' : 'Let time pass'}
             </button>
             <button type="button" className="btn small" onClick={() => act('checkin')} disabled={paused}>
-              {run.status === 'notified' ? 'Knock knock, I’m here!' : 'I’m here!'}
+              {run.status === 'notified' ? 'Knock knock, I’m here!' : 'Say “I’m here”'}
             </button>
             <button type="button" className="btn small" onClick={() => act(paused ? 'resume' : 'pause')}>
-              {paused ? 'I’m back' : 'Pause, I’m away'}
+              {paused ? 'Back again' : 'Go away for a bit'}
             </button>
             <button type="button" className="text-btn quiet" onClick={reset}>
               Start over
@@ -192,8 +202,20 @@ export function Watch() {
         </div>
       </section>
 
+      <div className="narrow service">
+        {service === true && <StartWatch config={config} />}
+        {service === false && (
+          <p className="note">
+            <Ghost size={30} mood="sleep" />
+            <span>
+              This copy of Phylactery has no watch service (the offline jar file never does), so here you can only try the rhythm. Everything else works.
+            </span>
+          </p>
+        )}
+      </div>
+
       <section className="narrow chat" aria-label="Messages">
-        <h2 className="center section-title">Messages</h2>
+        <h2 className="center section-title">What the preview would send</h2>
         {messages.length === 0 && <p className="center faint">Nothing yet. Let time pass, and stay quiet.</p>}
         {messages.map((e) => (
           <Message key={`${e.kind}-${e.at}-${e.n ?? 0}`} event={e} of={config.reminders} />
@@ -201,7 +223,7 @@ export function Watch() {
         <p className="note">
           <Ghost size={30} mood="wink" />
           <span>
-            This is a preview with June’s demo jar, so nothing is really sent. The real watch will only ever know email addresses and times,
+            These are previews with June’s demo jar, so nothing here is really sent. A real watch only ever knows names, email addresses and times,
             never what is inside a jar.
           </span>
         </p>

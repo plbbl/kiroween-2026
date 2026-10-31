@@ -1,6 +1,15 @@
+# Netlify hosts the app and the watch service.
+# Set these environment variables in the Netlify UI:
+#   RESEND_API_KEY   an API key from resend.com
+#   MAIL_FROM        e.g. "Phylactery <watch@your.domain>" (a domain verified in Resend)
+#   TICK_SECRET      any long random string (protects the manual /api/watch/tick)
 [build]
   command = "npm ci && npm run build"
   publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
 
 [[headers]]
   for = "/*"

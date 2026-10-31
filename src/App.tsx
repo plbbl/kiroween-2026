@@ -8,7 +8,7 @@ import { Guides } from './pages/Guides.tsx';
 import { Home } from './pages/Home.tsx';
 import { Seal } from './pages/seal/Seal.tsx';
 import { Seance } from './pages/seance/Seance.tsx';
-import { Watch } from './pages/Watch.tsx';
+import { Watch } from './pages/watch/Watch.tsx';
 
 const NAV: { route: Route; label: string }[] = [
   { route: 'seal', label: 'Seal' },
@@ -32,7 +32,7 @@ function SoundIcon({ on }: { on: boolean }) {
 
 export function App() {
   const embedded = useMemo(() => embeddedJar(), []);
-  const { route: hashRoute, anchor } = useHashRoute();
+  const { route: hashRoute, anchor, params } = useHashRoute();
   // A downloaded Grimoire opens straight into its séance.
   const route: Route = embedded && hashRoute === 'home' ? 'seance' : hashRoute;
 
@@ -87,7 +87,7 @@ export function App() {
       <main id="main">
         {route === 'home' && <Home />}
         {route === 'seal' && <Seal />}
-        {route === 'watch' && <Watch />}
+        {route === 'watch' && <Watch params={params} />}
         {route === 'seance' && <Seance embedded={embedded} />}
         {route === 'guides' && <Guides anchor={anchor} />}
         {route === 'gallery' && <Gallery />}

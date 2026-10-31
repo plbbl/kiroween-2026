@@ -2188,3 +2188,78 @@ textarea.mono-input {
     max-width: 94%;
   }
 }
+
+/* ── Real watch ───────────────────────────────────────────── */
+
+.link-result,
+.start-watch {
+  margin-top: 26px;
+  text-align: center;
+}
+
+.start-watch {
+  text-align: left;
+}
+
+.start-watch.sent {
+  text-align: center;
+}
+
+.link-ghost {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.link-result h2,
+.start-watch h2 {
+  margin-bottom: 8px;
+}
+
+.watch-facts {
+  list-style: none;
+  padding: 0;
+  margin: 14px auto 18px;
+  max-width: 520px;
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  color: var(--fg-soft);
+}
+
+.watch-facts li {
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: var(--surface-2);
+}
+
+.watch-facts b {
+  color: var(--accent);
+}
+
+.service {
+  margin-top: 24px;
+}
+
+.person-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.friends-label {
+  margin-top: 10px;
+}
+
+@media (max-width: 760px) {
+  .person-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.try-tag {
+  margin-right: 6px;
+  vertical-align: middle;
+}
