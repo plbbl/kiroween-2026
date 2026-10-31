@@ -197,7 +197,7 @@ function Envelope({ jar, opened, holder, buddy }: { jar: JarFile; opened: Opened
     <div className={`envelope-wrap${letter ? ' opened' : ''}${letter || asking ? ' wide' : ''}`}>
       <div className="envelope" aria-hidden={!!letter}>
         <span className="envelope-buddy">
-          <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} mood={asking ? 'happy' : 'open'} size={52} float phase={holder.x * 0.7} />
+          <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} mood={asking ? 'happy' : 'open'} size={64} float phase={holder.x * 0.7} />
         </span>
         <div className="envelope-back" />
         <div className="envelope-front">

@@ -24,7 +24,11 @@ Phylactery joins the pieces, and makes a heavy subject gentle: death as a reunio
 |---|---|
 | ![Home](docs/screenshots/home.jpg) | ![Sealed: a fan of cards and a self-check](docs/screenshots/sealed.jpg) |
 | ![The séance, two candles lit](docs/screenshots/seance.jpg) | ![What June left](docs/screenshots/reveal.jpg) |
-| ![A letter, opened with Clara's seal](docs/screenshots/letter.jpg) | ![The watch: the ghost gets worried](docs/screenshots/watch.jpg) |
+| ![Letters, each with its reader's buddy peeking over the top](docs/screenshots/letters.jpg) | ![A letter, opened with Clara's seal](docs/screenshots/letter.jpg) |
+
+| | |
+|---|---|
+| ![The watch: eleven quiet days, three reminders, then friends are asked](docs/screenshots/watch.jpg) | ![A printed card: the outside opens the jar, the folded half is a private seal](docs/screenshots/card.jpg) |
 
 ## The costume
 

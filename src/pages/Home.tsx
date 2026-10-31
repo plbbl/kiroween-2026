@@ -144,7 +144,7 @@ export function Home() {
       </section>
 
       <footer className="footer center faint">
-        Open source under MIT · Made for Kiroween 2026 · No analytics, no servers, no tracking
+        Open source under MIT · Made for Kiroween 2026 · No analytics, no tracking · Your jar is never uploaded
       </footer>
     </div>
   );

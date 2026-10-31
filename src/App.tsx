@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Stars } from './ui/art/Decor.tsx';
 import { Ghost } from './ui/art/Ghost.tsx';
 import { embeddedJar, href, ShellProvider, useHashRoute, type Route } from './ui/shell.tsx';
@@ -36,11 +36,12 @@ export function App() {
   // A downloaded Grimoire opens straight into its séance.
   const route: Route = embedded && hashRoute === 'home' ? 'seance' : hashRoute;
 
-  const [theme, setTheme] = useState<'day' | 'night'>('day');
+  // Start in the right light, so a jar file opens at night without a flash of day.
+  const [theme, setTheme] = useState<'day' | 'night'>(() => (route === 'seance' ? 'night' : 'day'));
   const [candlelight, setCandlelight] = useState(0);
   const [soundOn, setSoundOn] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.body.dataset.theme = theme;
   }, [theme]);
 
@@ -49,6 +50,31 @@ export function App() {
   }, [candlelight]);
 
   const shell = useMemo(() => ({ setTheme, setCandlelight }), []);
+
+  // The purple pill under the current page slides from link to link.
+  const nav = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    const el = nav.current;
+    if (!el) return;
+    const place = () => {
+      const a = el.querySelector<HTMLElement>('a[aria-current="page"]');
+      el.style.setProperty('--pill-on', a ? '1' : '0');
+      if (!a) return;
+      el.style.setProperty('--pill-x', `${a.offsetLeft}px`);
+      el.style.setProperty('--pill-y', `${a.offsetTop}px`);
+      el.style.setProperty('--pill-w', `${a.offsetWidth}px`);
+      el.style.setProperty('--pill-h', `${a.offsetHeight}px`);
+    };
+    place();
+    // Slide only after the first placement, never in from the corner.
+    const ready = requestAnimationFrame(() => (el.dataset.ready = ''));
+    void document.fonts?.ready.then(place);
+    window.addEventListener('resize', place);
+    return () => {
+      cancelAnimationFrame(ready);
+      window.removeEventListener('resize', place);
+    };
+  }, [route]);
 
   const toggleSound = () => {
     const next = !soundOn;
@@ -62,7 +88,8 @@ export function App() {
 
   return (
     <ShellProvider value={shell}>
-      <div className="backdrop" aria-hidden="true" />
+      <div className="backdrop day" aria-hidden="true" />
+      <div className="backdrop night" aria-hidden="true" />
       {theme === 'night' && <Stars />}
 
       <header className="topbar no-print">
@@ -72,7 +99,7 @@ export function App() {
           </span>
           <span>Phylactery</span>
         </a>
-        <nav className="nav" aria-label="Main">
+        <nav className="nav" aria-label="Main" ref={nav}>
           {NAV.map((n) => (
             <a key={n.route} href={href(n.route)} aria-current={route === n.route ? 'page' : undefined}>
               {n.label}
@@ -85,12 +112,14 @@ export function App() {
       </header>
 
       <main id="main">
-        {route === 'home' && <Home />}
-        {route === 'seal' && <Seal />}
-        {route === 'watch' && <Watch params={params} />}
-        {route === 'seance' && <Seance embedded={embedded} />}
-        {route === 'guides' && <Guides anchor={anchor} />}
-        {route === 'gallery' && <Gallery />}
+        <div className="route" key={route}>
+          {route === 'home' && <Home />}
+          {route === 'seal' && <Seal />}
+          {route === 'watch' && <Watch params={params} />}
+          {route === 'seance' && <Seance embedded={embedded} />}
+          {route === 'guides' && <Guides anchor={anchor} />}
+          {route === 'gallery' && <Gallery />}
+        </div>
       </main>
     </ShellProvider>
   );

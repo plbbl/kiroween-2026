@@ -108,7 +108,7 @@ body {
   transition: opacity 900ms var(--soft);
 }
 
-[data-theme='day'] .backdrop {
+.backdrop.day {
   background:
     radial-gradient(circle at 12% 8%, rgba(205, 184, 255, 0.45), transparent 34%),
     radial-gradient(circle at 92% 30%, rgba(255, 143, 184, 0.16), transparent 30%),
@@ -116,11 +116,33 @@ body {
     var(--lilac-soft);
 }
 
-[data-theme='night'] .backdrop {
+/* Night fades in over the day, and back out. */
+.backdrop.night {
+  opacity: 0;
   background:
     radial-gradient(ellipse at 50% 108%, rgba(255, 181, 71, calc(var(--candlelight, 0) * 0.28)), transparent 55%),
     radial-gradient(ellipse at 50% -10%, rgba(142, 71, 255, 0.35), transparent 60%),
     linear-gradient(180deg, #170f27 0%, #120b1e 100%);
+}
+
+[data-theme='night'] .backdrop.night {
+  opacity: 1;
+}
+
+/* Each page arrives with a small lift. */
+.route {
+  animation: route-in 520ms var(--soft) both;
+}
+
+@keyframes route-in {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+  to {
+    opacity: 1;
+    translate: none;
+  }
 }
 
 /* ── Type ─────────────────────────────────────────────────── */
@@ -329,12 +351,35 @@ a {
 }
 
 .nav {
+  position: relative;
   display: flex;
   gap: 2px;
   align-items: center;
 }
 
+.nav::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--pill-w, 0);
+  height: var(--pill-h, 0);
+  transform: translate(var(--pill-x, 0), var(--pill-y, 0)) scale(calc(0.6 + var(--pill-on, 0) * 0.4));
+  border-radius: 999px;
+  background: var(--purple);
+  box-shadow: 0 6px 14px -6px rgba(110, 40, 230, 0.7);
+  opacity: var(--pill-on, 0);
+}
+
+.nav[data-ready]::before {
+  transition:
+    transform 520ms var(--spring),
+    width 520ms var(--spring),
+    opacity 300ms var(--soft);
+}
+
 .nav a {
+  position: relative;
   font-family: var(--display);
   font-weight: 500;
   font-size: 1rem;
@@ -354,7 +399,7 @@ a {
 
 .nav a[aria-current='page'] {
   color: #fff;
-  background: var(--purple);
+  background: none;
 }
 
 .icon-btn {

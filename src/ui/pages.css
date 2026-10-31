@@ -1442,7 +1442,7 @@ textarea.mono-input {
 /* The buddy peeks over the top, from behind. */
 .envelope-buddy {
   position: absolute;
-  top: -44px;
+  top: -58px;
   right: 14%;
   z-index: 0;
 }
