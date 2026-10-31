@@ -36,7 +36,7 @@ export function makeGrimoire(jar: JarFile): string {
     `<meta http-equiv="Content-Security-Policy" content="${CSP}">\n` +
     `<script id="phylactery-jar" type="application/json">${json}</script>\n`;
   return pristine
-    .replace(/<title>[^<]*<\/title>/, `<title>The Phylactery of ${escapeHtml(jar.owner)}</title>`)
+    .replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(jar.owner)}’s jar · Phylactery</title>`)
     .replace(/<head>/i, `<head>\n${head}`);
 }
 

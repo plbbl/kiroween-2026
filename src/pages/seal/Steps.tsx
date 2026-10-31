@@ -120,8 +120,8 @@ export function StepLeave({ content, setContent }: { content: JarContent; setCon
                   <input type="text" value={a.note} placeholder="Anything they should know" onChange={(e) => updateAccount(i, { note: e.target.value })} />
                 </label>
               </div>
-              <button type="button" className="text-btn quiet remove" onClick={() => setAccounts(accounts.filter((_, j) => j !== i))} aria-label={`Remove ${a.service || 'this account'}`}>
-                Remove
+              <button type="button" className="icon-btn small remove" onClick={() => setAccounts(accounts.filter((_, j) => j !== i))} aria-label={`Remove ${a.service || 'this account'}`}>
+                ×
               </button>
             </li>
           ))}
@@ -149,8 +149,8 @@ export function StepLeave({ content, setContent }: { content: JarContent; setCon
                   <input type="text" value={d.location} placeholder="Blue folder, top drawer of the desk" onChange={(e) => updateDoc(i, { location: e.target.value })} />
                 </label>
               </div>
-              <button type="button" className="text-btn quiet remove" onClick={() => setDocuments(documents.filter((_, j) => j !== i))} aria-label={`Remove ${d.item || 'this place'}`}>
-                Remove
+              <button type="button" className="icon-btn small remove" onClick={() => setDocuments(documents.filter((_, j) => j !== i))} aria-label={`Remove ${d.item || 'this place'}`}>
+                ×
               </button>
             </li>
           ))}
@@ -193,6 +193,8 @@ export function StepWishes({ content, setContent }: { content: JarContent; setCo
 
 export function StepCircle({ draft, setDraft }: { draft: Draft; setDraft: (d: Draft) => void }) {
   const n = draft.holders.length;
+  const key = (name: string) => name.trim().toLowerCase();
+  const twice = (name: string) => !!key(name) && draft.holders.filter((h) => key(h.name) === key(name)).length > 1;
   const update = (i: number, patch: Partial<HolderDraft>) => setDraft({ ...draft, holders: draft.holders.map((h, j) => (j === i ? { ...h, ...patch } : h)) });
   const setHolders = (holders: HolderDraft[]) => setDraft({ ...draft, holders, threshold: Math.min(Math.max(2, draft.threshold), Math.max(2, holders.length)) });
 
@@ -207,7 +209,14 @@ export function StepCircle({ draft, setDraft }: { draft: Draft; setDraft: (d: Dr
               </span>
               <label className="field">
                 <span className="visually-hidden">Name of person {i + 1}</span>
-                <input type="text" value={h.name} placeholder={`Friend ${i + 1}`} onChange={(e) => update(i, { name: e.target.value })} />
+                <input
+                  type="text"
+                  value={h.name}
+                  placeholder={`Friend ${i + 1}`}
+                  aria-invalid={twice(h.name) || undefined}
+                  aria-describedby={twice(h.name) ? 'same-name' : undefined}
+                  onChange={(e) => update(i, { name: e.target.value })}
+                />
               </label>
               <button type="button" className={`chip${h.writing ? ' on' : ''}`} onClick={() => update(i, { writing: !h.writing })} aria-expanded={h.writing}>
                 {h.writing ? '✓ Letter' : '+ Letter'}
@@ -218,6 +227,11 @@ export function StepCircle({ draft, setDraft }: { draft: Draft; setDraft: (d: Dr
                 </button>
               )}
             </div>
+            {twice(h.name) && draft.holders.findIndex((x) => key(x.name) === key(h.name)) !== i && (
+              <p className="field-error" id="same-name">
+                Someone else in the circle has this name. Add a surname or a nickname, so each card is clear.
+              </p>
+            )}
             {h.writing && (
               <label className="field letter-field pop">
                 <span>A letter only {h.name.trim() || 'they'} can open</span>

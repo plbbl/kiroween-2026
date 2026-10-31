@@ -142,35 +142,133 @@ export function Reveal({ jar, opened, circle, buddies }: { jar: JarFile; opened:
               Letters
             </h2>
             <p className="center muted">Each one opens only with the private seal folded inside its reader’s card.</p>
-            <div className="envelopes">
-              {letters.map((h) => (
-                <Envelope key={h.x} jar={jar} opened={opened} holder={h} buddy={buddies.get(h.x)!} />
-              ))}
-            </div>
+            <Letters jar={jar} opened={opened} holders={letters} buddies={buddies} />
           </section>
         )}
 
         <section className="center after">
           <Ghost costume="sheet" mood="happy" size={70} float />
-          <p className="muted">There is a gentle checklist for the days that follow.</p>
-          <div className="row centered">
-            <a className="btn primary" href={`${href('guides')}#after`}>
-              For the days that follow
-            </a>
-            <button type="button" className="btn" onClick={() => window.location.reload()}>
-              Close the jar
-            </button>
-          </div>
-          <p className="faint">Closing forgets everything that was opened. Nothing was saved.</p>
+          {isDemo(jar) ? (
+            <>
+              <p className="muted">That was June’s jar. Yours takes about ten minutes.</p>
+              <div className="row centered">
+                <a className="btn primary" href={href('seal')}>
+                  Seal your own jar
+                </a>
+                <a className="btn" href={`${href('guides')}#after`}>
+                  For the days that follow
+                </a>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="muted">There is a gentle checklist for the days that follow.</p>
+              <div className="row centered">
+                <a className="btn primary" href={`${href('guides')}#after`}>
+                  For the days that follow
+                </a>
+                <button type="button" className="btn" onClick={() => window.location.reload()}>
+                  Close the jar
+                </button>
+              </div>
+              <p className="faint">Closing forgets everything that was opened. Nothing was saved.</p>
+            </>
+          )}
         </section>
       </div>
     </div>
   );
 }
 
-function Envelope({ jar, opened, holder, buddy }: { jar: JarFile; opened: OpenedJar; holder: JarHolder; buddy: Buddy }) {
-  const [letter, setLetter] = useState<Letter | null>(null);
-  const [asking, setAsking] = useState(false);
+/**
+ * The envelopes stay in one row. The seal is asked for, and the letters
+ * are read, below the row, so opening one never moves the others.
+ */
+function Letters({ jar, opened, holders, buddies }: { jar: JarFile; opened: OpenedJar; holders: JarHolder[]; buddies: Map<number, Buddy> }) {
+  const [asking, setAsking] = useState<number | null>(null);
+  const [read, setRead] = useState<Record<number, Letter>>({});
+  const holder = holders.find((h) => h.x === asking);
+  const order = holders.filter((h) => read[h.x]);
+
+  return (
+    <>
+      <div className="envelopes">
+        {holders.map((h) => {
+          const buddy = buddies.get(h.x)!;
+          const isOpen = !!read[h.x];
+          const first = h.name.split(/\s+/)[0];
+          return (
+            <div key={h.x} className={`envelope-wrap${isOpen ? ' opened' : ''}${asking === h.x ? ' asking' : ''}`}>
+              <div className="envelope" aria-hidden="true">
+                <span className="envelope-buddy">
+                  <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} mood={isOpen || asking === h.x ? 'happy' : 'open'} size={64} phase={h.x * 0.7} />
+                </span>
+                <span className="envelope-hands">
+                  <GhostHand costume={buddy.costume} size={17} />
+                  <GhostHand costume={buddy.costume} size={17} />
+                </span>
+                <div className="envelope-back" />
+                <div className="envelope-letter" />
+                <div className="envelope-front">
+                  <span className="envelope-to">
+                    for <span className="full-name">{h.name}</span>
+                    <span className="first-name">{first}</span>
+                  </span>
+                </div>
+                <div className="envelope-flap">
+                  <span className="envelope-seal">
+                    <WaxSeal initials={initialsOf(jar.owner)} size={46} state={isOpen ? 'broken' : 'whole'} />
+                  </span>
+                </div>
+              </div>
+              {isOpen ? (
+                <a className="btn small" href={`#letter-${h.x}`} onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById(`letter-${h.x}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}>
+                  Read {first}’s letter
+                </a>
+              ) : (
+                <button type="button" className="btn small" aria-expanded={asking === h.x} onClick={() => setAsking(asking === h.x ? null : h.x)}>
+                  Open with {first}’s seal
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {holder && !read[holder.x] && (
+        <SealEntry
+          key={holder.x}
+          jar={jar}
+          opened={opened}
+          holder={holder}
+          onOpen={(letter) => {
+            setRead({ ...read, [holder.x]: letter });
+            setAsking(null);
+          }}
+        />
+      )}
+
+      {order.map((h) => {
+        const buddy = buddies.get(h.x)!;
+        const letter = read[h.x]!;
+        return (
+          <article key={h.x} id={`letter-${h.x}`} className="letter">
+            <span className="letter-buddy">
+              <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} mood="happy" size={64} float />
+            </span>
+            <p className="paper-tag">for {letter.to}</p>
+            <Paragraphs text={letter.text} start={900} step={260} />
+          </article>
+        );
+      })}
+    </>
+  );
+}
+
+function SealEntry({ jar, opened, holder, onOpen }: { jar: JarFile; opened: OpenedJar; holder: JarHolder; onOpen: (letter: Letter) => void }) {
   const demoCard = isDemo(jar) ? DEMO_CARDS.find((c) => c.name === holder.name) : undefined;
   const firstName = holder.name.split(/\s+/)[0];
 
@@ -187,7 +285,7 @@ function Envelope({ jar, opened, holder, buddy }: { jar: JarFile; opened: Opened
       const l = await openLetter(jar, opened, card);
       sound.crack();
       setTimeout(() => sound.chime(), 300);
-      setLetter(l);
+      onOpen(l);
       return null;
     } catch (e) {
       return e instanceof Error ? e.message : 'That seal didn’t open the letter.';
@@ -195,49 +293,14 @@ function Envelope({ jar, opened, holder, buddy }: { jar: JarFile; opened: Opened
   };
 
   return (
-    <div className={`envelope-wrap${letter ? ' opened' : ''}${letter || asking ? ' wide' : ''}`}>
-      <div className="envelope" aria-hidden={!!letter}>
-        <span className="envelope-buddy">
-          <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} mood={asking ? 'happy' : 'open'} size={64} phase={holder.x * 0.7} />
-        </span>
-        <span className="envelope-hands" aria-hidden="true">
-          <GhostHand costume={buddy.costume} size={17} />
-          <GhostHand costume={buddy.costume} size={17} />
-        </span>
-        <div className="envelope-back" />
-        <div className="envelope-front">
-          <span className="envelope-to">for {holder.name}</span>
-        </div>
-        <div className="envelope-flap">
-          <span className="envelope-seal">
-            <WaxSeal initials={initialsOf(jar.owner)} size={46} state={letter ? 'broken' : 'whole'} />
-          </span>
-        </div>
-      </div>
-      {letter && (
-        <article className="letter">
-          <span className="letter-buddy">
-            <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} mood="happy" size={64} float />
-          </span>
-          <p className="paper-tag">for {letter.to}</p>
-          <Paragraphs text={letter.text} start={1500} step={260} />
-        </article>
-      )}
-      {!letter && !asking && (
-        <button type="button" className="btn small" onClick={() => setAsking(true)}>
-          Open with {firstName}’s seal
+    <div className="card envelope-input pop">
+      <p className="envelope-input-title">{firstName}’s private seal</p>
+      {demoCard && (
+        <button type="button" className="btn small primary" onClick={() => void tryOpen(demoCard.seal)}>
+          Use {firstName}’s seal from the demo
         </button>
       )}
-      {!letter && asking && (
-        <div className="card envelope-input pop">
-          {demoCard && (
-            <button type="button" className="btn small primary" onClick={() => void tryOpen(demoCard.seal)}>
-              Use {firstName}’s seal from the demo
-            </button>
-          )}
-          <CardInput kind="seal" onCard={tryOpen} />
-        </div>
-      )}
+      <CardInput kind="seal" onCard={tryOpen} />
     </div>
   );
 }

@@ -147,7 +147,7 @@ export function Seal() {
             <div className="trail-fill" style={{ width: `${progress * 100}%` }} />
           </div>
           <div className="trail-ghost" style={{ left: `${progress * 100}%` }} aria-hidden="true">
-            <Ghost mood="happy" size={38} float />
+            <Ghost mood="happy" size={52} float />
           </div>
           <ol className="trail-steps">
             {STEPS.map((s, i) => (
@@ -218,7 +218,8 @@ export function Seal() {
             )}
           </div>
 
-          {step === 4 && problems.length > 0 && (
+          {/* A repeated name is pointed out next to the name itself. */}
+          {step === 4 && problems.length > 0 && !problems[0]!.includes('same name') && (
             <p className="error" role="status">
               {problems[0]}
             </p>

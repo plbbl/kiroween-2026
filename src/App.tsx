@@ -10,6 +10,14 @@ import { Seal } from './pages/seal/Seal.tsx';
 import { Seance } from './pages/seance/Seance.tsx';
 import { Watch } from './pages/watch/Watch.tsx';
 
+const TITLES: Partial<Record<Route, string>> = {
+  seal: 'Seal a jar',
+  watch: 'Still here?',
+  seance: 'Séance',
+  guides: 'Guides',
+  gallery: 'The cast',
+};
+
 const NAV: { route: Route; label: string }[] = [
   { route: 'seal', label: 'Seal' },
   { route: 'watch', label: 'Watch' },
@@ -44,6 +52,11 @@ export function App() {
   useLayoutEffect(() => {
     document.body.dataset.theme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    const page = embedded && route === 'seance' ? `${embedded.owner}’s jar` : TITLES[route];
+    document.title = page ? `${page} · Phylactery` : 'Phylactery';
+  }, [route, embedded]);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--candlelight', String(candlelight));

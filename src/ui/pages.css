@@ -369,7 +369,7 @@
 
 .trail-ghost {
   position: absolute;
-  top: -4px;
+  top: -36px;
   transform: translateX(-50%);
   transition: left 700ms var(--spring);
   z-index: 2;
@@ -546,9 +546,20 @@
 
 .row-card .remove {
   position: absolute;
-  top: 15px;
-  right: 18px;
-  font-size: 0.86rem;
+  top: 8px;
+  right: 10px;
+}
+
+.field-error {
+  margin: 6px 0 0 64px;
+  color: #c02a5a;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+input[aria-invalid='true'] {
+  border-color: #ff7aa6;
+  background-color: #fff3f7;
 }
 
 .wish-grid {
@@ -801,7 +812,19 @@ button.buddy-card {
 }
 
 .buddy-card-art {
-  margin-top: -6px;
+  display: grid;
+  place-items: end center;
+  width: 104px;
+  height: 104px;
+  margin-top: -8px;
+  border-radius: 50%;
+  /* A soft lilac disc, so even a white sheet ghost stands out on cream. */
+  background: radial-gradient(circle at 50% 42%, #efe5ff, #e2d3ff 70%);
+}
+
+.demo-card .buddy-card-art {
+  width: 76px;
+  height: 76px;
 }
 
 .buddy-card-name {
@@ -1560,11 +1583,6 @@ textarea.mono-input {
   width: 100%;
 }
 
-/* Asking for a seal, or reading: this letter takes the whole row. */
-.envelope-wrap.wide {
-  grid-column: 1 / -1;
-}
-
 .envelope {
   position: relative;
   width: min(100%, 240px);
@@ -1619,6 +1637,16 @@ textarea.mono-input {
   transition: transform 900ms var(--soft);
 }
 
+.envelope-to .first-name {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .envelope-to .first-name {
+    display: inline;
+  }
+}
+
 .envelope-to {
   font-family: var(--display);
   font-weight: 600;
@@ -1661,26 +1689,40 @@ textarea.mono-input {
   z-index: 1;
 }
 
-.opened .envelope {
-  animation: envelope-away 700ms var(--soft) 1000ms forwards;
+/* Inside: a sheet of paper that rises when the flap opens. */
+.envelope-letter {
+  position: absolute;
+  left: 9%;
+  right: 9%;
+  top: 8%;
+  bottom: 10%;
+  z-index: 2;
+  border-radius: 8px;
+  background:
+    repeating-linear-gradient(#fffdf6 0 9px, #e8dcc4 9px 10px) 14px 16px / calc(100% - 28px) 40px no-repeat,
+    #fffdf6;
+  transition: transform 700ms var(--spring) 350ms;
 }
 
-@keyframes envelope-away {
-  0% {
-    opacity: 1;
-    max-height: 240px;
-    transform: none;
-  }
-  100% {
-    opacity: 0;
-    max-height: 0;
-    transform: translateY(20px) scale(0.9);
-  }
+.opened .envelope-letter {
+  transform: translateY(-34%);
+}
+
+/* The one whose seal is being asked for. */
+.envelope-wrap.asking .envelope {
+  transform: translateY(-6px);
+  filter: drop-shadow(0 0 14px rgba(255, 196, 87, 0.55));
+}
+
+.envelope {
+  transition: transform 400ms var(--spring), filter 400ms var(--soft);
 }
 
 .letter {
   position: relative;
   width: min(100%, 560px);
+  margin: 50px auto 0;
+  scroll-margin-top: 110px;
   padding: 34px 34px 28px;
   border-radius: 26px;
   background: #fffdf8;
@@ -1688,7 +1730,7 @@ textarea.mono-input {
   font-size: 1.1rem;
   line-height: 1.75;
   box-shadow: 0 24px 40px -22px rgba(0, 0, 0, 0.8);
-  animation: letter-out 1s var(--spring) 1300ms both;
+  animation: letter-out 1s var(--spring) 500ms both;
 }
 
 .letter-buddy {
@@ -1710,8 +1752,17 @@ textarea.mono-input {
 
 .envelope-input {
   width: min(100%, 560px);
+  margin: 26px auto 0;
   display: grid;
   gap: 10px;
+}
+
+.envelope-input-title {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.15rem;
+  text-align: center;
 }
 
 .after {
@@ -1976,7 +2027,7 @@ textarea.mono-input {
 
 .walker {
   position: absolute;
-  top: 0;
+  top: -12px;
   transform: translateX(-50%);
 }
 
@@ -2426,7 +2477,8 @@ textarea.mono-input {
     justify-self: start;
   }
 
-  .letter-field {
+  .letter-field,
+  .field-error {
     margin-left: 0;
   }
 
@@ -2460,12 +2512,46 @@ textarea.mono-input {
     padding: 22px 20px;
   }
 
-  .fan-card {
-    margin: 4px -16px;
-  }
-
   .todo {
     grid-template-columns: 1fr;
+  }
+
+  /* Three small envelopes side by side. */
+  .envelopes {
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    gap: 46px 10px;
+  }
+
+  .envelope-buddy,
+  .envelope-hands {
+    zoom: 0.72;
+  }
+
+  .envelope-seal {
+    zoom: 0.62;
+  }
+
+  .envelope-to .full-name {
+    display: none;
+  }
+
+  .envelope-front {
+    padding-bottom: 8px;
+  }
+
+  .envelope-to {
+    font-size: 0.82rem;
+  }
+
+  .envelope-wrap .btn.small {
+    padding: 0 10px;
+    font-size: 0.8rem;
+  }
+
+  /* All the cards in one row. */
+  .fan-card {
+    zoom: 0.7;
+    margin: 4px 2px;
   }
 
   .sealed-jar {
@@ -2560,6 +2646,12 @@ textarea.mono-input {
 
 .friends-label {
   margin-top: 10px;
+}
+
+.start-hint {
+  margin: 10px 0 0;
+  text-align: right;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 760px) {

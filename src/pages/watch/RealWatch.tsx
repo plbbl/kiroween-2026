@@ -93,6 +93,9 @@ export function LinkAction({ params }: { params: URLSearchParams }) {
       </div>
       <h1>{title}</h1>
       {body && <p className="muted">{body}</p>}
+      {error && action !== 'optout' && (
+        <p className="faint">Each new email replaces the links in the one before. Try the newest email from us.</p>
+      )}
       {action === 'manage' && view && !deleted && (
         <>
           <ul className="watch-facts">
@@ -229,6 +232,7 @@ export function StartWatch({ config }: { config: WatchConfig }) {
           {state === 'sending' ? 'Sending…' : 'Start the watch'}
         </button>
       </div>
+      {filled.length === 0 && <p className="faint start-hint">Add at least one friend to start.</p>}
       {error && (
         <p className="error" role="alert">
           {error}

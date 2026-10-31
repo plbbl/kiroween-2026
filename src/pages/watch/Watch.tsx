@@ -181,7 +181,7 @@ export function Watch({ params }: { params: URLSearchParams }) {
                   <span key={i} className={`mark m-${e.kind}${e.at <= day ? ' passed' : ''}`} style={{ left: pct(e.at) }} title={`${e.kind}, day ${e.at.toFixed(1)}`} />
                 ))}
               <span className="walker" style={{ left: pct(day) } as CSSProperties} aria-hidden="true">
-                <Ghost mood={face.mood} size={40} float />
+                <Ghost mood={face.mood} size={54} float />
               </span>
             </div>
 
