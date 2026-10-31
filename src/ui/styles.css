@@ -42,6 +42,7 @@
   --fg-faint: var(--ink-faint);
   --surface: #fff;
   --surface-2: #faf7ff;
+  --field: #f6f1ff;
   --line: #e9dfff;
   --line-strong: #d9c8ff;
   --accent: var(--purple-text);
@@ -56,6 +57,7 @@
   --fg-faint: #8d80a8;
   --surface: rgba(255, 255, 255, 0.06);
   --surface-2: rgba(255, 255, 255, 0.04);
+  --field: rgba(255, 255, 255, 0.06);
   --line: rgba(205, 184, 255, 0.16);
   --line-strong: rgba(205, 184, 255, 0.3);
   --accent: #b996ff;
@@ -151,7 +153,7 @@ h1,
 h2,
 h3 {
   font-family: var(--display);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.08;
   margin: 0;
   letter-spacing: -0.01em;
@@ -560,13 +562,14 @@ textarea {
   width: 100%;
   border: 2px solid var(--line);
   border-radius: 18px;
-  background: var(--surface);
+  background-color: var(--field);
   color: var(--fg);
   font-family: var(--body);
   font-size: 1.05rem;
   padding: 13px 16px;
   transition:
     border-color 250ms var(--soft),
+    background-color 250ms var(--soft),
     box-shadow 250ms var(--soft);
 }
 
@@ -580,6 +583,7 @@ input:focus,
 select:focus,
 textarea:focus {
   outline: none;
+  background-color: var(--surface);
   border-color: var(--purple);
   box-shadow: 0 0 0 5px rgba(142, 71, 255, 0.16);
 }
@@ -626,11 +630,11 @@ select {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 7px 14px;
   border-radius: 999px;
-  border: 2px solid var(--line);
-  background: var(--surface);
-  color: var(--fg-soft);
+  border: 2px solid transparent;
+  background: var(--lilac);
+  color: var(--accent);
   font-family: var(--display);
   font-weight: 500;
   font-size: 0.92rem;
@@ -641,7 +645,10 @@ select {
 .chip:hover {
   transform: translateY(-2px);
   border-color: var(--lavender);
-  color: var(--fg);
+}
+
+[data-theme='night'] .chip {
+  background: rgba(205, 184, 255, 0.14);
 }
 
 .note {
@@ -1252,6 +1259,149 @@ select {
   }
 }
 
+/* ── Halloween decor ──────────────────────────────────────── */
+
+.pumpkin,
+.bat,
+.moon,
+.web,
+.lantern,
+.candy {
+  display: block;
+  overflow: visible;
+}
+
+.pumpkin .pumpkin-face,
+.pumpkin .pumpkin-glow,
+.lantern .lantern-glow,
+.bat .bat-wing,
+.web .web-spider {
+  transform-box: view-box;
+}
+
+.pumpkin.lit .pumpkin-face {
+  animation: carved-flicker 2.4s ease-in-out infinite;
+  animation-delay: var(--phase, 0s);
+}
+
+.pumpkin.lit .pumpkin-glow,
+.lantern .lantern-glow {
+  transform-origin: center;
+  animation: glow 2.6s ease-in-out infinite;
+  animation-delay: var(--phase, 0s);
+}
+
+@keyframes carved-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0.82;
+  }
+  55% {
+    opacity: 0.96;
+  }
+  70% {
+    opacity: 0.86;
+  }
+}
+
+.bat.flap .bat-wing.left {
+  transform-origin: 40px 30px;
+  animation: flap-left 0.34s ease-in-out infinite alternate;
+}
+
+.bat.flap .bat-wing.right {
+  transform-origin: 60px 30px;
+  animation: flap-right 0.34s ease-in-out infinite alternate;
+}
+
+@keyframes flap-left {
+  from {
+    transform: rotate(16deg) scaleY(0.8);
+  }
+  to {
+    transform: rotate(-14deg);
+  }
+}
+
+@keyframes flap-right {
+  from {
+    transform: rotate(-16deg) scaleY(0.8);
+  }
+  to {
+    transform: rotate(14deg);
+  }
+}
+
+/* Bats cross the sky quickly, then stay away for a while. */
+/* Behind the page's content: main is a stacking context above the backdrop. */
+#main {
+  position: relative;
+  z-index: 1;
+}
+
+.flying-bats {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.flying-bat {
+  position: absolute;
+  left: 0;
+  animation: bat-cross linear infinite both;
+}
+
+.flying-bat-bob {
+  animation: bat-bob 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes bat-cross {
+  0% {
+    transform: translateX(-80px);
+  }
+  32%,
+  100% {
+    transform: translateX(calc(100vw + 80px));
+  }
+}
+
+@keyframes bat-bob {
+  from {
+    translate: 0 -10px;
+  }
+  to {
+    translate: 0 10px;
+  }
+}
+
+.web {
+  color: rgba(122, 90, 180, 0.32);
+}
+
+[data-theme='night'] .web {
+  color: rgba(225, 210, 255, 0.28);
+}
+
+.web .web-spider {
+  transform-origin: 74px 52px;
+  animation: spider 5s ease-in-out infinite;
+}
+
+@keyframes spider {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.72);
+  }
+}
+
 /* ── Reduced motion: keep every state, drop the movement ─── */
 
 @media (prefers-reduced-motion: reduce) {
@@ -1267,7 +1417,8 @@ select {
 
   .candle .z,
   .jar-zzz i,
-  .sparkle {
+  .sparkle,
+  .flying-bats {
     display: none;
   }
 }

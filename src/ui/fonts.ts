@@ -4,6 +4,7 @@
 
 import fredoka500 from '@fontsource/fredoka/files/fredoka-latin-500-normal.woff2';
 import fredoka600 from '@fontsource/fredoka/files/fredoka-latin-600-normal.woff2';
+import fredoka700 from '@fontsource/fredoka/files/fredoka-latin-700-normal.woff2';
 import mono400 from '@fontsource/fragment-mono/files/fragment-mono-latin-400-normal.woff2';
 import nunito400 from '@fontsource/nunito/files/nunito-latin-400-normal.woff2';
 import nunito400i from '@fontsource/nunito/files/nunito-latin-400-italic.woff2';
@@ -13,6 +14,7 @@ import nunito800 from '@fontsource/nunito/files/nunito-latin-800-normal.woff2';
 const faces: [family: string, weight: number, style: 'normal' | 'italic', url: string][] = [
   ['Fredoka', 500, 'normal', fredoka500],
   ['Fredoka', 600, 'normal', fredoka600],
+  ['Fredoka', 700, 'normal', fredoka700],
   ['Nunito', 400, 'normal', nunito400],
   ['Nunito', 400, 'italic', nunito400i],
   ['Nunito', 700, 'normal', nunito700],

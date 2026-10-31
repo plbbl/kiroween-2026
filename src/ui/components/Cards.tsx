@@ -40,11 +40,14 @@ export function BuddyCard({
 }) {
   const body = (
     <>
+      <svg className="buddy-card-corners" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M10 84 L11 89 L16 90 L11 91 L10 96 L9 91 L4 90 L9 89 Z M90 84 L91 89 L96 90 L91 91 L90 96 L89 91 L84 90 L89 89 Z" />
+      </svg>
       <span className="buddy-card-num mono">
         {index + 1}/{total}
       </span>
       <span className="buddy-card-art">
-        <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} size={84} float phase={index * 0.6} />
+        <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} size={96} float phase={index * 0.6} />
       </span>
       <span className="buddy-card-name">{name}</span>
       {note && (

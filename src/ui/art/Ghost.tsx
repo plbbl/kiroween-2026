@@ -476,3 +476,25 @@ export function Ghost({
     </svg>
   );
 }
+
+/**
+ * One little hand, drawn on its own so it can sit in front of an edge the
+ * ghost is peeking over, while the ghost itself stays behind.
+ */
+export function GhostHand({ costume = 'sheet', size = 20 }: { costume?: Costume; size?: number }) {
+  const { id, url } = useIds();
+  const [light, mid, , edge] = TONES[costume];
+  return (
+    <svg className="ghost-hand" viewBox="0 0 24 20" width={size} height={(size * 20) / 24} aria-hidden="true">
+      <defs>
+        <radialGradient id={id('hand')} cx="40%" cy="25%" r="90%">
+          <stop offset="0" stopColor={light} />
+          <stop offset="0.5" stopColor={mid} />
+          <stop offset="1" stopColor={edge} />
+        </radialGradient>
+      </defs>
+      <ellipse cx="12" cy="16.5" rx="9.5" ry="2.6" fill="#2a1650" opacity="0.22" />
+      <ellipse cx="12" cy="10" rx="10.5" ry="7.6" fill={url('hand')} />
+    </svg>
+  );
+}

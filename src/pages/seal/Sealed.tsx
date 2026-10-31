@@ -37,7 +37,7 @@ export function Sealed({ result }: { result: SealResult }) {
     <div className="page sealed-page">
       <section className="narrow center sealed-hero">
         <div className="sealed-jar pop">
-          <Jar initials={initialsOf(jar.owner)} size={200} warmth={0.6} />
+          <Jar initials={initialsOf(jar.owner)} size={250} warmth={0.6} />
           <Sparkles burst="sealed" radius={150} count={18} />
         </div>
         <h1 className="sealed-title">Sealed!</h1>
@@ -65,7 +65,7 @@ export function Sealed({ result }: { result: SealResult }) {
               total={n}
               note={c.hasLetter ? `${c.name} has a private letter` : undefined}
               className="fan-card pop"
-              style={{ '--rot': `${(i - mid) * 4}deg`, '--lift': `${Math.abs(i - mid) * 6}px`, '--d': `${200 + i * 110}ms` } as CSSProperties}
+              style={{ '--rot': `${(i - mid) * 7}deg`, '--lift': `${Math.abs(i - mid) * 12}px`, '--d': `${200 + i * 110}ms` } as CSSProperties}
             />
           );
         })}
@@ -79,7 +79,7 @@ export function Sealed({ result }: { result: SealResult }) {
         </p>
       )}
 
-      <section className="todo narrow">
+      <section className="todo wrap">
         <article className="todo-item card">
           <span className="todo-num">1</span>
           <div>
