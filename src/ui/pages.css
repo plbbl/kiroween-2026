@@ -606,7 +606,7 @@
 
 .chip.on {
   border-color: var(--lavender);
-  color: var(--accent);
+  color: var(--purple-press);
   background: #e4d6ff;
 }
 
