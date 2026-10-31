@@ -272,6 +272,20 @@ export async function optOut(deps: Deps, token: unknown): Promise<{ owner: strin
 }
 
 /** Send whatever is due. Call it on a schedule, e.g. hourly. */
+/**
+ * Once a year, on the Day of the Dead (November 2), the owner is asked
+ * whether their jar still says what they want. Not in a watch's first
+ * month, not while it is paused, and not while friends are being asked.
+ */
+function reviewDue(record: WatchRecord, now: number, status: WatchStatus): string | null {
+  if (record.confirmedAt === null || status === 'paused' || status === 'notified') return null;
+  const year = new Date(now).getUTCFullYear();
+  const dayOfTheDead = Date.UTC(year, 10, 2);
+  const key = `review:${year}`;
+  if (now < dayOfTheDead || record.sent.includes(key) || record.confirmedAt > dayOfTheDead - 30 * DAY) return null;
+  return key;
+}
+
 export async function tick(deps: Deps): Promise<{ sent: number }> {
   let sent = 0;
   const now = deps.now();
@@ -280,13 +294,32 @@ export async function tick(deps: Deps): Promise<{ sent: number }> {
     if (!record || record.confirmedAt === null) continue;
     const run = runWatch(record.config, record.actions, daysSince(record, now));
     const due = run.events.filter((e) => (e.kind === 'due' || e.kind === 'reminder' || e.kind === 'notify') && !record.sent.includes(`${e.kind}:${e.at.toFixed(5)}`));
-    if (!due.length) continue;
+    const review = reviewDue(record, now, run.status);
+    if (!due.length && !review) continue;
+    const first = record.owner.name.split(/\s+/)[0]!;
+    if (review) {
+      await deps.mailer.send({
+        to: record.owner.email,
+        subject: `${first}, a yearly look at your jar`,
+        text:
+          `Today is the Day of the Dead. Once a year, on this day, we suggest a look at what you left in your jar.\n\n` +
+          `Passwords change, accounts close, people move. If something in your jar is out of date, seal a new one at ` +
+          `${deps.baseUrl.replace(/\/?$/, '/')}#/seal and give out the new cards. The old cards still open the old jar file, ` +
+          `so ask for them back or tell your friends which one counts.\n\n` +
+          `If everything is still right, there is nothing to do. Your watch carries on as before.\n`,
+      });
+      record.sent.push(review);
+      sent++;
+    }
+    if (!due.length) {
+      await deps.store.put(record);
+      continue;
+    }
     // After downtime several questions may be due at once: send only the latest.
     const questions = due.filter((e) => e.kind !== 'notify');
     const toSend = [...questions.slice(-1), ...due.filter((e) => e.kind === 'notify')];
     const checkinToken = await rotateCheckin(deps, record);
     for (const e of toSend) {
-      const first = record.owner.name.split(/\s+/)[0]!;
       if (e.kind === 'due') {
         await deps.mailer.send({
           to: record.owner.email,

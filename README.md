@@ -16,7 +16,7 @@ Phylactery joins the pieces, and makes a heavy subject gentle: death as a reunio
 
 **I. Seal.** Write a note for everyone, the accounts you keep and how to get in, where things are, and your wishes. Add a private letter for anyone. Everything is encrypted in your browser and the key is split into one card per friend. You choose how many must gather. Before you print, Phylactery proves it works: every group of that size opens the jar, and no smaller group does.
 
-**II. Watch.** Every so often, one gentle question: *still here?* One tap answers it. Go quiet, and you are reminded. Only then are your friends asked to *check on you*, never told you are gone. Answer late, and they hear that all is well.
+**II. Watch.** Every so often, one gentle question: *still here?* One tap answers it. Go quiet, and you are reminded. Only then are your friends asked to *check on you*, never told you are gone. Answer late, and they hear that all is well. Once a year, on the Day of the Dead (November 2), the watch also asks whether your jar is still up to date.
 
 **III. Séance.** When the time comes, friends bring their cards. Each card lights a sleepy candle and its little ghost buddy floats in. When enough candles are lit, the wax seal cracks, the cork pops, and the ghost wakes up and hands over your words. Each letter then opens only with the private seal folded inside its reader's card.
 
@@ -106,7 +106,7 @@ Limits worth knowing: this is browser cryptography; the app as a whole has not h
 
 ### Tests
 
-`npm test` runs 33 tests, most of them property-based (fast-check), among them:
+`npm test` runs 35 tests, most of them property-based (fast-check), among them:
 
 - any set of cards at or above the threshold opens the jar and returns exactly what was sealed; one card short reveals nothing;
 - each letter opens only with its own seal, never with another holder's seal relabelled;
@@ -114,7 +114,7 @@ Limits worth knowing: this is browser cryptography; the app as a whole has not h
 - every card survives the round trip through its QR text and its words, including sloppy typing;
 - buddies in a circle wear different costumes and carry different emblems;
 - someone who checks in on time never alarms anyone; friends are never asked before the full silence;
-- the watch service, with a fake clock: nothing before confirmation, reminders then friends then "all is well", pause, opt-out, rate limits, bad tokens.
+- the watch service, with a fake clock: nothing before confirmation, reminders then friends then "all is well", pause, opt-out, rate limits, bad tokens, and the yearly Day of the Dead review (once a year, never in a watch's first month or while friends are being asked).
 
 The property tests caught a real bug: the base32 decoder accepted non-canonical padding bits, so a damaged QR code could decode to the same card. Decoding is now strict.
 

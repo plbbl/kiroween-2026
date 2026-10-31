@@ -3,8 +3,8 @@ import { MemoryStore, OutboxMailer } from './adapters.ts';
 import { handle } from './http.ts';
 import { DAY, type Deps } from './service.ts';
 
-function setup() {
-  let now = Date.UTC(2026, 10, 1, 9);
+function setup(start = Date.UTC(2026, 10, 1, 9)) {
+  let now = start;
   const mailer = new OutboxMailer();
   const deps: Deps = { store: new MemoryStore(), mailer, now: () => now, baseUrl: 'https://phylactery.test/' };
   const call = async (path: string, body?: unknown, headers: Record<string, string> = {}) => {
@@ -23,7 +23,7 @@ function setup() {
     const m = new RegExp(`#/watch\\?${action}=([^\\s]+)`).exec(mailer.sent[mailIndex]!.text);
     return m ? decodeURIComponent(m[1]!) : null;
   };
-  return { deps, mailer, call, tick, advance, linkIn };
+  return { deps, mailer, call, tick, advance, linkIn, now: () => now };
 }
 
 const start = {
@@ -36,6 +36,53 @@ const start = {
 };
 
 describe('watch service', () => {
+  it('once a year, on the Day of the Dead, asks the owner to look at their jar', async () => {
+    const t = setup(Date.UTC(2026, 8, 1, 9));
+    await t.call('/api/watch', start);
+    const manage = t.linkIn(0, 'manage')!;
+    await t.call('/api/watch/confirm', { token: t.linkIn(0, 'confirm')! });
+    const reviews = () => t.mailer.sent.filter((m) => /a yearly look at your jar/.test(m.subject));
+    // The owner answers every few days, until the day after the Day of the Dead.
+    while (t.now() < Date.UTC(2026, 10, 3, 12)) {
+      t.advance(3);
+      await t.call('/api/watch/checkin', { token: manage });
+      await t.tick();
+    }
+    expect(reviews()).toHaveLength(1);
+    expect(reviews()[0]!.to).toBe('june@example.com');
+    expect(reviews()[0]!.text).toMatch(/#\/seal/);
+    // Once a year, not once a tick.
+    while (t.now() < Date.UTC(2027, 10, 1)) {
+      t.advance(3);
+      await t.call('/api/watch/checkin', { token: manage });
+      await t.tick();
+    }
+    expect(reviews()).toHaveLength(1);
+    t.advance(3);
+    await t.tick();
+    expect(reviews()).toHaveLength(2);
+  });
+
+  it('sends no yearly review in a watch’s first month, or while friends are being asked', async () => {
+    const t = setup(Date.UTC(2026, 9, 20, 9));
+    await t.call('/api/watch', start);
+    const manage = t.linkIn(0, 'manage')!;
+    await t.call('/api/watch/confirm', { token: t.linkIn(0, 'confirm')! });
+    // Confirmed on October 20, answering on time: still too new on November 2.
+    for (let i = 0; i < 5; i++) {
+      t.advance(3);
+      await t.call('/api/watch/checkin', { token: manage });
+      await t.tick();
+    }
+    expect(t.mailer.sent.some((m) => m.subject === 'Please check on June Alder')).toBe(false);
+    expect(t.mailer.sent.some((m) => /yearly/.test(m.subject))).toBe(false);
+    // A year on, the owner has gone quiet and friends were asked: no review.
+    t.advance(365);
+    await t.tick();
+    expect(t.mailer.sent.some((m) => m.subject === 'Please check on June Alder')).toBe(true);
+    expect(t.mailer.sent.some((m) => /yearly/.test(m.subject))).toBe(false);
+  });
+
   it('does nothing until the owner confirms', async () => {
     const t = setup();
     expect((await t.call('/api/watch', start)).status).toBe(201);
