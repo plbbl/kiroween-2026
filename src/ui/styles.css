@@ -877,9 +877,13 @@ textarea.ruled:focus {
   transition: opacity 200ms linear;
 }
 
-.wax.cracking .crack,
-.wax.broken .crack {
+.wax.cracking .crack {
   opacity: 1;
+}
+
+.wax.broken .crack {
+  opacity: 0;
+  transition: opacity 900ms var(--ease) 300ms;
 }
 
 .wax.cracking {

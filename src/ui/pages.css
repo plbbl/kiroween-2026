@@ -1534,9 +1534,7 @@ textarea.mono-input:focus {
 .letter {
   position: relative;
   padding: 44px 48px;
-  background:
-    repeating-linear-gradient(to bottom, transparent 0, transparent calc(2.1rem - 1px), rgba(26, 22, 19, 0.08) calc(2.1rem - 1px), rgba(26, 22, 19, 0.08) 2.1rem),
-    linear-gradient(180deg, #f3ecdc, #e9dfc8);
+  background: linear-gradient(180deg, #f3ecdc, #e9dfc8);
   color: var(--ink);
   box-shadow: 0 30px 50px -30px #000;
   animation: unfold 1.4s var(--ease) both;
@@ -1547,10 +1545,13 @@ textarea.mono-input:focus {
   color: var(--ink-faint);
 }
 
+/* Ruled lines drawn under each line of text. */
 .letter-body {
   margin-top: 18px;
   font-size: 1.22rem;
   line-height: 2.1rem;
+  background-image: linear-gradient(to bottom, transparent calc(2.1rem - 1px), rgba(26, 22, 19, 0.1) calc(2.1rem - 1px));
+  background-size: 100% 2.1rem;
 }
 
 .letter-body p {
