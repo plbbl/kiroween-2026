@@ -865,7 +865,7 @@ select {
 }
 
 .candle .candle-glow {
-  transform-origin: 40px 34px;
+  transform-origin: 40px 46px;
   animation: glow 2.4s ease-in-out infinite;
   animation-delay: var(--phase, 0s);
 }
@@ -880,7 +880,7 @@ select {
 }
 
 .candle.just-lit .candle-face {
-  transform-origin: 40px 106px;
+  transform-origin: 40px 112px;
   animation: wake 700ms var(--spring) both;
 }
 
@@ -996,7 +996,7 @@ select {
 .jar-ghost {
   position: absolute;
   left: 50%;
-  top: 46%;
+  top: 40%;
   z-index: 2;
   transform: translate(-50%, 0);
   transition: transform 1.6s var(--spring) 0.5s;
@@ -1017,7 +1017,7 @@ select {
 .jar-seal {
   position: absolute;
   left: 50%;
-  top: 29%;
+  top: 37%;
   z-index: 5;
   transform: translate(-50%, -50%);
 }

@@ -7,7 +7,7 @@ import { Jar, type JarState } from '../ui/art/Jar.tsx';
 import { WaxSeal, type WaxState } from '../ui/art/WaxSeal.tsx';
 import { useAtmosphere } from '../ui/shell.tsx';
 
-const MOODS: Mood[] = ['open', 'happy', 'sleep', 'wow', 'worried', 'sad', 'wink'];
+const MOODS: Mood[] = ['open', 'curious', 'happy', 'sleep', 'wow', 'worried', 'sad', 'wink'];
 
 /** The cast, for design review. Not linked from the app: open #/gallery. */
 export function Gallery() {

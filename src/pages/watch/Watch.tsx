@@ -15,7 +15,7 @@ const HOLDERS = DEMO_JAR.holders.map((h) => h.name);
 const MOOD: Record<WatchStatus, { mood: Mood; say: string }> = {
   well: { mood: 'happy', say: 'All good! See you soon.' },
   paused: { mood: 'sleep', say: 'Resting while you’re away.' },
-  due: { mood: 'open', say: 'Still here?' },
+  due: { mood: 'curious', say: 'Still here?' },
   reminding: { mood: 'worried', say: 'Hello? Just tap to say you’re okay.' },
   notified: { mood: 'sad', say: 'I’ve asked your friends to check on you.' },
 };
