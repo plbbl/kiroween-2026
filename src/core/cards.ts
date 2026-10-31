@@ -19,8 +19,8 @@ export const MAX_CARDS = 10;
 
 const SHARD_KIND = 0x01;
 const SEAL_KIND = 0x02;
-const SHARD_LENGTH = 1 + JAR_ID_LENGTH + 1 + 1 + SHARE_LENGTH; // 40 bytes, 30 words
-const SEAL_LENGTH = 1 + JAR_ID_LENGTH + 1 + SEAL_SECRET_LENGTH; // 22 bytes, 17 words
+const SHARD_LENGTH = SHARE_LENGTH + JAR_ID_LENGTH + 2 + 1; // 40 bytes, 30 words
+const SEAL_LENGTH = SEAL_SECRET_LENGTH + JAR_ID_LENGTH + 1 + 1; // 22 bytes, 17 words
 const QR_PREFIX = 'PH1-';
 const QR_CHECKSUM_LENGTH = 2;
 
@@ -52,25 +52,23 @@ export function shardX(shard: Shard): number {
   return shard.share[SHARE_LENGTH - 1]!;
 }
 
+// The secret bytes come first so that the words on two cards of the same
+// jar differ from the very first word; the shared jar id and the kind byte
+// come last.
 export function encodeCard(card: Card): Uint8Array {
   if (card.kind === 'shard') {
-    return concat(
-      Uint8Array.of(SHARD_KIND),
-      card.jarId,
-      Uint8Array.of(card.threshold, card.total),
-      card.share,
-    );
+    return concat(card.share, card.jarId, Uint8Array.of(card.threshold, card.total, SHARD_KIND));
   }
-  return concat(Uint8Array.of(SEAL_KIND), card.jarId, Uint8Array.of(card.x), card.secret);
+  return concat(card.secret, card.jarId, Uint8Array.of(card.x, SEAL_KIND));
 }
 
 export function decodeCard(bytes: Uint8Array): Card {
-  const kind = bytes[0];
+  const kind = bytes[bytes.length - 1];
   if (kind === SHARD_KIND && bytes.length === SHARD_LENGTH) {
-    const jarId = bytes.slice(1, 1 + JAR_ID_LENGTH);
-    const threshold = bytes[1 + JAR_ID_LENGTH]!;
-    const total = bytes[2 + JAR_ID_LENGTH]!;
-    const share = bytes.slice(3 + JAR_ID_LENGTH);
+    const share = bytes.slice(0, SHARE_LENGTH);
+    const jarId = bytes.slice(SHARE_LENGTH, SHARE_LENGTH + JAR_ID_LENGTH);
+    const threshold = bytes[SHARE_LENGTH + JAR_ID_LENGTH]!;
+    const total = bytes[SHARE_LENGTH + JAR_ID_LENGTH + 1]!;
     if (threshold < 2 || threshold > total || total > MAX_CARDS) {
       throw new CardError('This card describes an impossible circle.');
     }
@@ -78,9 +76,9 @@ export function decodeCard(bytes: Uint8Array): Card {
     return { kind: 'shard', jarId, threshold, total, share };
   }
   if (kind === SEAL_KIND && bytes.length === SEAL_LENGTH) {
-    const jarId = bytes.slice(1, 1 + JAR_ID_LENGTH);
-    const x = bytes[1 + JAR_ID_LENGTH]!;
-    const secret = bytes.slice(2 + JAR_ID_LENGTH);
+    const secret = bytes.slice(0, SEAL_SECRET_LENGTH);
+    const jarId = bytes.slice(SEAL_SECRET_LENGTH, SEAL_SECRET_LENGTH + JAR_ID_LENGTH);
+    const x = bytes[SEAL_SECRET_LENGTH + JAR_ID_LENGTH]!;
     if (x === 0) throw new CardError('This seal is damaged.');
     return { kind: 'seal', jarId, x, secret };
   }

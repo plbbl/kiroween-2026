@@ -1,0 +1,79 @@
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { parseJar, type JarFile } from '../core/jar.ts';
+
+export type Route = 'home' | 'seal' | 'watch' | 'seance' | 'guides';
+
+const ROUTES: Route[] = ['home', 'seal', 'watch', 'seance', 'guides'];
+
+function readRoute(): { route: Route; anchor: string } {
+  const [path = '', anchor = ''] = window.location.hash.replace(/^#\/?/, '').split('#');
+  const route = (ROUTES as string[]).includes(path) ? (path as Route) : 'home';
+  return { route, anchor };
+}
+
+export function useHashRoute(): { route: Route; anchor: string } {
+  const [state, setState] = useState(readRoute);
+  useEffect(() => {
+    const on = () => {
+      setState(readRoute());
+      window.scrollTo({ top: 0 });
+    };
+    window.addEventListener('hashchange', on);
+    return () => window.removeEventListener('hashchange', on);
+  }, []);
+  return state;
+}
+
+export function go(route: Route, anchor?: string) {
+  window.location.hash = `/${route === 'home' ? '' : route}${anchor ? `#${anchor}` : ''}`;
+}
+
+export function href(route: Route): string {
+  return `#/${route === 'home' ? '' : route}`;
+}
+
+/** A jar embedded in this very file, present when the page is a downloaded Grimoire. */
+export function embeddedJar(): JarFile | null {
+  const el = document.getElementById('phylactery-jar');
+  if (!el?.textContent) return null;
+  try {
+    return parseJar(el.textContent);
+  } catch {
+    return null;
+  }
+}
+
+interface Shell {
+  setTheme: (t: 'day' | 'night') => void;
+  setMourning: (px: number) => void;
+  setCandlelight: (v: number) => void;
+}
+
+const ShellContext = createContext<Shell | null>(null);
+
+export function ShellProvider({ value, children }: { value: Shell; children: ReactNode }) {
+  return <ShellContext.Provider value={value}>{children}</ShellContext.Provider>;
+}
+
+export function useShell(): Shell {
+  const s = useContext(ShellContext);
+  if (!s) throw new Error('useShell outside provider');
+  return s;
+}
+
+/** Set the page atmosphere while a page is shown. */
+export function useAtmosphere(theme: 'day' | 'night', mourning = 3) {
+  const shell = useShell();
+  useEffect(() => {
+    shell.setTheme(theme);
+    shell.setMourning(mourning);
+  }, [shell, theme, mourning]);
+}
+
+export function prefersReducedMotion(): boolean {
+  return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+}
+
+export function wait(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, prefersReducedMotion() ? Math.min(ms, 60) : ms));
+}

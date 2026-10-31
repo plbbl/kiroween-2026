@@ -9,3 +9,6 @@ build/
 # Never ignore .kiro - required by the Kiroween 2026 rules
 !.kiro/
 !.kiro/**
+
+# Playwright output
+e2e/shots/
