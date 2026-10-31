@@ -99,18 +99,23 @@ function statusOf(events: WatchEvent[], paused: boolean): WatchStatus {
   }
 }
 
-/** The words holders receive. It asks them to look in on someone; it never says anyone has died. */
-export function holderMessage(owner: string, holder: string): { subject: string; body: string } {
+const firstOf = (name: string) => name.trim().split(/\s+/)[0] ?? name;
+
+/**
+ * The words holders receive. It asks them to look in on someone, with how
+ * long the silence has been; it never says anyone has died.
+ */
+export function holderMessage(owner: string, holder: string, silence?: { days: number; reminders: number }): { subject: string; body: string } {
+  const first = firstOf(owner);
+  const quiet = silence
+    ? `We have not heard from ${first} for ${Math.round(silence.days)} days, and ${silence.reminders === 1 ? 'a reminder' : `${silence.reminders} reminders`} went unanswered.`
+    : `We have not heard from ${first} for a while, and our reminders went unanswered.`;
   return {
     subject: `Please check on ${owner}`,
     body:
-      `Dear ${holder},\n\n` +
-      `${owner} chose you as one of the people who keep a card for their Phylactery. ` +
-      `They usually let us know they are well, and we have not heard from them for a while. ` +
-      `We have reminded them several times.\n\n` +
-      `Please try to reach ${owner}, or ask someone close to them. ` +
-      `There may be a simple reason: a trip, a lost phone, a busy week.\n\n` +
-      `Keep your card safe. Only if you learn that ${owner} has passed away should you gather with the other holders.\n`,
+      `Dear ${firstOf(holder)},\n\n` +
+      `${owner} asked us to check in with them now and then, and to write to you if they went quiet. ${quiet}\n\n` +
+      `Please try to reach ${first}, or someone close to them. There may be a simple reason: a trip, a lost phone, a busy week.\n`,
   };
 }
 

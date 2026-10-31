@@ -49,7 +49,7 @@ describe('watch service: friends know what to do', () => {
     const t = setup();
     const toFriends = await askFriends(t, start);
     const clara = toFriends.find((m) => m.to === 'clara@example.com')!;
-    expect(clara.text).toMatch(/We asked Ben Okafor too/);
+    expect(clara.text).toMatch(/We wrote to Ben Okafor too/);
     expect(clara.text).toMatch(/#\/seance/);
     expect(clara.text).not.toMatch(/\?jar=/);
   });
@@ -69,7 +69,7 @@ describe('watch service: friends know what to do', () => {
     expect(toFriends).toHaveLength(2);
     const tokens = toFriends.map((m) => decodeURIComponent(/#\/seance\?jar=([^\s]+)/.exec(m.text)![1]!));
     expect(new Set(tokens).size).toBe(2);
-    expect(toFriends[0]!.text).toMatch(/any 2 of Clara Alder and Ben Okafor/);
+    expect(toFriends[0]!.text).toMatch(/Any 2 of Clara Alder and Ben Okafor/);
     for (const token of tokens) {
       const res = await t.call('/api/watch/jar/open', { token });
       expect(res.status).toBe(200);

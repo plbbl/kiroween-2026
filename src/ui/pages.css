@@ -2626,9 +2626,14 @@ textarea.mono-input {
     font-size: 0.8rem;
   }
 
-  /* All the cards in one row. */
+  /* Three cards fit in one row; more wrap in tidy rows. */
+  .fan {
+    padding: 0;
+    gap: 6px 0;
+  }
+
   .fan-card {
-    zoom: 0.7;
+    zoom: 0.64;
     margin: 4px 2px;
   }
 

@@ -255,8 +255,8 @@ export function StartWatch({ config }: { config: WatchConfig }) {
       <p className="tag">for real</p>
       <h2 id="start-title">Start your watch</h2>
       <p className="muted">
-        Uses the rhythm above. We keep names, email addresses and times, and a locked copy of your jar only if you choose. You can pause or delete it from the link we
-        send. Once a year, on the Day of the Dead, we also ask whether your jar is still up to date.
+        Uses the rhythm above. We keep names, emails and times, and a locked copy of your jar only if you choose. Pause or delete it any time from
+        the link we send.
       </p>
       <div className="person-grid">
         <label className="field">

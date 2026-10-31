@@ -76,6 +76,15 @@ interface PrintProps {
   threshold: number;
 }
 
+/**
+ * Where this copy of Phylactery lives, for a card found in a drawer years
+ * later. Empty when running from a file, which has no address to print.
+ */
+function homeAddress(): string {
+  if (typeof location === 'undefined' || !/^https?:$/.test(location.protocol)) return '';
+  return (location.host + location.pathname).replace(/\/index\.html$/, '/').replace(/\/$/, '');
+}
+
 function WordGrid({ words, columns }: { words: string[]; columns: number }) {
   return (
     <ol className="word-grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
@@ -111,8 +120,9 @@ function ShardFace({ owner, card, buddy, index, total, threshold }: PrintProps) 
       </div>
       <WordGrid words={cardToWords(card.shard)} columns={5} />
       <footer className="card-foot">
-        When the time comes, gather with the others and open the jar file, or any copy of Phylactery. Keep this card safe, like a
-        house key. Never post a photo of it.
+        When the time comes, gather with the others and open {owner.split(/\s+/)[0]}’s jar file
+        {homeAddress() ? `, or go to ${homeAddress()} and choose Séance` : ', or any copy of Phylactery'}, then each offer your card. Keep this card safe,
+        like a house key. Never post a photo of it.
       </footer>
     </section>
   );
@@ -177,7 +187,10 @@ export function PrintableKey({ owner, keyCard }: { owner: string; keyCard: KeyCa
           <Qr text={cardToQrText(keyCard)} size={128} label={`Code for ${owner}'s key`} />
         </div>
         <WordGrid words={cardToWords(keyCard)} columns={4} />
-        <footer className="card-foot">To change the jar: open Phylactery, choose Seal, then “Change what’s inside”, and give it your jar file and this key.</footer>
+        <footer className="card-foot">
+          To change the jar: open your jar file{homeAddress() ? ` or ${homeAddress()}` : ''}, choose Seal, then “Change what’s inside”, and give it
+          your jar file and this key.
+        </footer>
       </section>
     </article>
   );

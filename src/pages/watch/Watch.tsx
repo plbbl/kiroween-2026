@@ -231,7 +231,7 @@ export function Watch({ params }: { params: URLSearchParams }) {
             ) : (
               <ol className="inbox-list" ref={inbox} tabIndex={0} aria-label="Messages, oldest first">
                 {messages.map((e, i) => (
-                  <Message key={`${e.kind}-${e.at}-${e.n ?? 0}`} event={e} of={config.reminders} afterNotify={e.kind === 'checkin' && messages[i - 1]?.kind === 'notify'} />
+                  <Message key={`${e.kind}-${e.at}-${e.n ?? 0}`} event={e} of={config.reminders} silentDays={config.cadenceDays + config.graceDays} afterNotify={e.kind === 'checkin' && messages[i - 1]?.kind === 'notify'} />
                 ))}
               </ol>
             )}
@@ -260,7 +260,7 @@ export function Watch({ params }: { params: URLSearchParams }) {
 
 const friendsLine = HOLDERS.map((h) => h.split(' ')[0]).join(', ');
 
-function Message({ event, of, afterNotify = false }: { event: WatchEvent; of: number; afterNotify?: boolean }) {
+function Message({ event, of, silentDays, afterNotify = false }: { event: WatchEvent; of: number; silentDays: number; afterNotify?: boolean }) {
   const when = `day ${Math.floor(event.at)}`;
   if (event.kind === 'checkin' || event.kind === 'pause' || event.kind === 'resume') {
     const text = event.kind === 'checkin' ? 'I’m here!' : event.kind === 'pause' ? 'Away for a while.' : 'Back again!';
@@ -278,7 +278,7 @@ function Message({ event, of, afterNotify = false }: { event: WatchEvent; of: nu
               to {friendsLine} · {when}
             </span>
             <p className="msg-title">{OWNER} is okay</p>
-            <p>{OWNER} has just let us know they are well. Thank you for caring. There is nothing more to do.</p>
+            <p>Good news: {OWNER} just answered us. All is well, and there is nothing more to do. Thank you for caring.</p>
           </li>
         )}
       </>
@@ -294,7 +294,7 @@ function Message({ event, of, afterNotify = false }: { event: WatchEvent; of: nu
       </li>
     );
   }
-  const m = holderMessage(OWNER, HOLDERS[0]!);
+  const m = holderMessage(OWNER, HOLDERS[0]!, { days: silentDays, reminders: of });
   return (
     <li className="msg to-friends pop">
       <span className="msg-meta">

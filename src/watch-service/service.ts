@@ -194,7 +194,7 @@ export async function createWatch(deps: Deps, raw: unknown): Promise<{ id: strin
     to: owner.email,
     subject: 'Please confirm your watch',
     text:
-      `Hi ${owner.name},\n\n` +
+      `Hi ${owner.name.split(/\s+/)[0]},\n\n` +
       `Someone (hopefully you) asked Phylactery to keep watch over you. Nothing will happen until you confirm:\n\n` +
       `${link(deps, 'confirm', checkin.token)}\n\n` +
       `After that, about every ${config.cadenceDays} day${config.cadenceDays > 1 ? 's' : ''} we will send a link like the one above. One tap says you are still here.\n\n` +
@@ -295,7 +295,10 @@ export async function checkin(deps: Deps, token: unknown): Promise<WatchView> {
       await deps.mailer.send({
         to: h.email,
         subject: `${record.owner.name} is okay`,
-        text: `Dear ${h.name},\n\n${record.owner.name} has just let us know they are well. Thank you for caring. There is nothing more to do.\n`,
+        text:
+          `Dear ${h.name.split(/\s+/)[0]},\n\n` +
+          `Good news: ${record.owner.name} just answered us. All is well, and there is nothing more to do. Thank you for caring.\n\n` +
+          `— Phylactery\n`,
       });
     }
   }
@@ -382,7 +385,9 @@ export async function tick(deps: Deps): Promise<{ sent: number }> {
         await deps.mailer.send({
           to: record.owner.email,
           subject: `${first}, still here?`,
-          text: `Just checking in. One tap lets us know you are well:\n\n${link(deps, 'here', checkinToken)}\n`,
+          text:
+            `Just checking in. One tap lets us know you are well:\n\n${link(deps, 'here', checkinToken)}\n\n` +
+            `Going away for a while? Pause the watch from the manage link in your first email.\n`,
         });
       } else if (e.kind === 'reminder') {
         const m = ownerReminder(first, e.n ?? 1, record.config.reminders);
@@ -392,19 +397,20 @@ export async function tick(deps: Deps): Promise<{ sent: number }> {
         const jarLinks = await rotateJarLinks(deps, record);
         for (const [i, h] of record.holders.entries()) {
           if (h.removed) continue;
-          const m = holderMessage(record.owner.name, h.name);
+          const m = holderMessage(record.owner.name, h.name, { days: e.at - run.lastSign, reminders: record.config.reminders });
           await deps.mailer.send({
             to: h.email,
             subject: m.subject,
             text:
               `${m.body}\n${whatToDo(deps, record, h, jarLinks[i]!)}\n\n` +
-              `If you don't know ${record.owner.name}, or would rather not be asked again: ${link(deps, 'optout', optouts[i]!)}\n`,
+              `— Phylactery, the check-in ${first} set up\n\n` +
+              `Don't know ${record.owner.name}, or would rather not be asked again? ${link(deps, 'optout', optouts[i]!)}\n`,
           });
         }
         await deps.mailer.send({
           to: record.owner.email,
           subject: 'We asked your friends to check on you',
-          text: `We have not heard from you, so we asked ${record.holders.filter((h) => !h.removed).map((h) => h.name).join(', ')} to look in on you.\n\nIf you are fine, tap here and we will tell them:\n${link(deps, 'here', checkinToken)}\n`,
+          text: `We have not heard from you, so we asked ${list(record.holders.filter((h) => !h.removed).map((h) => h.name))} to look in on you.\n\nIf you are fine, tap here and we will tell them:\n${link(deps, 'here', checkinToken)}\n`,
         });
       }
       sent++;
@@ -434,15 +440,18 @@ async function rotateCheckin(deps: Deps, record: WatchRecord): Promise<string> {
 function whatToDo(deps: Deps, record: WatchRecord, holder: Holder, jarToken: string): string {
   const first = record.owner.name.split(/\s+/)[0]!;
   const others = record.holders.filter((h) => !h.removed && h !== holder).map((h) => h.name);
-  const asked = others.length ? `We asked ${list(others)} too.` : '';
-  if (!record.jar) {
-    return `${asked} If it comes to that, gather with the others who hold ${first}'s cards, open the jar file ${first} gave you (or ${deps.baseUrl.replace(/\/?$/, '/')}#/seance), and each offer your card.`.trim();
-  }
-  const j = parseJar(record.jar.json);
+  const asked = others.length ? `We wrote to ${list(others)} too.\n\n` : '';
+  const base = deps.baseUrl.replace(/\/?$/, '/');
+  const kept = record.jar ? parseJar(record.jar.json) : null;
+  const who = kept ? `Any ${kept.threshold} of ${list(kept.holders.map((h) => h.name))} can open it together.` : 'Enough of you together can open it.';
+  const how = kept
+    ? `${first} left a locked copy with us. When you are ready, this link opens it for you; the others get their own:\n${base}#/seance?jar=${encodeURIComponent(jarToken)}`
+    : `Open the jar file ${first} gave you (or ${base}#/seance), and each offer your card.`;
   return (
-    `${asked} If it comes to that, any ${j.threshold} of ${list(j.holders.map((h) => h.name))} can open what ${first} left, together. ` +
-    `${first} left a locked copy with us; this link opens it for you:\n${deps.baseUrl.replace(/\/?$/, '/')}#/seance?jar=${encodeURIComponent(jarToken)}`
-  ).trim();
+    asked +
+    `If you learn that ${first} has passed away: ${first} left words for the people close to them in a locked jar, and you hold one of its cards. ${who} ${how}\n\n` +
+    `Until then, keep your card safe.`
+  );
 }
 
 const list = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : (names[0] ?? ''));
