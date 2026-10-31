@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { MemoryStore, OutboxMailer } from './adapters.ts';
 import { handle } from './http.ts';
+import { emptyContent, parseJar, sealJar } from '../core/jar.ts';
 import { DAY, type Deps } from './service.ts';
 
 function setup(start = Date.UTC(2026, 10, 1, 9)) {
@@ -34,6 +35,70 @@ const start = {
   ],
   config: { cadenceDays: 7, graceDays: 4, reminders: 3 },
 };
+
+async function askFriends(t: ReturnType<typeof setup>, body: unknown) {
+  await t.call('/api/watch', body);
+  await t.call('/api/watch/confirm', { token: t.linkIn(0, 'confirm')! });
+  t.advance(12);
+  await t.tick();
+  return t.mailer.sent.filter((m) => m.subject === 'Please check on June Alder');
+}
+
+describe('watch service: friends know what to do', () => {
+  it('without a kept jar, each friend hears who else was asked and how the circle opens the jar file', async () => {
+    const t = setup();
+    const toFriends = await askFriends(t, start);
+    const clara = toFriends.find((m) => m.to === 'clara@example.com')!;
+    expect(clara.text).toMatch(/We asked Ben Okafor too/);
+    expect(clara.text).toMatch(/#\/seance/);
+    expect(clara.text).not.toMatch(/\?jar=/);
+  });
+
+  it('with a kept jar, each friend gets their own link that opens exactly that jar', async () => {
+    const t = setup();
+    const { jar } = await sealJar({
+      owner: 'June Alder',
+      content: emptyContent(),
+      threshold: 2,
+      holders: [
+        { name: 'Clara Alder', letter: '' },
+        { name: 'Ben Okafor', letter: '' },
+      ],
+    });
+    const toFriends = await askFriends(t, { ...start, jar: JSON.stringify(jar) });
+    expect(toFriends).toHaveLength(2);
+    const tokens = toFriends.map((m) => decodeURIComponent(/#\/seance\?jar=([^\s]+)/.exec(m.text)![1]!));
+    expect(new Set(tokens).size).toBe(2);
+    expect(toFriends[0]!.text).toMatch(/any 2 of Clara Alder and Ben Okafor/);
+    for (const token of tokens) {
+      const res = await t.call('/api/watch/jar/open', { token });
+      expect(res.status).toBe(200);
+      expect(parseJar(res.body.jar as string)).toEqual(jar);
+    }
+    expect((await t.call('/api/watch/jar/open', { token: `${tokens[0]!.split('.')[0]}.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` })).status).toBe(404);
+    // The owner's own manage link is not a friend's jar link.
+    expect((await t.call('/api/watch/jar/open', { token: t.linkIn(0, 'manage')! })).status).toBe(404);
+  });
+
+  it('the owner replaces or removes the kept jar; only real jars are kept', async () => {
+    const t = setup();
+    await t.call('/api/watch', start);
+    const manage = t.linkIn(0, 'manage')!;
+    const first = await sealJar({ owner: 'June Alder', content: emptyContent(), threshold: 2, holders: [{ name: 'A', letter: '' }, { name: 'B', letter: '' }] });
+    const kept = await t.call('/api/watch/jar', { token: manage, jar: JSON.stringify(first.jar) });
+    expect(kept.status).toBe(200);
+    expect((kept.body.jar as { revision: number }).revision).toBe(1);
+    expect((await t.call('/api/watch/jar', { token: manage, jar: '{"not":"a jar"}' })).status).toBe(400);
+    expect((await t.call('/api/watch/jar', { token: manage, jar: 'x'.repeat(300_000) })).status).toBe(413);
+    expect((await t.call('/api/watch/jar', { token: manage, jar: null })).body.jar).toBeNull();
+    // Friends are asked; with no jar kept, their email points to the jar file instead.
+    await t.call('/api/watch/confirm', { token: t.linkIn(0, 'confirm')! });
+    t.advance(12);
+    await t.tick();
+    const toClara = t.mailer.sent.find((m) => m.to === 'clara@example.com')!;
+    expect(toClara.text).not.toMatch(/\?jar=/);
+  });
+});
 
 describe('watch service', () => {
   it('once a year, on the Day of the Dead, asks the owner to look at their jar', async () => {

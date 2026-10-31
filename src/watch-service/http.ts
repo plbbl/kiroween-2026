@@ -10,11 +10,13 @@
 //   POST   /api/watch/resume     { token }
 //   POST   /api/watch/delete     { token }
 //   POST   /api/watch/optout     { token }                   a friend leaves a watch
+//   POST   /api/watch/jar        { token, jar }              the owner keeps (or, with jar: null, removes) a locked copy
+//   POST   /api/watch/jar/open   { token }                   a friend's link opens the kept copy
 //   POST   /api/watch/tick       (header x-tick-secret)      send what is due
 //
 // Tokens travel in request bodies, never in URLs the server logs.
 
-import { checkin, confirm, createWatch, optOut, remove, setPaused, status, tick, WatchError, type Deps } from './service.ts';
+import { checkin, confirm, createWatch, fetchJar, keepJar, MAX_JAR_CHARS, optOut, remove, setPaused, status, tick, WatchError, type Deps } from './service.ts';
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -28,8 +30,10 @@ export async function handle(req: Request, deps: Deps, tickSecret?: string): Pro
     if (path === '/api/health') return json({ ok: true, service: 'phylactery-watch' });
     if (req.method !== 'POST') return json({ error: 'Not found.' }, 404);
     const text = await req.text();
-    if (text.length > 20_000) return json({ error: 'Too large.' }, 413);
-    let body: { token?: unknown } = {};
+    // Requests that carry a jar may be bigger; nothing else needs to be.
+    const limit = path === '/api/watch' || path === '/api/watch/jar' ? MAX_JAR_CHARS + 20_000 : 20_000;
+    if (text.length > limit) return json({ error: 'Too large.' }, 413);
+    let body: { token?: unknown; jar?: unknown } = {};
     try {
       body = text ? JSON.parse(text) : {};
     } catch {
@@ -53,6 +57,10 @@ export async function handle(req: Request, deps: Deps, tickSecret?: string): Pro
         return json({ ok: true });
       case '/api/watch/optout':
         return json(await optOut(deps, body.token));
+      case '/api/watch/jar':
+        return json(await keepJar(deps, body.token, body.jar));
+      case '/api/watch/jar/open':
+        return json(await fetchJar(deps, body.token));
       case '/api/watch/tick':
         if (!tickSecret || req.headers.get('x-tick-secret') !== tickSecret) return json({ error: 'Forbidden.' }, 403);
         return json(await tick(deps));

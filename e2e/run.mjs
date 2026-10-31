@@ -339,6 +339,12 @@ try {
   await w.locator('.link-result').getByRole('button', { name: 'Pause, I’m away' }).click();
   await w.getByText('Paused. Nothing will be sent until you resume.').waitFor({ timeout: 5000 });
   check(true, 'the owner confirms and pauses a real watch from the emailed links');
+  await w.locator('.kept-jar-actions input[type="file"]').setInputFiles(jarPath);
+  await w.getByText(/A locked copy of your jar is kept: version 1/).waitFor({ timeout: 5000 });
+  check(true, 'the owner gives the watch a locked copy of the jar file');
+  await w.goto(`${base}#/seance?jar=notarealwatch.notarealsecretatall`);
+  await w.getByText(/expired or was never valid/).waitFor({ timeout: 5000 });
+  check(true, 'a dead link to a kept jar explains itself');
 } catch (e) {
   check(false, `real watch flow: ${e}`);
 } finally {

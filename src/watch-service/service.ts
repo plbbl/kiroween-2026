@@ -1,17 +1,23 @@
 // The watch service: the only part of Phylactery that runs on a server.
 //
-// It knows names, email addresses and times. It never sees a jar, a card
-// or a key. Everything here is plain logic with its store, mailer and clock
-// passed in, so it runs on any host and is tested with a fake clock.
+// It knows names, email addresses and times. It never sees a card or a key.
+// If the owner chooses, it also keeps a locked copy of their jar, so that
+// friends who are asked to check on them can reach it later; locked,
+// because without the cards it is only ciphertext. Everything here is plain
+// logic with its store, mailer and clock passed in, so it runs on any host
+// and is tested with a fake clock.
 
 import { sha256 } from '@noble/hashes/sha2.js';
 import { bytesToHex } from '@noble/hashes/utils.js';
 import { toBase64Url } from '../core/bytes.ts';
+import { JarError, parseJar } from '../core/jar.ts';
 import { holderMessage, ownerReminder, runWatch, validateWatch, type OwnerAction, type WatchConfig, type WatchStatus } from '../core/watch.ts';
 
 export const DAY = 24 * 60 * 60 * 1000;
 export const MAX_HOLDERS = 10;
 export const MAX_WATCHES_PER_OWNER = 3;
+/** A jar is a few kilobytes; long letters make it bigger, never this big. */
+export const MAX_JAR_CHARS = 200_000;
 
 export interface Person {
   name: string;
@@ -20,7 +26,15 @@ export interface Person {
 
 interface Holder extends Person {
   optoutHash: string;
+  /** For the link to the kept jar, made when friends are first asked. */
+  jarHash?: string;
   removed: boolean;
+}
+
+/** The owner's jar, as the watch keeps it: locked, exactly as sealed. */
+export interface KeptJar {
+  json: string;
+  keptAt: number;
 }
 
 export interface WatchRecord {
@@ -39,6 +53,7 @@ export interface WatchRecord {
   sent: string[];
   manageHash: string;
   checkinHash: string;
+  jar?: KeptJar;
 }
 
 export interface WatchStore {
@@ -119,6 +134,20 @@ export interface CreateInput {
   owner: Person;
   holders: Person[];
   config: WatchConfig;
+  /** Optional: the jar file's JSON, to keep for the friends. */
+  jar?: unknown;
+}
+
+/** Check that what we are given is a jar, and keep it exactly as it is. */
+function cleanJar(raw: unknown, now: number): KeptJar {
+  const json = typeof raw === 'string' ? raw : JSON.stringify(raw);
+  if (!json || json.length > MAX_JAR_CHARS) throw new WatchError('That jar is too large to keep.', 413);
+  try {
+    parseJar(json);
+  } catch (e) {
+    throw new WatchError(e instanceof JarError ? e.message : 'That is not a jar.', 400);
+  }
+  return { json, keptAt: now };
 }
 
 export async function createWatch(deps: Deps, raw: unknown): Promise<{ id: string }> {
@@ -158,6 +187,7 @@ export async function createWatch(deps: Deps, raw: unknown): Promise<{ id: strin
     sent: [],
     manageHash: manage.hash,
     checkinHash: checkin.hash,
+    ...(input.jar === undefined || input.jar === null ? {} : { jar: cleanJar(input.jar, deps.now()) }),
   };
   await deps.store.put(record);
   await deps.mailer.send({
@@ -194,6 +224,8 @@ export interface WatchView {
   holders: string[];
   lastSign: string | null;
   nextAsk: string | null;
+  /** The kept jar, if any: whose it is, its version and when it was given. */
+  jar: { owner: string; revision: number; sealedAt: string; keptAt: string } | null;
 }
 
 function view(deps: Deps, record: WatchRecord): WatchView {
@@ -211,7 +243,33 @@ function view(deps: Deps, record: WatchRecord): WatchView {
     holders: record.holders.filter((h) => !h.removed).map((h) => h.name),
     lastSign: lastSignAt ? new Date(lastSignAt).toISOString() : null,
     nextAsk: nextAsk ? new Date(nextAsk).toISOString() : null,
+    jar: keptSummary(record.jar),
   };
+}
+
+function keptSummary(kept: KeptJar | undefined): WatchView['jar'] {
+  if (!kept) return null;
+  const j = parseJar(kept.json);
+  return { owner: j.owner, revision: j.revision ?? 1, sealedAt: j.sealedAt, keptAt: new Date(kept.keptAt).toISOString() };
+}
+
+/** The owner gives the watch their newest jar, or takes it back (jar: null). */
+export async function keepJar(deps: Deps, token: unknown, jar: unknown): Promise<WatchView> {
+  const record = await load(deps, token, 'manage');
+  if (jar === null || jar === undefined) delete record.jar;
+  else record.jar = cleanJar(jar, deps.now());
+  await deps.store.put(record);
+  return view(deps, record);
+}
+
+/** A friend's link from the "please check on" email opens the kept jar. */
+export async function fetchJar(deps: Deps, token: unknown): Promise<{ jar: string }> {
+  const { id, secret } = splitToken(token);
+  const record = await deps.store.get(id);
+  const holder = record?.holders.find((h) => !h.removed && h.jarHash && sameHash(hash(secret), h.jarHash));
+  if (!record || !holder) throw new WatchError('That link has expired or was never valid.', 404);
+  if (!record.jar) throw new WatchError('No jar is kept with this watch any more. Use the jar file you were given.', 404);
+  return { jar: record.jar.json };
 }
 
 /** The owner's confirmation link doubles as their check-in link. */
@@ -303,9 +361,9 @@ export async function tick(deps: Deps): Promise<{ sent: number }> {
         subject: `${first}, a yearly look at your jar`,
         text:
           `Today is the Day of the Dead. Once a year, on this day, we suggest a look at what you left in your jar.\n\n` +
-          `Passwords change, accounts close, people move. If something in your jar is out of date, seal a new one at ` +
-          `${deps.baseUrl.replace(/\/?$/, '/')}#/seal and give out the new cards. The old cards still open the old jar file, ` +
-          `so ask for them back or tell your friends which one counts.\n\n` +
+          `Passwords change, accounts close, people move. If something in your jar is out of date, change it with your key at ` +
+          `${deps.baseUrl.replace(/\/?$/, '/')}#/seal?update. Your friends keep their cards; send them the new jar file` +
+          `${record.jar ? ', and give the watch a copy from your manage link' : ''}.\n\n` +
           `If everything is still right, there is nothing to do. Your watch carries on as before.\n`,
       });
       record.sent.push(review);
@@ -331,13 +389,16 @@ export async function tick(deps: Deps): Promise<{ sent: number }> {
         await deps.mailer.send({ to: record.owner.email, subject: m.subject, text: `${m.body}\n\n${link(deps, 'here', checkinToken)}\n` });
       } else {
         const optouts = await rotateOptouts(deps, record);
+        const jarLinks = await rotateJarLinks(deps, record);
         for (const [i, h] of record.holders.entries()) {
           if (h.removed) continue;
           const m = holderMessage(record.owner.name, h.name);
           await deps.mailer.send({
             to: h.email,
             subject: m.subject,
-            text: `${m.body}\nIf you don't know ${record.owner.name}, or would rather not be asked again: ${link(deps, 'optout', optouts[i]!)}\n`,
+            text:
+              `${m.body}\n${whatToDo(deps, record, h, jarLinks[i]!)}\n\n` +
+              `If you don't know ${record.owner.name}, or would rather not be asked again: ${link(deps, 'optout', optouts[i]!)}\n`,
           });
         }
         await deps.mailer.send({
@@ -364,6 +425,37 @@ async function rotateCheckin(deps: Deps, record: WatchRecord): Promise<string> {
   record.checkinHash = t.hash;
   await deps.store.put(record);
   return t.token;
+}
+
+/**
+ * The part of the email that tells a friend who else was asked and how the
+ * circle opens the jar, if it ever comes to that.
+ */
+function whatToDo(deps: Deps, record: WatchRecord, holder: Holder, jarToken: string): string {
+  const first = record.owner.name.split(/\s+/)[0]!;
+  const others = record.holders.filter((h) => !h.removed && h !== holder).map((h) => h.name);
+  const asked = others.length ? `We asked ${list(others)} too.` : '';
+  if (!record.jar) {
+    return `${asked} If it comes to that, gather with the others who hold ${first}'s cards, open the jar file ${first} gave you (or ${deps.baseUrl.replace(/\/?$/, '/')}#/seance), and each offer your card.`.trim();
+  }
+  const j = parseJar(record.jar.json);
+  return (
+    `${asked} If it comes to that, any ${j.threshold} of ${list(j.holders.map((h) => h.name))} can open what ${first} left, together. ` +
+    `${first} left a locked copy with us; this link opens it for you:\n${deps.baseUrl.replace(/\/?$/, '/')}#/seance?jar=${encodeURIComponent(jarToken)}`
+  ).trim();
+}
+
+const list = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : (names[0] ?? ''));
+
+/** Each friend gets their own link to the kept jar; earlier ones stop working. */
+async function rotateJarLinks(deps: Deps, record: WatchRecord): Promise<string[]> {
+  const tokens = record.holders.map((h) => {
+    const t = newToken(deps, record.id);
+    h.jarHash = t.hash;
+    return t.token;
+  });
+  await deps.store.put(record);
+  return tokens;
 }
 
 async function rotateOptouts(deps: Deps, record: WatchRecord): Promise<string[]> {

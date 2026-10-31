@@ -1,10 +1,42 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { JarError, type JarFile } from '../../core/jar.ts';
 import type { WatchConfig } from '../../core/watch.ts';
 import { Sparkles } from '../../ui/art/Decor.tsx';
 import { Ghost, type Mood } from '../../ui/art/Ghost.tsx';
 import { sound } from '../../ui/sound.ts';
 import { firstName, numberWord, plural } from '../../ui/text.ts';
-import { ApiError, watchApi, type WatchView } from '../../ui/watchApi.ts';
+import { jarFromText } from '../../ui/grimoire.ts';
+import { ApiError, jarHandoff, watchApi, type WatchView } from '../../ui/watchApi.ts';
+
+/** A button that reads a jar file chosen by the owner. */
+function JarFileButton({ label, onJar, className = 'btn small' }: { label: string; onJar: (jar: JarFile) => void; className?: string }) {
+  const [error, setError] = useState('');
+  return (
+    <span className="jar-file-button">
+      <label className={className}>
+        {label}
+        <input
+          type="file"
+          accept=".html,.json,text/html,application/json"
+          onChange={async (e) => {
+            const f = e.target.files?.[0];
+            e.target.value = '';
+            if (!f) return;
+            try {
+              setError('');
+              onJar(jarFromText(await f.text()));
+            } catch (err) {
+              setError(err instanceof JarError ? err.message : 'That file isn’t a jar.');
+            }
+          }}
+        />
+      </label>
+      {error && <span className="error">{error}</span>}
+    </span>
+  );
+}
+
+const versionOf = (j: { revision?: number }) => j.revision ?? 1;
 
 const day = (iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }) : '';
@@ -107,7 +139,13 @@ export function LinkAction({ params }: { params: URLSearchParams }) {
               <b>{numberWord(view.config.reminders)}</b> {plural(view.config.reminders, 'reminder')}
             </li>
             {view.lastSign && <li>Last sign from you: {day(view.lastSign)}</li>}
+            <li>
+              {view.jar
+                ? `A locked copy of your jar is kept: version ${view.jar.revision}, given ${day(view.jar.keptAt)}. If your friends are asked, each gets a link to it.`
+                : 'No copy of your jar is kept. If your friends are asked, they will need the jar file you gave them.'}
+            </li>
           </ul>
+          <KeptJarActions view={view} busy={busy} onKeep={(jar) => act(() => watchApi.keepJar(token, jar))} />
           <div className="row centered">
             <button type="button" className="btn primary small" disabled={busy} onClick={() => act(() => watchApi.checkin(token))}>
               I’m here!
@@ -144,6 +182,27 @@ export function LinkAction({ params }: { params: URLSearchParams }) {
   );
 }
 
+/** Give the watch the newest jar, or take the copy back. */
+function KeptJarActions({ view, busy, onKeep }: { view: WatchView; busy: boolean; onKeep: (jar: JarFile | null) => void }) {
+  const fresh = jarHandoff.peek();
+  const newer = fresh && (!view.jar || versionOf(fresh) > view.jar.revision || fresh.sealedAt !== view.jar.sealedAt);
+  return (
+    <div className="row centered kept-jar-actions">
+      {newer && (
+        <button type="button" className="btn small primary" disabled={busy} onClick={() => onKeep(fresh)}>
+          Keep the jar you just {versionOf(fresh) > 1 ? 'updated' : 'sealed'}
+        </button>
+      )}
+      <JarFileButton label={view.jar ? 'Give a newer jar file' : 'Keep a copy of my jar file'} onJar={onKeep} />
+      {view.jar && (
+        <button type="button" className="text-btn quiet" disabled={busy} onClick={() => onKeep(null)}>
+          Remove the copy
+        </button>
+      )}
+    </div>
+  );
+}
+
 interface PersonDraft {
   name: string;
   email: string;
@@ -158,6 +217,8 @@ export function StartWatch({ config }: { config: WatchConfig }) {
   ]);
   const [state, setState] = useState<'idle' | 'sending' | 'sent'>('idle');
   const [error, setError] = useState('');
+  const [jar, setJar] = useState<JarFile | null>(() => jarHandoff.peek());
+  const [keep, setKeep] = useState(true);
 
   const filled = friends.filter((f) => f.name.trim() || f.email.trim());
   const submit = async (e: FormEvent) => {
@@ -165,7 +226,7 @@ export function StartWatch({ config }: { config: WatchConfig }) {
     setError('');
     setState('sending');
     try {
-      await watchApi.start({ owner, holders: filled, config });
+      await watchApi.start({ owner, holders: filled, config, ...(jar && keep ? { jar: JSON.stringify(jar) } : {}) });
       setState('sent');
       sound.chime();
     } catch (err) {
@@ -194,7 +255,7 @@ export function StartWatch({ config }: { config: WatchConfig }) {
       <p className="tag">for real</p>
       <h2 id="start-title">Start your watch</h2>
       <p className="muted">
-        Uses the rhythm above. We keep only names, email addresses and times, never anything from your jar. You can pause or delete it from the link we
+        Uses the rhythm above. We keep names, email addresses and times, and a locked copy of your jar only if you choose. You can pause or delete it from the link we
         send. Once a year, on the Day of the Dead, we also ask whether your jar is still up to date.
       </p>
       <div className="person-grid">
@@ -220,6 +281,23 @@ export function StartWatch({ config }: { config: WatchConfig }) {
           </label>
         </div>
       ))}
+      <div className="keep-jar">
+        <p className="label">Your jar, for your friends</p>
+        {jar ? (
+          <label className="keep-jar-check">
+            <input type="checkbox" checked={keep} onChange={(e) => setKeep(e.target.checked)} />
+            <span>
+              Keep a locked copy of {jar.owner}’s jar{versionOf(jar) > 1 ? ` (version ${versionOf(jar)})` : ''}. If your friends are ever asked, each
+              gets a link to it, so no one has to keep the file for years. Without their cards it can’t be read, by us or anyone.
+            </span>
+          </label>
+        ) : (
+          <p className="muted keep-jar-none">
+            Optional: <JarFileButton label="choose your jar file" onJar={setJar} className="text-btn" /> and we keep a locked copy, so no one has to
+            keep the file for years.
+          </p>
+        )}
+      </div>
       <div className="spread">
         {friends.length < 10 ? (
           <button type="button" className="text-btn" onClick={() => setFriends([...friends, { name: '', email: '' }])}>

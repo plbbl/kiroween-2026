@@ -2719,6 +2719,73 @@ textarea.mono-input {
   margin-top: 10px;
 }
 
+/* A jar file chosen by the owner: the input hides inside its label. */
+.jar-file-button {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.jar-file-button label {
+  position: relative;
+  cursor: pointer;
+}
+
+.jar-file-button label:has(input:focus-visible) {
+  outline: 3px solid var(--purple);
+  outline-offset: 3px;
+}
+
+.jar-file-button input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.keep-jar {
+  margin: 18px 0 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--surface-2);
+  border: 2px dashed var(--line-strong);
+}
+
+.keep-jar .label {
+  margin-bottom: 6px;
+}
+
+.keep-jar-check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: var(--fg-soft);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.keep-jar-check input {
+  margin-top: 4px;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--purple);
+}
+
+.keep-jar-none {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.kept-jar-actions {
+  margin: -4px 0 16px;
+}
+
+.watch-copy {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
 .start-hint {
   margin: 10px 0 0;
   text-align: right;

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from 'react';
 import { circleBuddies } from '../../core/buddy.ts';
 import { verifyCircle, type CircleCheck, type JarFile, type SealResult } from '../../core/jar.ts';
 import { Sparkles } from '../../ui/art/Decor.tsx';
@@ -9,6 +9,7 @@ import { BuddyCard, EnvelopeMark, PrintableCard, PrintableKey } from '../../ui/c
 import { capitalised, numberWord } from '../../ui/text.ts';
 import { canMakeGrimoire, download, makeGrimoire, safeFilename } from '../../ui/grimoire.ts';
 import { href } from '../../ui/shell.tsx';
+import { ApiError, jarHandoff, watchApi, watchAvailable } from '../../ui/watchApi.ts';
 
 function combos(n: number, k: number): number {
   let r = 1;
@@ -111,7 +112,7 @@ export function Sealed({ result }: { result: SealResult }) {
           <div>
             <h3>Turn on the watch</h3>
             <p className="muted">We ask now and then if you are still here, and only ask your friends to check on you if you go quiet.</p>
-            <a className="btn" href={href('watch')}>
+            <a className="btn" href={href('watch')} onClick={() => jarHandoff.give(jar)}>
               Set the watch
             </a>
           </div>
@@ -142,7 +143,7 @@ export function Updated({ jar }: { jar: JarFile }) {
         </div>
         <h1 className="sealed-title">Updated!</h1>
         <p className="lede">
-          Version {jar.revision ?? 2} of {first}’s jar. Every card still opens it, and nothing new needs printing.
+          Version {jar.revision ?? 2} of {first}’s jar. Every card still opens it, and nothing new needs printing. Keep your key for next time.
         </p>
       </section>
 
@@ -158,17 +159,58 @@ export function Updated({ jar }: { jar: JarFile }) {
             {!grimoireOk && <p className="faint">The jar file can only be made from the built app.</p>}
           </div>
         </article>
-        <article className="todo-item card">
-          <span className="todo-num">2</span>
-          <div>
-            <h3>Keep your key</h3>
-            <p className="muted">The same key works for the next change. Put it back where you keep it.</p>
-            <a className="btn" href={href('home')}>
-              Done
-            </a>
-          </div>
-        </article>
+        <WatchCopy jar={jar} />
       </section>
     </div>
+  );
+}
+
+/** If the watch keeps a copy of the jar, replace it with the new version here. */
+function WatchCopy({ jar }: { jar: JarFile }) {
+  const [service, setService] = useState<boolean | null>(null);
+  const [link, setLink] = useState('');
+  const [state, setState] = useState<'idle' | 'busy' | 'done'>('idle');
+  const [error, setError] = useState('');
+  useEffect(() => {
+    void watchAvailable().then(setService);
+  }, []);
+
+  const give = async (e: FormEvent) => {
+    e.preventDefault();
+    const token = /manage=([^&\s]+)/.exec(link)?.[1];
+    if (!token) {
+      setError('Paste the whole manage link from the email that confirmed your watch.');
+      return;
+    }
+    setState('busy');
+    setError('');
+    try {
+      await watchApi.keepJar(decodeURIComponent(token), jar);
+      setState('done');
+    } catch (err) {
+      setState('idle');
+      setError(err instanceof ApiError ? err.message : 'The watch service is not answering.');
+    }
+  };
+
+  return (
+    <article className="todo-item card">
+      <span className="todo-num">2</span>
+      <div>
+        <h3>The watch’s copy</h3>
+        {service === false && <p className="muted">If a watch keeps a copy of your jar, give it this file from its manage link.</p>}
+        {service && state === 'done' && <p className="muted">Done. Your friends’ links now open this version.</p>}
+        {service && state !== 'done' && (
+          <form className="watch-copy" onSubmit={give}>
+            <p className="muted">Does a watch keep a copy of your jar? Paste its manage link, from our email, to give it this version.</p>
+            <input type="url" aria-label="Your watch’s manage link" placeholder="https://…#/watch?manage=…" value={link} onChange={(e) => setLink(e.target.value)} />
+            <button type="submit" className="btn small" disabled={state === 'busy' || !link.trim()}>
+              {state === 'busy' ? 'Giving…' : 'Give it this jar'}
+            </button>
+            {error && <p className="error">{error}</p>}
+          </form>
+        )}
+      </div>
+    </article>
   );
 }

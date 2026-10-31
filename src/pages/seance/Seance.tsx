@@ -14,6 +14,7 @@ import { CardInput } from '../../ui/components/CardInput.tsx';
 import { jarFromText } from '../../ui/grimoire.ts';
 import { useAtmosphere, useShell, wait } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
+import { watchApi } from '../../ui/watchApi.ts';
 import { Reveal } from './Reveal.tsx';
 
 const REFUSALS: Record<string, string> = {
@@ -22,10 +23,26 @@ const REFUSALS: Record<string, string> = {
   duplicate: 'That card is already here.',
 };
 
-export function Seance({ embedded }: { embedded: JarFile | null }) {
+export function Seance({ embedded, params }: { embedded: JarFile | null; params: URLSearchParams }) {
   useAtmosphere('night');
   const shell = useShell();
   const [jar, setJar] = useState<JarFile | null>(embedded);
+  // A friend's link from the watch's email: the jar the owner left with it.
+  const token = embedded ? null : params.get('jar');
+  const [fetching, setFetching] = useState(!!token);
+  const [linkError, setLinkError] = useState('');
+  useEffect(() => {
+    if (!token) return;
+    let live = true;
+    watchApi
+      .openJar(token)
+      .then((j) => live && setJar(j))
+      .catch((e) => live && setLinkError(e instanceof Error ? e.message : 'That link did not open a jar.'))
+      .finally(() => live && setFetching(false));
+    return () => {
+      live = false;
+    };
+  }, [token]);
 
   useEffect(() => {
     sound.startDrone();
@@ -35,12 +52,22 @@ export function Seance({ embedded }: { embedded: JarFile | null }) {
     };
   }, [shell]);
 
-  if (!jar) return <Choose onChoose={setJar} />;
+  if (fetching) {
+    return (
+      <div className="page seance-page">
+        <section className="narrow center">
+          <Ghost mood="open" size={110} float />
+          <p className="lede">Fetching the jar…</p>
+        </section>
+      </div>
+    );
+  }
+  if (!jar) return <Choose onChoose={setJar} notice={linkError} />;
   return <Circle jar={jar} key={jar.jarId} onLeave={embedded ? undefined : () => setJar(null)} />;
 }
 
-function Choose({ onChoose }: { onChoose: (jar: JarFile) => void }) {
-  const [error, setError] = useState('');
+function Choose({ onChoose, notice = '' }: { onChoose: (jar: JarFile) => void; notice?: string }) {
+  const [error, setError] = useState(notice);
   const [over, setOver] = useState(false);
 
   const readFile = async (file: File) => {

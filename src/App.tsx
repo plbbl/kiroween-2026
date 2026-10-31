@@ -129,7 +129,7 @@ export function App() {
           {route === 'home' && <Home />}
           {route === 'seal' && <Seal params={params} embedded={embedded} />}
           {route === 'watch' && <Watch params={params} />}
-          {route === 'seance' && <Seance embedded={embedded} />}
+          {route === 'seance' && <Seance embedded={embedded} params={params} />}
           {route === 'guides' && <Guides anchor={anchor} />}
           {route === 'gallery' && <Gallery />}
         </div>

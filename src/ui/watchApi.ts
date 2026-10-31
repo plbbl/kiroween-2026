@@ -1,6 +1,7 @@
 // Talking to the watch service, when this copy of Phylactery has one.
 // The offline jar file and static hosts don't, and that's fine.
 
+import { parseJar, type JarFile } from '../core/jar.ts';
 import type { WatchConfig, WatchStatus } from '../core/watch.ts';
 
 export interface WatchView {
@@ -11,7 +12,20 @@ export interface WatchView {
   holders: string[];
   lastSign: string | null;
   nextAsk: string | null;
+  jar: { owner: string; revision: number; sealedAt: string; keptAt: string } | null;
 }
+
+/**
+ * A jar sealed or updated a moment ago, handed to the watch page within
+ * this visit so the owner need not choose the file again. Memory only.
+ */
+let handedOver: JarFile | null = null;
+export const jarHandoff = {
+  give: (jar: JarFile) => {
+    handedOver = jar;
+  },
+  peek: () => handedOver,
+};
 
 export class ApiError extends Error {}
 
@@ -40,7 +54,10 @@ export async function watchAvailable(): Promise<boolean> {
 }
 
 export const watchApi = {
-  start: (body: { owner: { name: string; email: string }; holders: { name: string; email: string }[]; config: WatchConfig }) => call<{ id: string }>('watch', body),
+  start: (body: { owner: { name: string; email: string }; holders: { name: string; email: string }[]; config: WatchConfig; jar?: string }) =>
+    call<{ id: string }>('watch', body),
+  keepJar: (token: string, jar: JarFile | null) => call<WatchView>('watch/jar', { token, jar: jar ? JSON.stringify(jar) : null }),
+  openJar: async (token: string) => parseJar((await call<{ jar: string }>('watch/jar/open', { token })).jar),
   confirm: (token: string) => call<WatchView>('watch/confirm', { token }),
   checkin: (token: string) => call<WatchView>('watch/checkin', { token }),
   status: (token: string) => call<WatchView>('watch/status', { token }),
