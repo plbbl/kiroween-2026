@@ -1,9 +1,10 @@
 import type { CSSProperties, MouseEvent } from 'react';
 import type { Buddy } from '../../core/buddy.ts';
-import { cardToQrText, cardToWords } from '../../core/cards.ts';
+import { cardToQrText, cardToWords, SHARD_SHARED_WORDS } from '../../core/cards.ts';
 import type { KeyCard } from '../../core/cards.ts';
 import type { HolderCards } from '../../core/jar.ts';
 import { Ghost } from '../art/Ghost.tsx';
+import { homeAddress } from '../grimoire.ts';
 import { numberWord } from '../text.ts';
 import { Qr } from './Qr.tsx';
 
@@ -78,15 +79,6 @@ interface PrintProps {
   threshold: number;
 }
 
-/**
- * Where this copy of Phylactery lives, for a card found in a drawer years
- * later. Empty when running from a file, which has no address to print.
- */
-function homeAddress(): string {
-  if (typeof location === 'undefined' || !/^https?:$/.test(location.protocol)) return '';
-  return (location.host + location.pathname).replace(/\/index\.html$/, '/').replace(/\/$/, '');
-}
-
 function WordGrid({ words, columns }: { words: string[]; columns: number }) {
   return (
     <ol className="word-grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
@@ -128,7 +120,7 @@ function ShardFace({ owner, circle, card, buddy, index, total, threshold }: Prin
       <footer className="card-foot">
         You also need {first}’s jar file, which {first} emails to each of you (keep that email). When the time comes, gather, open it
         {homeAddress() ? ` (or ${homeAddress()}, then Séance)` : ''}, and each offer your card. Keep this card safe, like a house key. Never post a photo
-        of it.
+        of it. Words {SHARD_SHARED_WORDS.from} to {SHARD_SHARED_WORDS.to} are the same on every card of this jar.
       </footer>
     </section>
   );
@@ -148,8 +140,8 @@ function SealFace({ owner, card, buddy }: PrintProps) {
           <p className="card-name small">{card.hasLetter ? `${first} wrote you a letter.` : 'For a letter, now or later.'}</p>
           <p className="card-rule">
             {card.hasLetter
-              ? 'Once the jar is open, this seal opens your letter. Keep it folded. Show no one.'
-              : `If ${first} leaves you a private letter, this half opens it once the jar is open. Keep it folded with your card.`}
+              ? 'Once the jar is open, this seal opens your letter. Keep it with your card, and show it to no one.'
+              : `If ${first} leaves you a private letter, this half opens it once the jar is open. Keep it with your card.`}
           </p>
         </div>
         <Qr text={cardToQrText(card.seal)} size={104} label={`Code for ${card.name}'s seal`} />
@@ -164,7 +156,7 @@ export function PrintableCard(props: PrintProps) {
     <article className="print-card">
       <ShardFace {...props} />
       <div className="fold-line" aria-hidden="true">
-        <span>fold here · the half below is yours alone</span>
+        <span>cut here · the half below is yours alone</span>
       </div>
       <SealFace {...props} />
     </article>
@@ -186,16 +178,16 @@ export function PrintableKey({ owner, keyCard }: { owner: string; keyCard: KeyCa
             <p className="card-held">For you, {owner.split(/\s+/)[0]}</p>
             <p className="card-name">Your key</p>
             <p className="card-rule">
-              With this you can change what is in the jar later, and your friends keep their cards. It also opens the jar on its own, so keep
-              it like a passport: not with the cards, not in a photo.
+              With this you can change what is in the jar later, and your friends keep their cards. It also opens the jar on its own, private
+              letters included, so keep it like a passport: not with the cards, not in a photo.
             </p>
           </div>
           <Qr text={cardToQrText(keyCard)} size={128} label={`Code for ${owner}'s key`} />
         </div>
         <WordGrid words={cardToWords(keyCard)} columns={4} />
         <footer className="card-foot">
-          To change the jar: open your jar file{homeAddress() ? ` or ${homeAddress()}` : ''}, choose Seal, then “Change what’s inside”, and give it
-          your jar file and this key.
+          To change the jar, or to open it without the cards: open your jar file{homeAddress() ? ` or ${homeAddress()}` : ''}, choose Seal, then
+          “Change what’s inside”, and give it your jar file and this key.
         </footer>
       </section>
     </article>

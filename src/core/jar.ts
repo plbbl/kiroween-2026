@@ -77,6 +77,8 @@ export interface SealInput {
   holders: HolderInput[];
   threshold: number;
   sealedAt?: Date;
+  /** Chosen ahead of sealing, so the circle's ghosts can be shown while writing. Random if left out. */
+  jarId?: Uint8Array;
 }
 
 export interface JarHolder {
@@ -207,7 +209,8 @@ export async function sealJar(input: SealInput): Promise<SealResult> {
   if (problems.length) throw new JarError(problems.join(' '));
 
   const seed = randomBytes(SEED_LENGTH);
-  const jarIdBytes = randomBytes(JAR_ID_LENGTH);
+  if (input.jarId && input.jarId.length !== JAR_ID_LENGTH) throw new JarError('A jar id has four bytes.');
+  const jarIdBytes = input.jarId ?? randomBytes(JAR_ID_LENGTH);
   const masterKey = await masterFrom(seed, jarIdBytes);
   const total = input.holders.length;
   const shares = await split(masterKey, total, input.threshold);

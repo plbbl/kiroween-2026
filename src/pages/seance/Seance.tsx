@@ -11,8 +11,9 @@ import { initialsOf, type WaxState } from '../../ui/art/WaxSeal.tsx';
 import { BuddyCard } from '../../ui/components/Cards.tsx';
 import { capitalised, numberWord } from '../../ui/text.ts';
 import { CardInput } from '../../ui/components/CardInput.tsx';
+import { ConfirmButton } from '../../ui/components/Confirm.tsx';
 import { jarFromText } from '../../ui/grimoire.ts';
-import { href, useAtmosphere, useShell, wait } from '../../ui/shell.tsx';
+import { href, useAtmosphere, useLeaveWarning, useShell, wait } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
 import { watchApi } from '../../ui/watchApi.ts';
 import { Reveal } from './Reveal.tsx';
@@ -220,6 +221,11 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
     shell.setCandlelight(phase === 'gathering' ? offered.length / k : 1);
   }, [shell, offered.length, k, phase]);
 
+  // Cards offered so far live only in this page.
+  useLeaveWarning(
+    !demo && phase === 'gathering' && offered.length > 0 ? 'Leaving puts the candles out, and the cards offered so far would be needed again. Leave anyway?' : null,
+  );
+
   const open = useCallback(
     async (circle: Offered[]) => {
       setPhase('waking');
@@ -257,7 +263,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
         return e instanceof CardError ? e.message : 'That card could not be read.';
       }
       if (card.kind === 'seal') return 'That’s a private seal, from the inside of a card. Keep it for the letters.';
-      if (card.kind === 'key') return `That’s ${first}’s own key, for updating the jar. The circle opens it with their cards.`;
+      if (card.kind === 'key') return `That’s ${first}’s own key. It opens the jar without the cards: choose Seal, then “Change what’s inside”.`;
       const current = offeredRef.current;
       if (current.length >= k) return 'Every candle is already lit.';
       const check = checkShard(jar, card, current.map((o) => o.shard));
@@ -303,7 +309,10 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
       {flight && <FlyingBuddy key={flight.id} flight={flight} onDone={endFlight} />}
 
       <section className="narrow center circle-head">
-        <p className="tag pop">{sealedOn ? `sealed ${sealedOn}` : 'séance'}</p>
+        <p className="tag pop">
+          {sealedOn ? `sealed ${sealedOn}` : 'séance'}
+          {jar.revision && jar.revision > 1 ? ` · version ${jar.revision}` : ''}
+        </p>
         <h1 className="pop" style={{ '--d': '80ms' } as CSSProperties}>
           {first}’s jar
         </h1>
@@ -404,9 +413,14 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
             )}
             {onLeave && (
               <p className="center">
-                <button type="button" className="text-btn quiet" onClick={onLeave}>
-                  Choose another jar
-                </button>
+                <ConfirmButton
+                  label="Choose another jar"
+                  question="Choosing another jar puts these candles out."
+                  yes="Choose another"
+                  no="Stay"
+                  ask={offered.length > 0}
+                  onConfirm={onLeave}
+                />
               </p>
             )}
           </>

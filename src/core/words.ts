@@ -7,7 +7,7 @@ import { sha256 } from '@noble/hashes/sha2.js';
 import { wordlist } from '@scure/bip39/wordlists/english.js';
 import { readBits } from './bytes.ts';
 
-const BITS_PER_WORD = 11;
+export const BITS_PER_WORD = 11;
 const MIN_CHECKSUM_BITS = 8;
 
 const index = new Map(wordlist.map((w, i) => [w, i]));

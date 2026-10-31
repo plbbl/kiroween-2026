@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
-import { circleBuddies } from '../../core/buddy.ts';
-import type { KeyCard } from '../../core/cards.ts';
+import { circleBuddies, circleCostumes } from '../../core/buddy.ts';
+import { randomBytes } from '../../core/bytes.ts';
+import { JAR_ID_LENGTH, type KeyCard } from '../../core/cards.ts';
 import { emptyContent, jarIdBytes, resealJar, sealJar, validateSealInput, type JarContent, type JarFile, type OwnedJar, type SealResult } from '../../core/jar.ts';
 import { Sparkles } from '../../ui/art/Decor.tsx';
 import { Ghost } from '../../ui/art/Ghost.tsx';
@@ -42,13 +43,7 @@ const STEPS: { label: string; title: (d: Draft) => string; sub: string; art: Rea
     label: 'Circle',
     title: () => 'Who keeps the cards?',
     sub: 'One card each, for people who would come if you needed them.',
-    art: (
-      <span className="art-trio">
-        <Ghost costume="bat" size={56} float phase={0.3} />
-        <Ghost costume="sheet" mood="happy" size={70} float phase={1} />
-        <Ghost costume="franken" size={56} float phase={1.7} />
-      </span>
-    ),
+    art: <Ghost mood="happy" size={86} float emblem="heart" />,
   },
   {
     label: 'Seal',
@@ -107,6 +102,8 @@ function initialDraft(): Draft {
  * closing the tab still forgets everything.
  */
 interface Kept {
+  /** Chosen at the start, so each friend's ghost on the circle step is the one on their card. */
+  jarId: Uint8Array;
   draft: Draft;
   step: number;
   reached: number;
@@ -129,11 +126,12 @@ export function Seal({ params, embedded }: { params: URLSearchParams; embedded: 
 function Wizard({ existing, onStartOver }: { existing: Existing | null; onStartOver: () => void }) {
   const updating = existing !== null;
   const memory = updating ? null : kept;
+  const [jarId] = useState(() => (existing ? jarIdBytes(existing.jar) : (memory?.jarId ?? randomBytes(JAR_ID_LENGTH))));
   const costumes = useMemo(() => {
-    if (!existing) return undefined;
-    const buddies = circleBuddies(jarIdBytes(existing.jar), existing.jar.holders.map((h) => h.x));
+    if (!existing) return circleCostumes(jarId);
+    const buddies = circleBuddies(jarId, existing.jar.holders.map((h) => h.x));
     return existing.jar.holders.map((h) => buddies.get(h.x)!.costume);
-  }, [existing]);
+  }, [existing, jarId]);
   const [draft, setDraft] = useState<Draft>(() => (existing ? draftFrom(existing) : (memory?.draft ?? initialDraft())));
   const [step, setStep] = useState(updating ? 1 : (memory?.step ?? 0));
   const [reached, setReached] = useState(updating ? STEPS.length - 1 : (memory?.reached ?? 0));
@@ -144,8 +142,8 @@ function Wizard({ existing, onStartOver }: { existing: Existing | null; onStartO
   const [result, setResult] = useState<SealResult | null>(memory?.result ?? null);
   const [updated, setUpdated] = useState<JarFile | null>(null);
   useEffect(() => {
-    if (!updating) kept = { draft, step, reached, result };
-  }, [updating, draft, step, reached, result]);
+    if (!updating) kept = { jarId, draft, step, reached, result };
+  }, [updating, jarId, draft, step, reached, result]);
   const [error, setError] = useState('');
 
   const input = useMemo(
@@ -154,8 +152,9 @@ function Wizard({ existing, onStartOver }: { existing: Existing | null; onStartO
       content: draft.content,
       threshold: draft.threshold,
       holders: draft.holders.map((h) => ({ name: h.name, letter: h.writing ? h.letter : '' })),
+      jarId,
     }),
-    [draft],
+    [draft, jarId],
   );
   const problems = validateSealInput(input);
 

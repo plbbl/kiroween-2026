@@ -118,17 +118,29 @@ body {
     var(--lilac-soft);
 }
 
-/* Night fades in over the day, and back out. */
+/* Night falls from the top and lifts the same way, behind a soft edge, so
+   day and night never mix into a muddy grey halfway. */
 .backdrop.night {
-  opacity: 0;
   background:
     radial-gradient(ellipse at 50% 108%, rgba(255, 181, 71, calc(var(--candlelight, 0) * 0.28)), transparent 55%),
     radial-gradient(ellipse at 50% -10%, rgba(142, 71, 255, 0.35), transparent 60%),
     linear-gradient(180deg, #170f27 0%, #120b1e 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent 60%);
+  mask-image: linear-gradient(to bottom, #000 40%, transparent 60%);
+  -webkit-mask-size: 100% 250%;
+  mask-size: 100% 250%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: 0 100%;
+  mask-position: 0 100%;
+  transition:
+    -webkit-mask-position 1000ms var(--soft),
+    mask-position 1000ms var(--soft);
 }
 
 [data-theme='night'] .backdrop.night {
-  opacity: 1;
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
 }
 
 /* Each page arrives with a small lift. */
@@ -460,10 +472,11 @@ article {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Solid, so candlelight behind a button never muddies it. */
 [data-theme='night'] .btn {
-  --b-bg: rgba(255, 255, 255, 0.08);
+  --b-bg: #2a1c4b;
   --b-fg: #f5f0ff;
-  --b-edge: rgba(205, 184, 255, 0.28);
+  --b-edge: #4f3a86;
 }
 
 /* A taller hit area that moves with the button, so lifting it on hover
@@ -496,6 +509,12 @@ article {
   min-height: 42px;
   padding: 0 18px;
   font-size: 0.98rem;
+}
+
+.btn.danger {
+  --b-bg: #c8324a;
+  --b-fg: #fff;
+  --b-edge: #962238;
 }
 
 .btn:disabled {

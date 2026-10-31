@@ -29,13 +29,24 @@ function escapeHtml(s: string): string {
   return s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
 }
 
+/**
+ * Where this copy of Phylactery lives, for a card or a file found years
+ * later. Empty when running from a file, which has no address to give.
+ */
+export function homeAddress(): string {
+  if (typeof location === 'undefined' || !/^https?:$/.test(location.protocol)) return '';
+  return (location.host + location.pathname).replace(/\/index\.html$/, '/').replace(/\/$/, '');
+}
+
 export function makeGrimoire(jar: JarFile): string {
   if (!pristine) throw new Error('The page was not captured.');
+  const home = homeAddress();
   const json = JSON.stringify(jar).replace(/</g, '\\u003c');
   const head =
     `<meta http-equiv="Content-Security-Policy" content="${CSP}">\n` +
     `<script id="phylactery-jar" type="application/json">${json}</script>\n`;
   return pristine
+    .replace('use the Phylactery website instead', home ? `go to ${escapeHtml(home)} instead` : 'use the Phylactery website instead')
     .replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(jar.owner)}’s jar · Phylactery</title>`)
     .replace(/<head>/i, `<head>\n${head}`);
 }
@@ -58,5 +69,5 @@ export function download(filename: string, text: string, type: string): void {
 }
 
 export function safeFilename(name: string): string {
-  return name.replace(/[^\p{L}\p{N} ._-]/gu, '').trim() || 'Phylactery';
+  return name.replace(/[^\p{L}\p{N} ._,'’()-]/gu, '').trim() || 'Phylactery';
 }

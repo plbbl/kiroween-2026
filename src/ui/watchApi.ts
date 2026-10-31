@@ -65,4 +65,5 @@ export const watchApi = {
   resume: (token: string) => call<WatchView>('watch/resume', { token }),
   remove: (token: string) => call<{ ok: true }>('watch/delete', { token }),
   optOut: (token: string) => call<{ owner: string }>('watch/optout', { token }),
+  resendManage: (email: string) => call<{ ok: true }>('watch/resend', { email }),
 };

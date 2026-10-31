@@ -54,7 +54,7 @@ function HeroPeekers({ layer }: { layer: 'ghosts' | 'hands' }) {
 }
 
 export function Home() {
-  useAtmosphere('day');
+  useAtmosphere('night');
 
   return (
     <div className="page home">
@@ -160,8 +160,8 @@ export function Home() {
         <div className="closing-ghost">
           <Ghost mood="happy" size={110} float rim={0.5} />
         </div>
-        <p className="closing-line">Death gives life its meaning.</p>
-        <p className="closing-sub">Leave something kind behind.</p>
+        <p className="closing-line">One day your friends will gather.</p>
+        <p className="closing-sub">Leave them something to open together.</p>
         <a className="btn primary" href={href('seal')}>
           Seal a jar
         </a>

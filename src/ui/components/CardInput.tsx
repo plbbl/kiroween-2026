@@ -34,8 +34,8 @@ function decodeCanvas(canvas: HTMLCanvasElement): string | null {
 
 /** A friend who typed the other half of their card, or the owner's key, is told so. */
 function wrongHalf(kind: CardInputProps['kind'], count: number): string | null {
-  if (kind === 'shard' && count === SEAL_WORDS) return 'That looks like your private seal, the folded half. Use the 30 words on the outside.';
-  if (kind === 'seal' && count === SHARD_WORDS) return 'That looks like the outside of your card. Use the 17 words on the folded half.';
+  if (kind === 'shard' && count === SEAL_WORDS) return 'That looks like your private seal, the smaller half. Use the 30 words on the card itself.';
+  if (kind === 'seal' && count === SHARD_WORDS) return 'That looks like the card itself. Use the 17 words on your private seal, the smaller half.';
   if (kind !== 'key' && count === KEY_WORDS) return 'That looks like the owner’s key. Use your own card.';
   return null;
 }

@@ -6,7 +6,7 @@ import { numberWord, plural } from '../../ui/text.ts';
 import { useAtmosphere } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
 import { watchAvailable } from '../../ui/watchApi.ts';
-import { LinkAction, linkActionOf, StartWatch } from './RealWatch.tsx';
+import { LinkAction, linkActionOf, ResendManage, StartWatch } from './RealWatch.tsx';
 
 const OWNER = DEMO_JAR.owner;
 const FIRST = OWNER.split(' ')[0]!;
@@ -162,6 +162,7 @@ export function Watch({ params }: { params: URLSearchParams }) {
           {realFirst && (
             <>
               <StartWatch config={config} />
+              <ResendManage />
               <h2 className="section-title how-title">See how it works</h2>
             </>
           )}
@@ -213,10 +214,10 @@ export function Watch({ params }: { params: URLSearchParams }) {
                 {playing ? 'Pause time' : day >= horizon ? 'That’s all' : 'Let time pass'}
               </button>
               <button type="button" className="btn small" onClick={() => act('checkin')} disabled={paused}>
-                {run.status === 'notified' ? 'Knock knock, I’m here!' : 'Say “I’m here”'}
+                I’m here
               </button>
               <button type="button" className="btn small" onClick={() => act(paused ? 'resume' : 'pause')}>
-                {paused ? 'Back again' : 'Go away for a bit'}
+                {paused ? 'Resume' : 'Pause, I’m away'}
               </button>
               <button type="button" className="text-btn quiet" onClick={reset}>
                 Start over

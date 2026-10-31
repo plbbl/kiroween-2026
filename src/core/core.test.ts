@@ -28,7 +28,7 @@ import {
   type JarContent,
   type SealInput,
 } from './jar.ts';
-import { circleBuddies, COSTUMES, EMBLEMS } from './buddy.ts';
+import { circleBuddies, circleCostumes, COSTUMES, EMBLEMS } from './buddy.ts';
 import { holderMessage, runWatch, type OwnerAction, type WatchConfig } from './watch.ts';
 import { bytesToWords, wordsToBytes } from './words.ts';
 
@@ -171,12 +171,12 @@ describe('cards', () => {
     );
   });
 
-  it('a buddy depends only on the jar and the circle, never on order', () => {
+  it('a buddy’s costume follows only the jar and the person’s place in the circle, so it is known before the cards exist', () => {
     fc.assert(
       fc.property(bytes(4, 4), fc.uniqueArray(fc.integer({ min: 1, max: 255 }), { minLength: 2, maxLength: 10 }), (jarId, xs) => {
-        const a = circleBuddies(jarId, xs);
-        const b = circleBuddies(jarId, [...xs].reverse());
-        expect([...a.entries()].sort()).toEqual([...b.entries()].sort());
+        const ahead = circleCostumes(jarId);
+        const buddies = circleBuddies(jarId, xs);
+        xs.forEach((x, i) => expect(buddies.get(x)!.costume).toBe(ahead[i % ahead.length]));
       }),
     );
   });
@@ -340,6 +340,19 @@ describe('jar', () => {
         expect(check.opened).toBeGreaterThan(0);
       }),
       { numRuns: 15 },
+    );
+  });
+
+  it('a jar sealed with a jar id chosen ahead gives each person the ghost shown before sealing', async () => {
+    await fc.assert(
+      fc.asyncProperty(sealInputArb, bytes(4, 4), async (input, jarId) => {
+        const { jar, cards } = await sealJar({ ...input, jarId });
+        expect(jar.jarId).toBe(toBase32(jarId));
+        const buddies = circleBuddies(cards[0]!.shard.jarId, jar.holders.map((h) => h.x));
+        const ahead = circleCostumes(jarId);
+        cards.forEach((c, i) => expect(buddies.get(c.x)!.costume).toBe(ahead[i % ahead.length]));
+      }),
+      { numRuns: 10 },
     );
   });
 

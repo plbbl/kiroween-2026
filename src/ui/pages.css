@@ -125,15 +125,16 @@
   display: flex;
   justify-content: center;
   align-items: flex-end;
+  /* The jar stands inside the hero: glass over an edge shows the edge through it. */
   margin-top: 4px;
-  margin-bottom: -76px;
+  padding-bottom: 34px;
 }
 
 .acts {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 22px;
-  margin-top: 130px;
+  margin-top: 72px;
 }
 
 .act {
@@ -319,11 +320,11 @@
   }
 
   .hero-altar {
-    margin-bottom: -56px;
+    padding-bottom: 24px;
   }
 
   .acts {
-    margin-top: 100px;
+    margin-top: 56px;
   }
 
   .promises,
@@ -471,12 +472,6 @@
   top: 22px;
   right: 30px;
   pointer-events: none;
-}
-
-.art-trio {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
 }
 
 .step-title {
@@ -1022,6 +1017,13 @@ button.buddy-card {
   margin-top: 6px;
 }
 
+.print-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 10px;
+}
+
 /* ── Card input ───────────────────────────────────────────── */
 
 .card-input {
@@ -1265,6 +1267,12 @@ textarea.mono-input {
   font-family: var(--display);
   font-weight: 600;
   font-size: 1.6rem;
+}
+
+/* Above the altar, so notes flying out of the jar pass behind the words. */
+.circle-head {
+  position: relative;
+  z-index: 700;
 }
 
 .circle-head h1 {
@@ -1570,9 +1578,37 @@ textarea.mono-input {
   font-size: 0.95rem;
 }
 
+.login-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.copy-btn {
+  flex: none;
+  min-height: 32px;
+  padding: 2px 12px;
+  border-radius: 999px;
+  border: 2px solid #e9dfff;
+  background: #fff;
+  color: var(--purple-text);
+  font: 700 0.82rem var(--display);
+  cursor: pointer;
+}
+
+.copy-btn:hover {
+  border-color: var(--purple);
+}
+
+@media print {
+  .copy-btn {
+    display: none;
+  }
+}
+
 .login {
   display: inline-block;
-  margin-top: 6px;
   padding: 4px 10px;
   border-radius: 10px;
   background: #fff;
@@ -2637,6 +2673,14 @@ textarea.mono-input {
     translate: -50% 0;
   }
 
+  /* Above the front candle is the jar, so its buddy stands clear to the right. */
+  .spot-buddy.front {
+    left: 100%;
+    right: auto;
+    bottom: 2%;
+    translate: 0 0;
+  }
+
   .places > div {
     grid-template-columns: 1fr;
     gap: 2px;
@@ -2870,10 +2914,84 @@ textarea.mono-input {
   }
 }
 
-.start-hint {
-  margin: 10px 0 0;
-  text-align: right;
+.friend-row {
+  margin-bottom: 10px;
+}
+
+.friend-row .person-grid {
+  margin-bottom: 0;
+}
+
+.friend-row .error,
+.person-grid .field .error {
+  display: block;
+  margin: 4px 0 0;
   font-size: 0.9rem;
+}
+
+.friends-hint {
+  margin: -2px 0 10px;
+  font-size: 0.9rem;
+}
+
+.missing-holders {
+  margin: 4px 0 0;
+  font-size: 0.92rem;
+}
+
+.confirm-inline {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 460px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--surface-2);
+  border: 2px solid var(--line-strong);
+  color: var(--fg);
+  text-align: center;
+}
+
+.delete-watch {
+  margin: 12px 0 0;
+}
+
+.resend {
+  margin: 14px 0 0;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.resend summary {
+  display: inline;
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.resend summary::-webkit-details-marker {
+  display: none;
+}
+
+.resend-form {
+  margin-top: 10px;
+}
+
+.resend-form .muted {
+  margin: 0 0 10px;
+}
+
+.resend-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.resend-row input {
+  flex: 1 1 220px;
+  max-width: 320px;
 }
 
 @media (max-width: 760px) {

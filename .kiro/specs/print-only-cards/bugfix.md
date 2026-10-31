@@ -11,4 +11,4 @@ WHEN the owner prints THEN the system SHALL print only the friends' cards and th
 ## Unchanged behavior
 
 - WHEN the page is on screen THEN the system SHALL CONTINUE TO show the Sealed page and hide the print area.
-- WHEN printing THEN the system SHALL CONTINUE TO print cards in black-and-white line art with the fold line.
+- WHEN printing THEN the system SHALL CONTINUE TO print cards in black-and-white line art with the cut line.

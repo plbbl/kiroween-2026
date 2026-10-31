@@ -31,7 +31,7 @@ export interface WatchRun {
   lastSign: number;
 }
 
-export const DEFAULT_WATCH: WatchConfig = { cadenceDays: 7, graceDays: 4, reminders: 3 };
+export const DEFAULT_WATCH: WatchConfig = { cadenceDays: 7, graceDays: 7, reminders: 3 };
 
 export function validateWatch(c: WatchConfig): string[] {
   const p: string[] = [];

@@ -9,6 +9,7 @@ import { Ghost, GhostHand } from '../../ui/art/Ghost.tsx';
 import { Jar } from '../../ui/art/Jar.tsx';
 import { WaxSeal, initialsOf } from '../../ui/art/WaxSeal.tsx';
 import { CardInput } from '../../ui/components/CardInput.tsx';
+import { ConfirmButton } from '../../ui/components/Confirm.tsx';
 import { href, useLeaveWarning } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
 
@@ -44,6 +45,38 @@ function Paragraphs({ text, start = 0, step = 380 }: { text: string; start?: num
           </p>
         ))}
     </>
+  );
+}
+
+/** Copies a login, so no one has to retype a password by hand on a phone. */
+function CopyButton({ text, label }: { text: string; label: string }) {
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    if (!done) return;
+    const t = setTimeout(() => setDone(false), 1600);
+    return () => clearTimeout(t);
+  }, [done]);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // A jar file opened from disk may not have the clipboard API.
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.append(area);
+      area.select();
+      document.execCommand('copy');
+      area.remove();
+    }
+    setDone(true);
+  };
+  return (
+    <button type="button" className="copy-btn" onClick={() => void copy()} aria-label={done ? 'Copied' : label}>
+      {done ? 'Copied' : 'Copy'}
+    </button>
   );
 }
 
@@ -102,7 +135,12 @@ export function Reveal({ jar, opened, circle, buddies }: { jar: JarFile; opened:
                     <b>{a.service || 'An account'}</b>
                     <span className={`pill wish-${a.wish}`}>{WISH_LABELS[a.wish]}</span>
                   </div>
-                  {a.login && <code className="login">{a.login}</code>}
+                  {a.login && (
+                    <div className="login-row">
+                      <code className="login">{a.login}</code>
+                      <CopyButton text={a.login} label={`Copy how to get into ${a.service || 'this account'}`} />
+                    </div>
+                  )}
                   {a.note && <p className="muted">{a.note}</p>}
                 </li>
               ))}
@@ -150,7 +188,7 @@ export function Reveal({ jar, opened, circle, buddies }: { jar: JarFile; opened:
             <h2 id="letters-title" className="center section-title">
               Letters
             </h2>
-            <p className="center muted">Each one opens only with the private seal folded inside its reader’s card.</p>
+            <p className="center muted">Each one opens only with its reader’s private seal, the half cut from their card.</p>
             <Letters jar={jar} opened={opened} holders={letters} buddies={buddies} />
           </section>
         )}
@@ -182,15 +220,14 @@ export function Reveal({ jar, opened, circle, buddies }: { jar: JarFile; opened:
               </div>
               <p className="faint">
                 Nothing was saved.{' '}
-                <button
-                  type="button"
-                  className="text-btn quiet"
-                  onClick={() => {
-                    if (window.confirm(`Close ${first}’s jar? To read it again, the cards would be needed again.`)) setClosing(true);
-                  }}
-                >
-                  Close the jar
-                </button>
+                <ConfirmButton
+                  label="Close the jar"
+                  question={`Close ${first}’s jar? To read it again, the cards would be needed again.`}
+                  yes="Close it"
+                  no="Keep reading"
+                  ask={!isDemo(jar)}
+                  onConfirm={() => setClosing(true)}
+                />
               </p>
             </>
           )}

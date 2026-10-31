@@ -22,7 +22,7 @@ const BEFORE: Item[] = [
   },
   {
     title: 'Choose a legacy contact on Facebook',
-    body: 'They can look after your memorialised profile, but cannot read your messages. You can choose deletion instead.',
+    body: 'They can look after your memorialized profile, but cannot read your messages. You can choose deletion instead.',
     link: { href: 'https://www.facebook.com/help/1568013990080948', label: 'Facebook Help' },
   },
   {
@@ -66,7 +66,7 @@ const AFTER: Item[] = [
   },
   {
     title: 'Follow the wishes for each account',
-    body: 'The jar says what to close, keep, memorialise or hand over. Download photos and files before anything is closed.',
+    body: 'The jar says what to close, keep, memorialize or hand over. Download photos and files before anything is closed. For money, don’t sign in as them: banks and brokers act on a death certificate and the executor’s papers.',
   },
   {
     title: 'Find the will',

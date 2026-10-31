@@ -44,8 +44,8 @@ export function App() {
   // A downloaded Grimoire opens straight into its séance.
   const route: Route = embedded && hashRoute === 'home' ? 'seance' : hashRoute;
 
-  // Start in the right light, so a jar file opens at night without a flash of day.
-  const [theme, setTheme] = useState<'day' | 'night'>(() => (route === 'seance' ? 'night' : 'day'));
+  // Start in the right light, so a jar file (or the home page) opens at night without a flash of day.
+  const [theme, setTheme] = useState<'day' | 'night'>(() => (route === 'seance' || route === 'home' ? 'night' : 'day'));
   const [candlelight, setCandlelight] = useState(0);
   const [soundOn, setSoundOn] = useState(false);
 

@@ -9,7 +9,7 @@ Sealing is the first act of Phylactery. The owner writes what their people will 
 - **Owner**: the person sealing the jar.
 - **Holder**: a friend who receives a card.
 - **Threshold**: how many cards are needed to open the jar.
-- **Card**: a holder's printed page; the outside is a shard (a Shamir share), the folded inside is a seal.
+- **Card**: a holder's printed page; the card itself is a shard (a Shamir share); the half cut from it is a seal.
 - **Jar file**: the app as one HTML file with the encrypted jar inside.
 - **System**: the Phylactery web app.
 
@@ -52,10 +52,10 @@ Sealing is the first act of Phylactery. The owner writes what their people will 
 
 #### Acceptance Criteria
 
-1. THE System SHALL print one page per holder: the shard outside with a QR code and 30 words, the seal inside with a QR code and 17 words, and a fold line between.
+1. THE System SHALL print one page per holder: the shard with a QR code and 30 words, the seal below a cut line with a QR code and 17 words; the owner's key SHALL print on its own.
 2. THE System SHALL encode every card with a checksum, so that a mistyped word or a damaged code is refused rather than read wrongly.
 3. THE System SHALL show each card's buddy (a costume and an emblem derived from the jar and the card), distinct within a circle, on screen and in print.
-4. WHEN printing THEN THE System SHALL print only the cards and the owner's key page.
+4. WHEN printing THEN THE System SHALL print only the cards, or only the owner's key page.
 
 ### Requirement 5: The jar file
 

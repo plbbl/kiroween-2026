@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from 'react';
+import { flushSync } from 'react-dom';
 import { circleBuddies } from '../../core/buddy.ts';
 import { verifyCircle, type CircleCheck, type JarFile, type SealResult } from '../../core/jar.ts';
 import { Sparkles } from '../../ui/art/Decor.tsx';
@@ -6,6 +7,7 @@ import { EmblemIcon } from '../../ui/art/Emblem.tsx';
 import { Jar } from '../../ui/art/Jar.tsx';
 import { initialsOf } from '../../ui/art/WaxSeal.tsx';
 import { BuddyCard, EnvelopeMark, PrintableCard, PrintableKey } from '../../ui/components/Cards.tsx';
+import { ConfirmButton } from '../../ui/components/Confirm.tsx';
 import { capitalised, numberWord } from '../../ui/text.ts';
 import { canMakeGrimoire, download, makeGrimoire, safeFilename } from '../../ui/grimoire.ts';
 import { href, useLeaveWarning } from '../../ui/shell.tsx';
@@ -27,10 +29,20 @@ export function Sealed({ result, onStartOver }: { result: SealResult; onStartOve
   const n = cards.length;
   // The cards and the jar exist only in this page's memory until they are printed and downloaded.
   const [printed, setPrinted] = useState(false);
+  const [keyPrinted, setKeyPrinted] = useState(false);
   const [saved, setSaved] = useState(false);
-  const missing = [...(printed ? [] : ['print the cards']), ...(saved ? [] : ['download the jar file'])];
+  // The key is printed on its own, so it is never handed out with the cards.
+  const [printing, setPrinting] = useState<'cards' | 'key'>('cards');
+  const print = (what: 'cards' | 'key') => {
+    flushSync(() => setPrinting(what));
+    window.print();
+    if (what === 'cards') setPrinted(true);
+    else setKeyPrinted(true);
+  };
+  const missing = [...(printed ? [] : ['print the cards']), ...(keyPrinted ? [] : ['print your key']), ...(saved ? [] : ['download the jar file'])];
+  const list = (xs: string[]) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} or ${xs[xs.length - 1]}` : xs[0]);
   useLeaveWarning(
-    missing.length ? `You haven’t ${missing.join(' or ')} yet. Closing this page forgets them, and no one could open the jar. Close anyway?` : null,
+    missing.length ? `You haven’t ${list(missing)} yet. Closing this page forgets them for good. Close anyway?` : null,
     { inApp: false },
   );
 
@@ -92,19 +104,20 @@ export function Sealed({ result, onStartOver }: { result: SealResult; onStartOve
         <article className="todo-item card">
           <span className="todo-num">1</span>
           <div>
-            <h3>Print the cards</h3>
-            <p className="muted">One page per friend, folded so the seal is inside. And one page for you: your key, to change the jar later.</p>
-            <button
-              type="button"
-              className="btn primary"
-              onClick={() => {
-                window.print();
-                setPrinted(true);
-              }}
-            >
-              Print or save as PDF
-            </button>
-            {printed && <p className="faint">Printed? Check that every page came out before you leave.</p>}
+            <h3>Print the cards, then your key</h3>
+            <p className="muted">
+              One page per friend: cut along the line and give them both halves. Your key prints on its own page. It opens everything, letters
+              included, so keep it apart from the cards.
+            </p>
+            <div className="print-buttons">
+              <button type="button" className={`btn${printed ? '' : ' primary'}`} onClick={() => print('cards')}>
+                {printed ? 'Print the cards again' : 'Print the cards'}
+              </button>
+              <button type="button" className={`btn${printed && !keyPrinted ? ' primary' : ''}`} onClick={() => print('key')}>
+                {keyPrinted ? 'Print your key again' : 'Print your key'}
+              </button>
+            </div>
+            {(printed || keyPrinted) && <p className="faint">Check that every page came out. You can print again until you leave this page.</p>}
           </div>
         </article>
         <article className="todo-item card">
@@ -142,23 +155,25 @@ export function Sealed({ result, onStartOver }: { result: SealResult; onStartOve
       </section>
 
       <p className="center start-over">
-        <button
-          type="button"
-          className="text-btn quiet"
-          onClick={() => {
-            if (missing.length && !window.confirm(`You haven’t ${missing.join(' or ')} yet. Seal a new jar and forget this one?`)) return;
-            onStartOver();
-          }}
-        >
-          Done? Seal another jar
-        </button>
+        <ConfirmButton
+          label="Done? Seal another jar"
+          question={`You haven’t ${list(missing)} yet. Seal a new jar and forget this one?`}
+          yes="Forget this one"
+          no="Stay"
+          danger
+          ask={missing.length > 0}
+          onConfirm={onStartOver}
+        />
       </p>
 
       <div className="print-area" aria-hidden="true">
-        {cards.map((c, i) => (
-          <PrintableCard key={c.x} owner={jar.owner} circle={cards.map((x) => x.name)} card={c} buddy={buddies.get(c.x)!} index={i} total={n} threshold={k} />
-        ))}
-        <PrintableKey owner={jar.owner} keyCard={result.key} />
+        {printing === 'cards' ? (
+          cards.map((c, i) => (
+            <PrintableCard key={c.x} owner={jar.owner} circle={cards.map((x) => x.name)} card={c} buddy={buddies.get(c.x)!} index={i} total={n} threshold={k} />
+          ))
+        ) : (
+          <PrintableKey owner={jar.owner} keyCard={result.key} />
+        )}
       </div>
     </div>
   );
@@ -189,7 +204,7 @@ export function Updated({ jar }: { jar: JarFile }) {
 
       <section className={`todo wrap ${service ? 'todo-two' : 'todo-one'}`}>
         <article className="todo-item card">
-          <span className="todo-num">1</span>
+          {service && <span className="todo-num">1</span>}
           <div>
             <h3>Send the new jar file</h3>
             <p className="muted">Email it to the same friends, and ask them to delete the old one: it still opens with the cards, but shows the old words.</p>

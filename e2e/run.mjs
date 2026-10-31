@@ -108,12 +108,16 @@ await audit(page, 'sealed');
 check(await page.getByText('Three cards were made. Any two of them open the jar.').isVisible(), 'sealing makes three cards');
 check(await page.getByText('Checked: all 3 groups of two open it, and no one can alone.').isVisible(), 'the self-check proves every pair opens it');
 
-// Printed cards
+// Printed cards, then the key on its own (the print dialog itself is skipped)
+await page.evaluate(() => {
+  window.print = () => {};
+});
+await page.getByRole('button', { name: 'Print the cards' }).click();
 await page.emulateMedia({ media: 'print' });
 await settle(600);
 await shot('09-print-cards');
 check((await page.locator('.print-card:not(.print-key) [aria-label^="Code for"]').count()) === 6, 'each printed card has a card code and a seal code');
-check((await page.locator('.print-key [aria-label^="Code for"]').count()) === 1, 'the owner’s key is printed on its own page');
+check((await page.locator('.print-key').count()) === 0, 'the owner’s key is not printed with the cards');
 check(
   !(await page.locator('.sealed-hero').isVisible()) && !(await page.locator('.todo').isVisible()) && (await page.locator('.print-card').first().isVisible()),
   'printing shows only the cards',
@@ -125,8 +129,15 @@ const wordsOf = (t) =>
     .filter(Boolean)
     .join(' ');
 const cardWords = await page.locator('.print-card:not(.print-key) .card-face:not(.seal-face) .word-grid').allInnerTexts();
-const keyWords = await page.locator('.print-key .word-grid').innerText();
 const sealWords = await page.locator('.print-card .seal-face .word-grid').first().innerText();
+await page.emulateMedia({ media: 'screen' });
+await page.getByRole('button', { name: 'Print your key' }).click();
+await page.emulateMedia({ media: 'print' });
+check(
+  (await page.locator('.print-key [aria-label^="Code for"]').count()) === 1 && (await page.locator('.print-card:not(.print-key)').count()) === 0,
+  'the owner’s key prints on its own',
+);
+const keyWords = await page.locator('.print-key .word-grid').innerText();
 await page.emulateMedia({ media: 'screen' });
 
 // The jar file opens offline, and printed words open it
@@ -334,6 +345,8 @@ try {
   await w.getByLabel('Your name').fill('Ada Lovelace');
   await w.getByLabel('Your email').fill('ada@example.com');
   await w.getByLabel('Friend 1 name').fill('Charles');
+  await w.getByRole('button', { name: 'Start the watch' }).click();
+  check(await w.getByText('Add Charles’s email.').isVisible(), 'a friend without an email is pointed out before anything is sent');
   await w.getByLabel('Friend 1 email').fill('charles@example.com');
   await w.getByRole('button', { name: 'Start the watch' }).click();
   await w.getByText('Check your inbox').waitFor();

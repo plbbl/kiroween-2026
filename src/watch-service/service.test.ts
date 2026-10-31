@@ -97,9 +97,22 @@ describe('watch service: friends know what to do', () => {
     const t = setup();
     const toFriends = await askFriends(t, start);
     const clara = toFriends.find((m) => m.to === 'clara@example.com')!;
-    expect(clara.text).toMatch(/We wrote to Ben Okafor too/);
+    expect(clara.text).toMatch(/We wrote to Ben Okafor \(ben@example\.com\) too/);
     expect(clara.text).toMatch(/#\/seance/);
     expect(clara.text).not.toMatch(/\?jar=/);
+    // Without the jar we can't know who holds a card, so the email doesn't say Clara does.
+    expect(clara.text).not.toMatch(/you hold/);
+  });
+
+  it('a friend on the watch who holds no card is told who does', async () => {
+    const t = setup();
+    const { jar } = await sealJar({ owner: 'June Alder', content: emptyContent(), threshold: 2, holders: [{ name: 'Clara', letter: '' }, { name: 'Rosa Lin', letter: '' }] });
+    const toFriends = await askFriends(t, { ...start, jar: JSON.stringify(jar) });
+    const clara = toFriends.find((m) => m.to === 'clara@example.com')!;
+    const ben = toFriends.find((m) => m.to === 'ben@example.com')!;
+    expect(clara.text).toMatch(/you hold one of its cards/);
+    expect(ben.text).toMatch(/You don't hold one of its cards, but Clara and Rosa Lin do/);
+    expect(ben.text).not.toMatch(/keep your card safe/);
   });
 
   it('with a kept jar, each friend gets their own link that opens exactly that jar', async () => {
@@ -292,6 +305,39 @@ describe('watch service', () => {
     expect((await t.call('/api/watch/optout', { token: optout })).body.owner).toBe('June Alder');
     const status = await t.call('/api/watch/status', { token: t.linkIn(0, 'manage') });
     expect(status.body.holders).toEqual(['Clara Alder']);
+  });
+
+  it('a friend who stops the emails keeps their link to the jar', async () => {
+    const t = setup();
+    const { jar } = await sealJar({ owner: 'June Alder', content: emptyContent(), threshold: 2, holders: [{ name: 'Clara Alder', letter: '' }, { name: 'Ben Okafor', letter: '' }] });
+    const toBen = (await askFriends(t, { ...start, jar: JSON.stringify(jar) })).find((m) => m.to === 'ben@example.com')!;
+    expect(toBen.text).toMatch(/Your link to the jar keeps working/);
+    const optout = decodeURIComponent(/#\/watch\?optout=([^\s]+)/.exec(toBen.text)![1]!);
+    const jarLink = decodeURIComponent(/#\/seance\?jar=([^\s]+)/.exec(toBen.text)![1]!);
+    await t.call('/api/watch/optout', { token: optout });
+    expect((await t.call('/api/watch/jar/open', { token: jarLink })).status).toBe(200);
+  });
+
+  it('an owner who lost their manage link gets a new one at their own address, at most once an hour', async () => {
+    const t = setup();
+    await t.call('/api/watch', start);
+    const old = t.linkIn(0, 'manage')!;
+    // Not before the watch is confirmed, and the answer never says whether a watch exists.
+    expect((await t.call('/api/watch/resend', { email: 'june@example.com' })).body.ok).toBe(true);
+    expect(t.mailer.sent.filter((m) => m.subject === 'Your new manage link')).toHaveLength(0);
+    await t.call('/api/watch/confirm', { token: t.linkIn(0, 'confirm')! });
+    expect((await t.call('/api/watch/resend', { email: ' June@Example.com ' })).body.ok).toBe(true);
+    expect((await t.call('/api/watch/resend', { email: 'nobody@example.com' })).body.ok).toBe(true);
+    await t.call('/api/watch/resend', { email: 'june@example.com' });
+    const resent = t.mailer.sent.filter((m) => m.subject === 'Your new manage link');
+    expect(resent.map((m) => m.to)).toEqual(['june@example.com']);
+    const fresh = decodeURIComponent(/#\/watch\?manage=([^\s]+)/.exec(resent[0]!.text)![1]!);
+    expect((await t.call('/api/watch/status', { token: fresh })).status).toBe(200);
+    expect((await t.call('/api/watch/status', { token: old })).status).toBe(404);
+    expect((await t.call('/api/watch/resend', { email: 'not an email' })).status).toBe(400);
+    t.advance(1 / 12);
+    await t.call('/api/watch/resend', { email: 'june@example.com' });
+    expect(t.mailer.sent.filter((m) => m.subject === 'Your new manage link')).toHaveLength(2);
   });
 
   it('refuses bad input, bad tokens and a missing tick secret', async () => {

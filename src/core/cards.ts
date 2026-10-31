@@ -1,7 +1,7 @@
 // What is printed on each card.
 //
-// Every card folds in half. The outside carries a shard: one Shamir share
-// of the jar's master key. The inside carries the holder's personal seal,
+// Every card is a page cut in two. The card itself carries a shard: one Shamir
+// share of the jar's master key. The smaller half carries the holder's personal seal,
 // which opens the letter written only to them. A seal is not a share, so
 // the people at the circle never learn each other's seals.
 //
@@ -13,7 +13,7 @@
 
 import { sha256 } from '@noble/hashes/sha2.js';
 import { concat, equal, fromBase32, toBase32 } from './bytes.ts';
-import { bytesToWords, splitWords, wordCountFor, wordsToBytes, WordsError } from './words.ts';
+import { BITS_PER_WORD, bytesToWords, splitWords, wordCountFor, wordsToBytes, WordsError } from './words.ts';
 
 export const JAR_ID_LENGTH = 4;
 export const KEY_LENGTH = 32;
@@ -33,6 +33,15 @@ const QR_PREFIX = 'PH1-';
 const QR_CHECKSUM_LENGTH = 2;
 
 export const SHARD_WORDS = wordCountFor(SHARD_LENGTH);
+/**
+ * The words (counted from 1) that carry only the jar id, the threshold and
+ * the kind: the same on every card of a jar. Printed cards say so, so that
+ * friends comparing cards don't think the printer slipped.
+ */
+export const SHARD_SHARED_WORDS = {
+  from: Math.ceil((SHARE_LENGTH * 8) / BITS_PER_WORD) + 1,
+  to: Math.floor((SHARD_LENGTH * 8) / BITS_PER_WORD),
+};
 export const SEAL_WORDS = wordCountFor(SEAL_LENGTH);
 export const KEY_WORDS = wordCountFor(KEY_LENGTH_BYTES);
 

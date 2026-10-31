@@ -10,13 +10,14 @@
 //   POST   /api/watch/resume     { token }
 //   POST   /api/watch/delete     { token }
 //   POST   /api/watch/optout     { token }                   a friend leaves a watch
+//   POST   /api/watch/resend     { email }                   a new manage link, to the owner's address
 //   POST   /api/watch/jar        { token, jar }              the owner keeps (or, with jar: null, removes) a locked copy
 //   POST   /api/watch/jar/open   { token }                   a friend's link opens the kept copy
 //   POST   /api/watch/tick       (header x-tick-secret)      send what is due
 //
 // Tokens travel in request bodies, never in URLs the server logs.
 
-import { checkin, confirm, createWatch, fetchJar, keepJar, MAX_JAR_CHARS, optOut, remove, setPaused, status, tick, WatchError, type Deps } from './service.ts';
+import { checkin, confirm, createWatch, fetchJar, keepJar, MAX_JAR_CHARS, optOut, remove, resendManage, setPaused, status, tick, WatchError, type Deps } from './service.ts';
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -33,7 +34,7 @@ export async function handle(req: Request, deps: Deps, tickSecret?: string): Pro
     // Requests that carry a jar may be bigger; nothing else needs to be.
     const limit = path === '/api/watch' || path === '/api/watch/jar' ? MAX_JAR_CHARS + 20_000 : 20_000;
     if (text.length > limit) return json({ error: 'Too large.' }, 413);
-    let body: { token?: unknown; jar?: unknown } = {};
+    let body: { token?: unknown; jar?: unknown; email?: unknown } = {};
     try {
       body = text ? JSON.parse(text) : {};
     } catch {
@@ -57,6 +58,8 @@ export async function handle(req: Request, deps: Deps, tickSecret?: string): Pro
         return json({ ok: true });
       case '/api/watch/optout':
         return json(await optOut(deps, body.token));
+      case '/api/watch/resend':
+        return json(await resendManage(deps, body.email));
       case '/api/watch/jar':
         return json(await keepJar(deps, body.token, body.jar));
       case '/api/watch/jar/open':

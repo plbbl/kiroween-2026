@@ -19,7 +19,7 @@ Anyone whose people would be locked out if something happened to them: of accoun
 ## Words we use (in the UI and in code)
 
 - **jar**: the encrypted bundle (`JarFile`). The **jar file** is this whole app as one HTML file with a jar inside.
-- **card**: one friend's printed page. Its outside is a **shard** (a Shamir share); its folded inside is a **seal** (opens that friend's letter).
+- **card**: one friend's printed page. The card itself is a **shard** (a Shamir share); the half cut from it is a **seal** (opens that friend's letter).
 - **key** (or key card): the owner's own page, the seed of every key in the jar. It changes the jar; it also opens it alone, so it is kept like a passport.
 - **circle**: the friends who hold cards. **threshold**: how many must gather.
 - **buddy**: the little ghost on each card (costume + emblem), derived from the jar, so the ghost on screen must match the ghost on paper.

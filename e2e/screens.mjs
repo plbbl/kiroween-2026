@@ -104,9 +104,18 @@ for (const which of sizes) {
     await shot('s7-cards');
     await to('.todo', -120);
     await shot('s7-steps');
+    await p.evaluate(() => {
+      window.print = () => {};
+    });
+    await p.getByRole('button', { name: 'Print the cards' }).click();
     await p.emulateMedia({ media: 'print' });
     await wait(500);
     await p.screenshot({ path: `${out}/${pre}-s8-print.png`, fullPage: true });
+    await p.emulateMedia({ media: 'screen' });
+    await p.getByRole('button', { name: 'Print your key' }).click();
+    await p.emulateMedia({ media: 'print' });
+    await wait(300);
+    await p.screenshot({ path: `${out}/${pre}-s8-print-key.png`, fullPage: true });
     keyWords = (await p.locator('.print-key .word-grid').innerText())
       .split('\n')
       .map((l) => l.replace(/^\d+\s*/, '').trim())
@@ -219,7 +228,7 @@ for (const which of sizes) {
     await p.evaluate(() => window.scrollTo(0, 0));
     await wait(400);
     await shot('w4-notified');
-    await p.getByRole('button', { name: /Knock knock/ }).click();
+    await p.getByRole('button', { name: 'I’m here', exact: true }).click();
     await wait(900);
     await p.evaluate(() => window.scrollTo(0, 0));
     await wait(400);
@@ -290,8 +299,15 @@ for (const which of sizes) {
       await to('.start-watch', -100);
       await shot('x1-form');
       await p.getByLabel('Your email').fill('not an email');
+      await p.getByLabel('Friend 1 name').fill('Charles');
+      await p.getByLabel('Friend 1 email').fill('charles@');
+      await p.getByRole('button', { name: 'Start the watch' }).click();
       await wait(300);
       await shot('x2-form-error');
+      await p.getByText('Have a watch, and lost its manage link?').click();
+      await wait(300);
+      await to('.resend', -300);
+      await shot('x2-resend');
       await p.getByLabel('Your name').fill('Ada Lovelace');
       await p.getByLabel('Your email').fill('ada@example.com');
       await p.getByLabel('Friend 1 name').fill('Charles');

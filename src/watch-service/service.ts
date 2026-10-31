@@ -61,6 +61,8 @@ export interface WatchRecord {
    * real time to answer a real question, even after the service was down.
    */
   silence?: { since: number; asked: number; lastAt: number };
+  /** When a new manage link was last sent on request, to send at most one an hour. */
+  manageResentAt?: number;
 }
 
 export interface WatchStore {
@@ -277,7 +279,8 @@ export async function keepJar(deps: Deps, token: unknown, jar: unknown): Promise
 export async function fetchJar(deps: Deps, token: unknown): Promise<{ jar: string }> {
   const { id, secret } = splitToken(token);
   const record = await deps.store.get(id);
-  const holder = record?.holders.find((h) => !h.removed && h.jarHash && sameHash(hash(secret), h.jarHash));
+  // A friend who opted out of the emails keeps the link they were given.
+  const holder = record?.holders.find((h) => h.jarHash && sameHash(hash(secret), h.jarHash));
   if (!record || !holder) throw new WatchError('That link has expired or was never valid.', 404);
   if (!record.jar) throw new WatchError('No jar is kept with this watch any more. Use the jar file you were given.', 404);
   return { jar: record.jar.json };
@@ -353,6 +356,37 @@ export async function setPaused(deps: Deps, token: unknown, paused: boolean): Pr
 export async function remove(deps: Deps, token: unknown): Promise<void> {
   const record = await load(deps, token, 'manage');
   await deps.store.delete(record.id);
+}
+
+/**
+ * The owner lost the email with their manage link: send a new one to the
+ * address the watch belongs to. The answer is the same whether or not a
+ * watch exists, so no one learns who has one.
+ */
+export async function resendManage(deps: Deps, raw: unknown): Promise<{ ok: true }> {
+  const email = typeof raw === 'string' ? raw.trim().toLowerCase() : '';
+  if (!EMAIL.test(email)) throw new WatchError('That doesn’t look like an email address.', 400);
+  const ownerKey = hash(email);
+  const now = deps.now();
+  for (const id of await deps.store.ids()) {
+    const record = await deps.store.get(id);
+    if (!record || record.ownerKey !== ownerKey || record.confirmedAt === null) continue;
+    if (record.manageResentAt && now - record.manageResentAt < 60 * 60 * 1000) continue;
+    const manage = newToken(deps, record.id);
+    record.manageHash = manage.hash;
+    record.manageResentAt = now;
+    await deps.store.put(record);
+    const url = link(deps, 'manage', manage.token);
+    await deps.mailer.send({
+      to: record.owner.email,
+      subject: 'Your new manage link',
+      action: { label: 'Manage my watch', url },
+      text:
+        `Someone (hopefully you) asked for a new link to manage your watch. Here it is; the old one no longer works:\n\n${url}\n\n` +
+        `If this wasn't you, nothing else has changed, and your watch carries on.\n`,
+    });
+  }
+  return { ok: true };
 }
 
 export async function optOut(deps: Deps, token: unknown): Promise<{ owner: string }> {
@@ -457,7 +491,7 @@ export async function tick(deps: Deps): Promise<{ sent: number }> {
             text:
               `${m.body}\n${whatToDo(deps, record, h, jarLinks[i]!)}\n\n` +
               `— Phylactery, the check-in ${first} set up\n\n` +
-              `Would rather not be asked again? ${link(deps, 'optout', optouts[i]!)}\n`,
+              `Would rather not get these emails? ${link(deps, 'optout', optouts[i]!)}${record.jar ? '\n(Your link to the jar keeps working.)' : ''}\n`,
           });
         }
         await deps.mailer.send({
@@ -494,19 +528,36 @@ async function rotateCheckin(deps: Deps, record: WatchRecord): Promise<string> {
  */
 function whatToDo(deps: Deps, record: WatchRecord, holder: Holder, jarToken: string): string {
   const first = record.owner.name.split(/\s+/)[0]!;
-  const others = record.holders.filter((h) => !h.removed && h !== holder).map((h) => h.name);
+  // The circle needs to gather, so friends can reach each other: the form says so.
+  const others = record.holders.filter((h) => !h.removed && h !== holder).map((h) => `${h.name} (${h.email})`);
   const asked = others.length ? `We wrote to ${list(others)} too.\n\n` : '';
   const base = deps.baseUrl.replace(/\/?$/, '/');
   const kept = record.jar ? parseJar(record.jar.json) : null;
-  const who = kept ? `Any ${kept.threshold} of ${list(kept.holders.map((h) => h.name))} can open it together.` : 'Enough of you together can open it.';
+  const card = `a printed page titled "${record.owner.name}'s jar" with 30 numbered words`;
+  // Without a kept jar we can't tell who holds a card; with one, we can.
+  const holds = kept ? kept.holders.some((k) => sameName(k.name, holder.name)) : null;
+  const what =
+    holds === null
+      ? `in a locked jar, and gave cards to the people who can open it (each ${card}). Enough of them together can open it.`
+      : holds
+        ? `in a locked jar, and you hold one of its cards (${card}). Any ${kept!.threshold} of ${list(kept!.holders.map((h) => h.name))} can open it together.`
+        : `in a locked jar. You don't hold one of its cards, but ${list(kept!.holders.map((h) => h.name))} do (each ${card}); any ${kept!.threshold} of them together can open it.`;
   const how = kept
     ? `${first} left a locked copy with us. When you are ready, this link opens it for you; the others get their own:\n${base}#/seance?jar=${encodeURIComponent(jarToken)}`
     : `Open the jar file ${first} gave you (or ${base}#/seance), and each offer your card.`;
   return (
     asked +
-    `If you learn that ${first} has passed away: ${first} left words for the people close to them in a locked jar, and you hold one of its cards (a printed page titled "${record.owner.name}'s jar" with 30 numbered words). ${who} ${how}\n\n` +
-    `Until then, keep your card safe.`
+    `If you learn that ${first} has passed away: ${first} left words for the people close to them ${what} ${how}` +
+    (holds === false ? '' : `\n\nUntil then, keep your card safe.`)
   );
+}
+
+/** "Rosa" and "Rosa Lopez" are the same person here; case and spacing don't matter. */
+function sameName(a: string, b: string): boolean {
+  const norm = (s: string) => s.trim().toLowerCase().split(/\s+/);
+  const [x, y] = [norm(a), norm(b)];
+  if (x.join(' ') === y.join(' ')) return true;
+  return (x.length === 1 || y.length === 1) && x[0] === y[0];
 }
 
 const list = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : (names[0] ?? ''));

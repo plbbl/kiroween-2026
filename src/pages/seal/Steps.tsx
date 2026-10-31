@@ -23,8 +23,6 @@ export interface Draft {
 
 type Patch = (patch: Partial<JarContent>) => void;
 
-/** Placeholder costumes for people before their cards exist. */
-export const PREVIEW_COSTUMES: Costume[] = ['sheet', 'pumpkin', 'bat', 'franken', 'bow', 'witch', 'skeleton', 'mummy', 'sheet', 'pumpkin'];
 
 export function StepName({ draft, setOwner }: { draft: Draft; setOwner: (s: string) => void }) {
   return (
@@ -76,7 +74,10 @@ const WISHES: { value: AccountWish; label: string }[] = [
   { value: 'hand-over', label: 'Hand it over' },
 ];
 
-const QUICK_ACCOUNTS = ['Password manager', 'Email', 'Phone', 'Bank', 'Photos', 'Social media'];
+const QUICK_ACCOUNTS = ['Phone', 'Password manager', 'Email', 'Bank', 'Photos', 'Social media'];
+
+// Most accounts send a code to the phone, so its passcode opens the rest.
+const LOGIN_HINT: Record<string, string> = { Phone: 'Its passcode, and where the backup codes are' };
 
 export function StepLeave({ content, setContent }: { content: JarContent; setContent: Patch }) {
   const accounts = content.accounts;
@@ -91,7 +92,10 @@ export function StepLeave({ content, setContent }: { content: JarContent; setCon
     <>
       <div className="sub-head">
         <h3>Accounts</h3>
-        <span className="faint">Passwords are safe here. Everyone who opens the jar together will see them; for one person only, use a private letter.</span>
+        <span className="faint">
+          Start with your phone: most accounts send it a code. Passwords are safe here. Everyone who opens the jar together will see them; for one
+          person only, use a private letter.
+        </span>
       </div>
       <div className="starters">
         {QUICK_ACCOUNTS.filter((q) => !accounts.some((a) => a.service === q)).map((q) => (
@@ -111,7 +115,7 @@ export function StepLeave({ content, setContent }: { content: JarContent; setCon
                 </label>
                 <label className="field">
                   <span>How to get in</span>
-                  <textarea rows={2} value={a.login} placeholder="Login, and the password or where it is" onChange={(e) => updateAccount(i, { login: e.target.value })} />
+                  <textarea rows={2} value={a.login} placeholder={LOGIN_HINT[a.service] ?? 'Login, and the password or where it is'} onChange={(e) => updateAccount(i, { login: e.target.value })} />
                 </label>
                 <label className="field">
                   <span>What should happen</span>
@@ -204,7 +208,7 @@ export function StepWishes({ content, setContent }: { content: JarContent; setCo
  * every printed card, so only the letters can change; `costumes` are then
  * the real buddies on those cards.
  */
-export function StepCircle({ draft, setDraft, locked = false, costumes = PREVIEW_COSTUMES }: { draft: Draft; setDraft: (d: Draft) => void; locked?: boolean; costumes?: Costume[] }) {
+export function StepCircle({ draft, setDraft, locked = false, costumes }: { draft: Draft; setDraft: (d: Draft) => void; locked?: boolean; costumes: Costume[] }) {
   const n = draft.holders.length;
   const key = (name: string) => name.trim().toLowerCase();
   const twice = (name: string) => !!key(name) && draft.holders.filter((h) => key(h.name) === key(name)).length > 1;
@@ -218,7 +222,7 @@ export function StepCircle({ draft, setDraft, locked = false, costumes = PREVIEW
           <li key={i} className="person pop" style={{ '--d': `${i * 60}ms` } as CSSProperties}>
             <div className="person-row">
               <span className="person-ghost" aria-hidden="true">
-                <Ghost costume={costumes[i]} mood={h.name.trim() ? 'happy' : 'open'} size={46} float phase={i * 0.5} />
+                <Ghost costume={costumes[i % costumes.length]} mood={h.name.trim() ? 'happy' : 'open'} size={46} float phase={i * 0.5} />
               </span>
               {locked ? (
                 <span className="person-name">{h.name}</span>
@@ -267,7 +271,7 @@ export function StepCircle({ draft, setDraft, locked = false, costumes = PREVIEW
       <div className="threshold" data-theme="night">
         <h3>How many must gather?</h3>
         <p className="faint">
-          {locked ? 'Set when the jar was sealed, and printed on every card.' : 'Tap a candle. Fewer is easier to gather; more is safer if a card goes missing.'}
+          {locked ? 'Set when the jar was sealed, and printed on every card.' : 'Tap a candle. Fewer is easier to gather, even if a card is lost. More keeps a stolen card useless.'}
         </p>
         <div className="threshold-candles" role="radiogroup" aria-label="Cards needed to open the jar">
           {draft.holders.map((_, i) => {
