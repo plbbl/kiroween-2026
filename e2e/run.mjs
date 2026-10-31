@@ -111,6 +111,10 @@ await page.emulateMedia({ media: 'print' });
 await settle(600);
 await shot('09-print-cards');
 check((await page.locator('.print-card [aria-label^="Code for"]').count()) === 6, 'each printed card has a card code and a seal code');
+check(
+  !(await page.locator('.sealed-hero').isVisible()) && !(await page.locator('.todo').isVisible()) && (await page.locator('.print-card').first().isVisible()),
+  'printing shows only the cards',
+);
 const wordsOf = (t) =>
   t
     .split('\n')

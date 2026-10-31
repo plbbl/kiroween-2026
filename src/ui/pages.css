@@ -2253,11 +2253,12 @@ textarea.mono-input {
   .stars,
   .topbar,
   .no-print,
-  main > .page > *:not(.print-area) {
+  main .page > :not(.print-area) {
     display: none !important;
   }
 
-  .page {
+  .page,
+  .route {
     padding: 0 !important;
     min-height: 0;
     animation: none;
