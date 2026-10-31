@@ -3,7 +3,8 @@ import { parseJar, type JarFile } from '../core/jar.ts';
 
 export type Route = 'home' | 'seal' | 'watch' | 'seance' | 'guides' | 'gallery';
 
-const ROUTES: Route[] = ['home', 'seal', 'watch', 'seance', 'guides', 'gallery'];
+// The gallery (the cast, for design review) exists only while developing.
+const ROUTES: Route[] = ['home', 'seal', 'watch', 'seance', 'guides', ...(import.meta.env.DEV ? (['gallery'] as const) : [])];
 
 interface HashRoute {
   route: Route;
@@ -19,10 +20,43 @@ function readRoute(): HashRoute {
   return { route, anchor, params: new URLSearchParams(query) };
 }
 
+/**
+ * Some pages hold what cannot be made again: freshly sealed cards before
+ * they are printed, an opened jar before the circle has finished reading.
+ * While such a page says so, leaving it asks first, whether by a link, the
+ * Back button, or closing the tab.
+ */
+let leaveWarning: string | null = null;
+
+/**
+ * `inApp: false` when the page's state survives moving to another page of
+ * the app (kept in memory), so only closing or reloading the tab is a loss.
+ */
+export function useLeaveWarning(message: string | null, { inApp = true }: { inApp?: boolean } = {}) {
+  useEffect(() => {
+    if (!message) return;
+    if (inApp) leaveWarning = message;
+    const onUnload = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener('beforeunload', onUnload);
+    return () => {
+      if (inApp) leaveWarning = null;
+      window.removeEventListener('beforeunload', onUnload);
+    };
+  }, [message, inApp]);
+}
+
 export function useHashRoute(): HashRoute {
   const [state, setState] = useState(readRoute);
   useEffect(() => {
+    let current = window.location.href;
     const on = () => {
+      if (leaveWarning && !window.confirm(leaveWarning)) {
+        // Stay: put the address back without leaving the page.
+        history.pushState(null, '', current);
+        return;
+      }
+      leaveWarning = null;
+      current = window.location.href;
       setState(readRoute());
       // A new page starts at the top at once; the page itself fades in.
       window.scrollTo({ top: 0, behavior: 'instant' });

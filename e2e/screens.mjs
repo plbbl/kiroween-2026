@@ -32,6 +32,8 @@ for (const which of sizes) {
   const phone = which === 'phone';
   const viewport = phone ? { width: 390, height: 844 } : { width: 1440, height: 900 };
   const ctx = await b.newContext({ viewport, deviceScaleFactor: phone ? 2 : 1, acceptDownloads: true });
+  // Pages that hold what cannot be made again ask before leaving; screenshots always mean to leave.
+  ctx.on('page', (np) => np.on('dialog', (d) => void d.accept()));
   const p = await ctx.newPage();
   const errors = [];
   p.on('pageerror', (e) => errors.push(String(e)));
@@ -58,7 +60,7 @@ for (const which of sizes) {
     await next();
     await wait(600);
     await p.getByRole('button', { name: '+ Password manager' }).click();
-    await p.getByPlaceholder('Login, and where the password is').fill('master password in the red notebook');
+    await p.getByPlaceholder('Login, and the password or where it is').fill('master password in the red notebook');
     await p.getByRole('button', { name: '+ Add a place' }).click();
     await p.getByPlaceholder('Will, deed, insurance, spare key…').fill('Will');
     await p.getByPlaceholder('Blue folder, top drawer of the desk').fill('Blue folder, top drawer');

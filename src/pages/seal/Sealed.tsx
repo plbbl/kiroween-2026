@@ -8,7 +8,7 @@ import { initialsOf } from '../../ui/art/WaxSeal.tsx';
 import { BuddyCard, EnvelopeMark, PrintableCard, PrintableKey } from '../../ui/components/Cards.tsx';
 import { capitalised, numberWord } from '../../ui/text.ts';
 import { canMakeGrimoire, download, makeGrimoire, safeFilename } from '../../ui/grimoire.ts';
-import { href } from '../../ui/shell.tsx';
+import { href, useLeaveWarning } from '../../ui/shell.tsx';
 import { ApiError, jarHandoff, watchApi, watchAvailable } from '../../ui/watchApi.ts';
 
 function combos(n: number, k: number): number {
@@ -17,7 +17,7 @@ function combos(n: number, k: number): number {
   return Math.round(r);
 }
 
-export function Sealed({ result }: { result: SealResult }) {
+export function Sealed({ result, onStartOver }: { result: SealResult; onStartOver: () => void }) {
   const { jar, cards } = result;
   const buddies = useMemo(() => circleBuddies(cards[0]!.shard.jarId, cards.map((c) => c.x)), [cards]);
   const [check, setCheck] = useState<CircleCheck | null>(null);
@@ -25,6 +25,14 @@ export function Sealed({ result }: { result: SealResult }) {
   const base = safeFilename(`${jar.owner}'s jar`);
   const k = jar.threshold;
   const n = cards.length;
+  // The cards and the jar exist only in this page's memory until they are printed and downloaded.
+  const [printed, setPrinted] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const missing = [...(printed ? [] : ['print the cards']), ...(saved ? [] : ['download the jar file'])];
+  useLeaveWarning(
+    missing.length ? `You haven’t ${missing.join(' or ')} yet. Closing this page forgets them, and no one could open the jar. Close anyway?` : null,
+    { inApp: false },
+  );
 
   useEffect(() => {
     let live = true;
@@ -86,24 +94,38 @@ export function Sealed({ result }: { result: SealResult }) {
           <div>
             <h3>Print the cards</h3>
             <p className="muted">One page per friend, folded so the seal is inside. And one page for you: your key, to change the jar later.</p>
-            <button type="button" className="btn primary" onClick={() => window.print()}>
-              Print the cards
+            <button
+              type="button"
+              className="btn primary"
+              onClick={() => {
+                window.print();
+                setPrinted(true);
+              }}
+            >
+              Print or save as PDF
             </button>
+            {printed && <p className="faint">Printed? Check that every page came out before you leave.</p>}
           </div>
         </article>
         <article className="todo-item card">
           <span className="todo-num">2</span>
           <div>
-            <h3>Give everyone the jar file</h3>
-            <p className="muted">One small file with this app and your locked jar inside. It opens offline. It is safe to email.</p>
-            <div className="row">
-              <button type="button" className="btn" disabled={!grimoireOk} onClick={() => download(`${base}.html`, makeGrimoire(jar), 'text/html')}>
-                Download the jar
-              </button>
-              <button type="button" className="text-btn" onClick={() => download(`${base}.json`, JSON.stringify(jar, null, 2), 'application/json')}>
-                or just the data
-              </button>
-            </div>
+            <h3>Give everyone their card and the jar file</h3>
+            <p className="muted">
+              Tell each friend what the card is. Email them all the jar file: this app with your locked jar inside. It opens offline, and is safe
+              to send.
+            </p>
+            <button
+              type="button"
+              className="btn"
+              disabled={!grimoireOk}
+              onClick={() => {
+                download(`${base}.html`, makeGrimoire(jar), 'text/html');
+                setSaved(true);
+              }}
+            >
+              Download the jar
+            </button>
             {!grimoireOk && <p className="faint">The jar file can only be made from the built app.</p>}
           </div>
         </article>
@@ -119,9 +141,22 @@ export function Sealed({ result }: { result: SealResult }) {
         </article>
       </section>
 
+      <p className="center start-over">
+        <button
+          type="button"
+          className="text-btn quiet"
+          onClick={() => {
+            if (missing.length && !window.confirm(`You haven’t ${missing.join(' or ')} yet. Seal a new jar and forget this one?`)) return;
+            onStartOver();
+          }}
+        >
+          Done? Seal another jar
+        </button>
+      </p>
+
       <div className="print-area" aria-hidden="true">
         {cards.map((c, i) => (
-          <PrintableCard key={c.x} owner={jar.owner} card={c} buddy={buddies.get(c.x)!} index={i} total={n} threshold={k} />
+          <PrintableCard key={c.x} owner={jar.owner} circle={cards.map((x) => x.name)} card={c} buddy={buddies.get(c.x)!} index={i} total={n} threshold={k} />
         ))}
         <PrintableKey owner={jar.owner} keyCard={result.key} />
       </div>
@@ -132,8 +167,13 @@ export function Sealed({ result }: { result: SealResult }) {
 /** After the owner changed what is inside: the same cards, a new jar file. */
 export function Updated({ jar }: { jar: JarFile }) {
   const grimoireOk = canMakeGrimoire();
-  const base = safeFilename(`${jar.owner}'s jar`);
+  // The version in the name, so the newest file is easy to tell apart.
+  const base = safeFilename(`${jar.owner}'s jar, version ${jar.revision ?? 2}`);
   const first = jar.owner.split(/\s+/)[0];
+  const [service, setService] = useState<boolean | null>(null);
+  useEffect(() => {
+    void watchAvailable().then(setService);
+  }, []);
   return (
     <div className="page sealed-page">
       <section className="narrow center sealed-hero">
@@ -147,19 +187,19 @@ export function Updated({ jar }: { jar: JarFile }) {
         </p>
       </section>
 
-      <section className="todo wrap todo-two">
+      <section className={`todo wrap ${service ? 'todo-two' : 'todo-one'}`}>
         <article className="todo-item card">
           <span className="todo-num">1</span>
           <div>
             <h3>Send the new jar file</h3>
-            <p className="muted">Give it to the same friends. An old file still opens with the cards, but shows the old words.</p>
+            <p className="muted">Email it to the same friends, and ask them to delete the old one: it still opens with the cards, but shows the old words.</p>
             <button type="button" className="btn primary" disabled={!grimoireOk} onClick={() => download(`${base}.html`, makeGrimoire(jar), 'text/html')}>
               Download the jar
             </button>
             {!grimoireOk && <p className="faint">The jar file can only be made from the built app.</p>}
           </div>
         </article>
-        <WatchCopy jar={jar} />
+        {service && <WatchCopy jar={jar} />}
       </section>
     </div>
   );
@@ -167,14 +207,9 @@ export function Updated({ jar }: { jar: JarFile }) {
 
 /** If the watch keeps a copy of the jar, replace it with the new version here. */
 function WatchCopy({ jar }: { jar: JarFile }) {
-  const [service, setService] = useState<boolean | null>(null);
   const [link, setLink] = useState('');
   const [state, setState] = useState<'idle' | 'busy' | 'done'>('idle');
   const [error, setError] = useState('');
-  useEffect(() => {
-    void watchAvailable().then(setService);
-  }, []);
-
   const give = async (e: FormEvent) => {
     e.preventDefault();
     const token = /manage=([^&\s]+)/.exec(link)?.[1];
@@ -198,9 +233,8 @@ function WatchCopy({ jar }: { jar: JarFile }) {
       <span className="todo-num">2</span>
       <div>
         <h3>The watch’s copy</h3>
-        {service === false && <p className="muted">If a watch keeps a copy of your jar, give it this file from its manage link.</p>}
-        {service && state === 'done' && <p className="muted">Done. Your friends’ links now open this version.</p>}
-        {service && state !== 'done' && (
+        {state === 'done' && <p className="muted">Done. Your friends’ links now open this version.</p>}
+        {state !== 'done' && (
           <form className="watch-copy" onSubmit={give}>
             <p className="muted">Does a watch keep a copy of your jar? Paste its manage link, from our email, to give it this version.</p>
             <input type="url" aria-label="Your watch’s manage link" placeholder="https://…#/watch?manage=…" value={link} onChange={(e) => setLink(e.target.value)} />

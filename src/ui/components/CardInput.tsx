@@ -32,6 +32,14 @@ function decodeCanvas(canvas: HTMLCanvasElement): string | null {
   return jsQR(img.data, img.width, img.height, { inversionAttempts: 'attemptBoth' })?.data ?? null;
 }
 
+/** A friend who typed the other half of their card, or the owner's key, is told so. */
+function wrongHalf(kind: CardInputProps['kind'], count: number): string | null {
+  if (kind === 'shard' && count === SEAL_WORDS) return 'That looks like your private seal, the folded half. Use the 30 words on the outside.';
+  if (kind === 'seal' && count === SHARD_WORDS) return 'That looks like the outside of your card. Use the 17 words on the folded half.';
+  if (kind !== 'key' && count === KEY_WORDS) return 'That looks like the owner’s key. Use your own card.';
+  return null;
+}
+
 export function CardInput({ kind, onCard, disabled = false }: CardInputProps) {
   const [mode, setMode] = useState<Mode>('words');
   const [text, setText] = useState('');
@@ -104,7 +112,7 @@ export function CardInput({ kind, onCard, disabled = false }: CardInputProps) {
           </label>
           <div className="spread words-meta">
             <span className={words.length === expected ? 'ok' : 'faint'} aria-live="polite">
-              {words.length} of {expected} words
+              {wrongHalf(kind, words.length) ?? `${words.length} of ${expected} words`}
               {unknown.length > 0 && <span className="error"> · not on the list: {unknown.slice(0, 3).join(', ')}</span>}
             </span>
             {hints.length > 0 && (

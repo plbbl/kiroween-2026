@@ -20,11 +20,18 @@ function setup(start = Date.UTC(2026, 10, 1, 9)) {
   const advance = (days: number) => {
     now += days * DAY;
   };
+  /** Time passing with the service running: a tick every six hours. */
+  const live = async (days: number) => {
+    for (let d = 0; d < days; d += 0.25) {
+      now += 0.25 * DAY;
+      await tick();
+    }
+  };
   const linkIn = (mailIndex: number, action: string) => {
     const m = new RegExp(`#/watch\\?${action}=([^\\s]+)`).exec(mailer.sent[mailIndex]!.text);
     return m ? decodeURIComponent(m[1]!) : null;
   };
-  return { deps, mailer, call, tick, advance, linkIn, now: () => now };
+  return { deps, mailer, call, tick, advance, live, linkIn, now: () => now };
 }
 
 const start = {
@@ -39,12 +46,52 @@ const start = {
 async function askFriends(t: ReturnType<typeof setup>, body: unknown) {
   await t.call('/api/watch', body);
   await t.call('/api/watch/confirm', { token: t.linkIn(0, 'confirm')! });
-  t.advance(12);
-  await t.tick();
+  await t.live(12);
   return t.mailer.sent.filter((m) => m.subject === 'Please check on June Alder');
 }
 
 describe('watch service: friends know what to do', () => {
+  it('when the owner confirms, each friend hears once that they were named, and nothing else yet', async () => {
+    const t = setup();
+    await t.call('/api/watch', start);
+    await t.call('/api/watch/confirm', { token: t.linkIn(0, 'confirm')! });
+    await t.call('/api/watch/confirm', { token: t.linkIn(0, 'confirm')! });
+    const intros = t.mailer.sent.filter((m) => m.subject === 'June Alder named you in their Phylactery');
+    expect(intros.map((m) => m.to).sort()).toEqual(['ben@example.com', 'clara@example.com']);
+    expect(intros[0]!.text).toMatch(/Please check on June Alder/);
+    expect(intros[0]!.text).toMatch(/#\/watch\?optout=/);
+    expect(intros.every((m) => !/died|dead|death|here=|manage=|jar=/i.test(m.text))).toBe(true);
+  });
+
+  it('after the service was down, the owner is asked first and friends only after a real chance to answer', async () => {
+    const t = setup();
+    await t.call('/api/watch', start);
+    await t.call('/api/watch/confirm', { token: t.linkIn(0, 'confirm')! });
+    t.advance(30); // the service was down: no tick for a month
+    await t.tick();
+    const asked = () => t.mailer.sent.filter((m) => m.subject === 'Please check on June Alder');
+    expect(asked()).toHaveLength(0);
+    expect(t.mailer.sent.at(-1)!.to).toBe('june@example.com');
+    // The schedule leaves a day between questions (4 days of grace, 3 reminders): not before.
+    t.advance(0.9);
+    await t.tick();
+    expect(asked()).toHaveLength(0);
+    t.advance(0.2);
+    await t.tick();
+    expect(asked()).toHaveLength(2);
+    // And the friends hear the truth: one message went unanswered, not three.
+    expect(asked()[0]!.text).toMatch(/our message went unanswered/);
+  });
+
+  it('with the service running, friends hear how many messages the owner really got', async () => {
+    const t = setup();
+    await t.call('/api/watch', start);
+    await t.call('/api/watch/confirm', { token: t.linkIn(0, 'confirm')! });
+    await t.live(12);
+    const toClara = t.mailer.sent.find((m) => m.to === 'clara@example.com' && m.subject.startsWith('Please check'))!;
+    expect(toClara.text).toMatch(/for 11 days, and 4 messages from us went unanswered/);
+  });
+
   it('without a kept jar, each friend hears who else was asked and how the circle opens the jar file', async () => {
     const t = setup();
     const toFriends = await askFriends(t, start);
@@ -93,8 +140,7 @@ describe('watch service: friends know what to do', () => {
     expect((await t.call('/api/watch/jar', { token: manage, jar: null })).body.jar).toBeNull();
     // Friends are asked; with no jar kept, their email points to the jar file instead.
     await t.call('/api/watch/confirm', { token: t.linkIn(0, 'confirm')! });
-    t.advance(12);
-    await t.tick();
+    await t.live(12);
     const toClara = t.mailer.sent.find((m) => m.to === 'clara@example.com')!;
     expect(toClara.text).not.toMatch(/\?jar=/);
   });
@@ -142,8 +188,7 @@ describe('watch service', () => {
     expect(t.mailer.sent.some((m) => m.subject === 'Please check on June Alder')).toBe(false);
     expect(t.mailer.sent.some((m) => /yearly/.test(m.subject))).toBe(false);
     // A year on, the owner has gone quiet and friends were asked: no review.
-    t.advance(365);
-    await t.tick();
+    await t.live(365);
     expect(t.mailer.sent.some((m) => m.subject === 'Please check on June Alder')).toBe(true);
     expect(t.mailer.sent.some((m) => /yearly/.test(m.subject))).toBe(false);
   });
@@ -171,8 +216,7 @@ describe('watch service', () => {
     expect(reminder.subject).toMatch(/June/);
 
     // Silent through the whole grace period: friends are asked, owner is told.
-    t.advance(4);
-    await t.tick();
+    await t.live(4);
     const toFriends = t.mailer.sent.filter((m) => m.subject === 'Please check on June Alder');
     expect(toFriends.map((m) => m.to).sort()).toEqual(['ben@example.com', 'clara@example.com']);
     expect(toFriends.every((m) => !/died|dead|death/i.test(m.text))).toBe(true);
@@ -210,18 +254,17 @@ describe('watch service', () => {
     await t.call('/api/watch/confirm', { token: t.linkIn(0, 'confirm') });
     const manage = t.linkIn(0, 'manage')!;
     expect((await t.call('/api/watch/pause', { token: manage })).body.status).toBe('paused');
-    t.advance(90);
-    await t.tick();
-    expect(t.mailer.sent).toHaveLength(1);
+    const before = t.mailer.sent.length;
+    await t.live(90);
+    expect(t.mailer.sent).toHaveLength(before);
   });
 
   it('a friend can leave a watch', async () => {
     const t = setup();
     await t.call('/api/watch', start);
     await t.call('/api/watch/confirm', { token: t.linkIn(0, 'confirm') });
-    t.advance(12);
-    await t.tick();
-    const toBen = t.mailer.sent.find((m) => m.to === 'ben@example.com')!;
+    await t.live(12);
+    const toBen = t.mailer.sent.filter((m) => m.to === 'ben@example.com').at(-1)!;
     const optout = decodeURIComponent(/#\/watch\?optout=([^\s]+)/.exec(toBen.text)![1]!);
     expect((await t.call('/api/watch/optout', { token: optout })).body.owner).toBe('June Alder');
     const status = await t.call('/api/watch/status', { token: t.linkIn(0, 'manage') });

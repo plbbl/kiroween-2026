@@ -35,7 +35,10 @@ export function StepName({ draft, setOwner }: { draft: Draft; setOwner: (s: stri
       </label>
       <p className="note">
         <Ghost size={30} mood="wink" />
-        <span>Nothing is saved until you seal the jar. If you close this page, your words vanish. That is on purpose.</span>
+        <span>
+          Nothing is saved until you seal the jar: if you leave this page, or switch apps on a phone, your words may vanish. That is on purpose. Have
+          your logins at hand before you start.
+        </span>
       </p>
       <p className="faint update-link">
         Sealed one before? <a href={`${href('seal')}?update`}>Change what’s inside</a> with your key.
@@ -66,6 +69,7 @@ export function StepMessage({ content, setContent }: { content: JarContent; setC
 }
 
 const WISHES: { value: AccountWish; label: string }[] = [
+  { value: 'decide', label: 'Up to them' },
   { value: 'close', label: 'Close it' },
   { value: 'memorialize', label: 'Keep as a memorial' },
   { value: 'keep', label: 'Keep it running' },
@@ -81,13 +85,13 @@ export function StepLeave({ content, setContent }: { content: JarContent; setCon
   const setDocuments = (d: DocumentPlace[]) => setContent({ documents: d });
   const updateAccount = (i: number, patch: Partial<Account>) => setAccounts(accounts.map((a, j) => (j === i ? { ...a, ...patch } : a)));
   const updateDoc = (i: number, patch: Partial<DocumentPlace>) => setDocuments(documents.map((d, j) => (j === i ? { ...d, ...patch } : d)));
-  const addAccount = (service = '') => setAccounts([...accounts, { service, login: '', wish: 'close', note: '' }]);
+  const addAccount = (service = '') => setAccounts([...accounts, { service, login: '', wish: 'decide', note: '' }]);
 
   return (
     <>
       <div className="sub-head">
         <h3>Accounts</h3>
-        <span className="faint">You can write passwords here. The jar is locked.</span>
+        <span className="faint">Passwords are safe here. Everyone who opens the jar together will see them; for one person only, use a private letter.</span>
       </div>
       <div className="starters">
         {QUICK_ACCOUNTS.filter((q) => !accounts.some((a) => a.service === q)).map((q) => (
@@ -107,7 +111,7 @@ export function StepLeave({ content, setContent }: { content: JarContent; setCon
                 </label>
                 <label className="field">
                   <span>How to get in</span>
-                  <input type="text" value={a.login} placeholder="Login, and where the password is" onChange={(e) => updateAccount(i, { login: e.target.value })} />
+                  <textarea rows={2} value={a.login} placeholder="Login, and the password or where it is" onChange={(e) => updateAccount(i, { login: e.target.value })} />
                 </label>
                 <label className="field">
                   <span>What should happen</span>
@@ -266,7 +270,7 @@ export function StepCircle({ draft, setDraft, locked = false, costumes = PREVIEW
           {locked ? 'Set when the jar was sealed, and printed on every card.' : 'Tap a candle. Fewer is easier to gather; more is safer if a card goes missing.'}
         </p>
         <div className="threshold-candles" role="radiogroup" aria-label="Cards needed to open the jar">
-          {draft.holders.map((h, i) => {
+          {draft.holders.map((_, i) => {
             const k = i + 1;
             return (
               <button
@@ -283,7 +287,7 @@ export function StepCircle({ draft, setDraft, locked = false, costumes = PREVIEW
                 }}
               >
                 <Candle lit={i < draft.threshold} justLit={i === draft.threshold - 1} size={64} phase={i * 0.6} key={`${i}-${i < draft.threshold}`} />
-                <span>{h.name.trim() || `Friend ${k}`}</span>
+                <span>{k}</span>
               </button>
             );
           })}

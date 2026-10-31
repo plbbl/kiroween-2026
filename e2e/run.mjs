@@ -34,6 +34,8 @@ const check = (ok, what) => {
 
 const browser = await chromium.launch();
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, acceptDownloads: true });
+// Pages that hold what cannot be made again ask before leaving; the walk-through always means to leave.
+context.on('page', (p) => p.on('dialog', (d) => void d.accept()));
 const page = await context.newPage();
 page.on('pageerror', (e) => errors.push(String(e)));
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
@@ -74,7 +76,7 @@ await shot('03-seal-message', false);
 await next();
 await settle(500);
 await page.getByRole('button', { name: '+ Password manager' }).click();
-await page.getByPlaceholder('Login, and where the password is').fill('master password: engine-of-difference');
+await page.getByPlaceholder('Login, and the password or where it is').fill('master password: engine-of-difference');
 await page.getByRole('button', { name: '+ Add a place' }).click();
 await page.getByPlaceholder('Will, deed, insurance, spare key…').fill('Notebooks');
 await page.getByPlaceholder('Blue folder, top drawer of the desk').fill('The cedar chest');
@@ -131,6 +133,11 @@ await page.emulateMedia({ media: 'screen' });
 const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Download the jar' }).click()]);
 const jarPath = join(shots, 'jar.html');
 await download.saveAs(jarPath);
+await page.goto(`${app}#/watch`);
+await settle(400);
+await page.goto(`${app}#/seal`);
+await settle(500);
+check(await page.getByRole('heading', { name: /Sealed!/ }).isVisible(), 'the sealed cards survive a visit to another page');
 const g = await context.newPage();
 g.on('pageerror', (e) => errors.push(`jar file: ${e}`));
 await g.goto(pathToFileURL(jarPath).href);

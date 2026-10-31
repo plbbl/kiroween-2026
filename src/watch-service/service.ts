@@ -54,6 +54,13 @@ export interface WatchRecord {
   manageHash: string;
   checkinHash: string;
   jar?: KeptJar;
+  /**
+   * What the owner was actually asked in the current silence (the one that
+   * began at the last sign, in schedule days): how many questions went out,
+   * and when the latest did. Friends are only asked once the owner has had
+   * real time to answer a real question, even after the service was down.
+   */
+  silence?: { since: number; asked: number; lastAt: number };
 }
 
 export interface WatchStore {
@@ -198,7 +205,7 @@ export async function createWatch(deps: Deps, raw: unknown): Promise<{ id: strin
       `Someone (hopefully you) asked Phylactery to keep watch over you. Nothing will happen until you confirm:\n\n` +
       `${link(deps, 'confirm', checkin.token)}\n\n` +
       `After that, about every ${config.cadenceDays} day${config.cadenceDays > 1 ? 's' : ''} we will send a link like the one above. One tap says you are still here.\n\n` +
-      `Keep this link to pause, change or delete the watch:\n${link(deps, 'manage', manage.token)}\n\n` +
+      `Keep this email. This link is the only way to pause, change or delete the watch:\n${link(deps, 'manage', manage.token)}\n\n` +
       `If this wasn't you, ignore this email and nothing more will be sent.\n`,
   });
   return { id };
@@ -272,11 +279,33 @@ export async function fetchJar(deps: Deps, token: unknown): Promise<{ jar: strin
   return { jar: record.jar.json };
 }
 
-/** The owner's confirmation link doubles as their check-in link. */
+/**
+ * The owner's confirmation link doubles as their check-in link. On first
+ * confirmation each friend hears, once, that they were named: an email that
+ * arrives years later from a stranger would look like a scam.
+ */
 export async function confirm(deps: Deps, token: unknown): Promise<WatchView> {
   const record = await load(deps, token, 'checkin');
   if (record.confirmedAt === null) {
     record.confirmedAt = deps.now();
+    const optouts = await rotateOptouts(deps, record);
+    const owner = record.owner.name;
+    const first = owner.split(/\s+/)[0]!;
+    for (const [i, h] of record.holders.entries()) {
+      if (h.removed) continue;
+      await deps.mailer.send({
+        to: h.email,
+        subject: `${owner} named you in their Phylactery`,
+        text:
+          `Dear ${h.name.split(/\s+/)[0]},\n\n` +
+          `${owner} set up Phylactery, a gentle check-in: now and then we ask ${first} "still here?", and ${first} taps a link. ` +
+          `${first} named you as someone we should write to if they ever stop answering for a long time.\n\n` +
+          `There is nothing for you to do now. If we ever write again, it will be from this address, with the subject "Please check on ${owner}".\n\n` +
+          `${first} may also give you a card: a printed page titled "${owner}'s jar" with 30 numbered words. Keep it safe, like a house key.\n\n` +
+          `— Phylactery\n\n` +
+          `Would rather not be part of this? ${link(deps, 'optout', optouts[i]!)}\n`,
+      });
+    }
     await deps.store.put(record);
   }
   return view(deps, record);
@@ -376,11 +405,27 @@ export async function tick(deps: Deps): Promise<{ sent: number }> {
       await deps.store.put(record);
       continue;
     }
+    if (record.silence?.since !== run.lastSign) record.silence = { since: run.lastSign, asked: 0, lastAt: 0 };
+    const silence = record.silence;
     // After downtime several questions may be due at once: send only the latest.
     const questions = due.filter((e) => e.kind !== 'notify');
-    const toSend = [...questions.slice(-1), ...due.filter((e) => e.kind === 'notify')];
+    let ask = questions[questions.length - 1];
+    const notify = due.find((e) => e.kind === 'notify');
+    // Friends are never asked before the owner was: if no question went out in
+    // this silence (the service was down), ask now and ask the friends later.
+    if (notify && !ask && silence.asked === 0) {
+      ask = run.events.filter((e) => (e.kind === 'due' || e.kind === 'reminder') && e.at >= run.lastSign).pop();
+    }
+    // The owner gets at least the time the schedule leaves between two questions.
+    const gap = (record.config.graceDays / (record.config.reminders + 1)) * DAY;
+    const friendsNow = notify && !ask && silence.asked > 0 && now - silence.lastAt >= gap - 1000;
+    const toSend = [...(ask ? [ask] : []), ...(friendsNow ? [notify] : [])];
     const checkinToken = await rotateCheckin(deps, record);
     for (const e of toSend) {
+      if (e.kind !== 'notify') {
+        silence.asked++;
+        silence.lastAt = now;
+      }
       if (e.kind === 'due') {
         await deps.mailer.send({
           to: record.owner.email,
@@ -397,14 +442,14 @@ export async function tick(deps: Deps): Promise<{ sent: number }> {
         const jarLinks = await rotateJarLinks(deps, record);
         for (const [i, h] of record.holders.entries()) {
           if (h.removed) continue;
-          const m = holderMessage(record.owner.name, h.name, { days: e.at - run.lastSign, reminders: record.config.reminders });
+          const m = holderMessage(record.owner.name, h.name, { days: (now - record.confirmedAt) / DAY - run.lastSign, asked: silence.asked });
           await deps.mailer.send({
             to: h.email,
             subject: m.subject,
             text:
               `${m.body}\n${whatToDo(deps, record, h, jarLinks[i]!)}\n\n` +
               `— Phylactery, the check-in ${first} set up\n\n` +
-              `Don't know ${record.owner.name}, or would rather not be asked again? ${link(deps, 'optout', optouts[i]!)}\n`,
+              `Would rather not be asked again? ${link(deps, 'optout', optouts[i]!)}\n`,
           });
         }
         await deps.mailer.send({
@@ -415,7 +460,8 @@ export async function tick(deps: Deps): Promise<{ sent: number }> {
       }
       sent++;
     }
-    record.sent.push(...due.map((e) => `${e.kind}:${e.at.toFixed(5)}`));
+    // Questions that were due are done (the latest was sent); the friends' turn waits until it really happened.
+    record.sent.push(...questions.map((e) => `${e.kind}:${e.at.toFixed(5)}`), ...(friendsNow ? [`notify:${notify.at.toFixed(5)}`] : []));
     await deps.store.put(record);
   }
   return { sent };
@@ -449,7 +495,7 @@ function whatToDo(deps: Deps, record: WatchRecord, holder: Holder, jarToken: str
     : `Open the jar file ${first} gave you (or ${base}#/seance), and each offer your card.`;
   return (
     asked +
-    `If you learn that ${first} has passed away: ${first} left words for the people close to them in a locked jar, and you hold one of its cards. ${who} ${how}\n\n` +
+    `If you learn that ${first} has passed away: ${first} left words for the people close to them in a locked jar, and you hold one of its cards (a printed page titled "${record.owner.name}'s jar" with 30 numbered words). ${who} ${how}\n\n` +
     `Until then, keep your card safe.`
   );
 }

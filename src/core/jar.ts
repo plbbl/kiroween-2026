@@ -31,7 +31,8 @@ import {
 
 export const JAR_FORMAT = 'phylactery.jar/1';
 
-export type AccountWish = 'close' | 'memorialize' | 'keep' | 'hand-over';
+/** 'decide' leaves it to the circle; it is the default, so nothing is closed by accident. */
+export type AccountWish = 'decide' | 'close' | 'memorialize' | 'keep' | 'hand-over';
 
 export interface Account {
   service: string;

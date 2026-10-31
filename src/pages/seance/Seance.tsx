@@ -380,6 +380,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
               <h2 className="center">{offered.length === 0 ? 'Who’s here first?' : `${capitalised(numberWord(remaining))} more to go`}</h2>
               {demo && <DemoTable jar={jar} offered={offered} buddies={buddies} onOffer={offer} />}
               <CardInput kind="shard" onCard={(t) => offer(t)} />
+              <p className="faint far-away">Someone far away? They can read you the 30 words on their card over the phone.</p>
               {failure && (
                 <p className="error" role="alert">
                   {failure}
@@ -395,9 +396,10 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
                 </span>
               </p>
             )}
-            {!demo && (
+
+            {!demo && !onLeave && (
               <p className="center faint owner-link">
-                Is this your jar, {first}? <a href={`${href('seal')}?update`}>Change what’s inside</a> with your key.
+                Sealed this jar yourself? <a href={`${href('seal')}?update`}>Update it with your key</a>.
               </p>
             )}
             {onLeave && (

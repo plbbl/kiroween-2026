@@ -105,7 +105,7 @@ export function LinkAction({ params }: { params: URLSearchParams }) {
     if (action === 'confirm') {
       mood = 'happy';
       title = 'You’re all set!';
-      body = `We’ll ask “still here?” about every ${view.config.cadenceDays === 1 ? 'day' : `${view.config.cadenceDays} days`}. The first time will be ${day(view.nextAsk)}.`;
+      body = `We’ll ask “still here?” about every ${view.config.cadenceDays === 1 ? 'day' : `${view.config.cadenceDays} days`}. The first time will be ${day(view.nextAsk)}. Keep the email we sent: its manage link is your way back here.`;
     } else if (action === 'here') {
       mood = 'happy';
       title = `Thank you, ${firstName(view.owner)}!`;
@@ -210,14 +210,18 @@ interface PersonDraft {
 
 /** Start a real watch. Shown only where the service is running. */
 export function StartWatch({ config }: { config: WatchConfig }) {
-  const [owner, setOwner] = useState<PersonDraft>({ name: '', email: '' });
-  const [friends, setFriends] = useState<PersonDraft[]>([
-    { name: '', email: '' },
-    { name: '', email: '' },
-  ]);
+  // Coming from a jar just sealed: its names are already known; only the emails are new.
+  const handed = jarHandoff.peek();
+  const [owner, setOwner] = useState<PersonDraft>({ name: handed?.owner ?? '', email: '' });
+  const [friends, setFriends] = useState<PersonDraft[]>(() =>
+    handed ? handed.holders.slice(0, 10).map((h) => ({ name: h.name, email: '' })) : [
+      { name: '', email: '' },
+      { name: '', email: '' },
+    ],
+  );
   const [state, setState] = useState<'idle' | 'sending' | 'sent'>('idle');
   const [error, setError] = useState('');
-  const [jar, setJar] = useState<JarFile | null>(() => jarHandoff.peek());
+  const [jar, setJar] = useState<JarFile | null>(handed);
   const [keep, setKeep] = useState(true);
 
   const filled = friends.filter((f) => f.name.trim() || f.email.trim());
@@ -255,8 +259,8 @@ export function StartWatch({ config }: { config: WatchConfig }) {
       <p className="tag">for real</p>
       <h2 id="start-title">Start your watch</h2>
       <p className="muted">
-        Uses the rhythm above. We keep names, emails and times, and a locked copy of your jar only if you choose. Pause or delete it any time from
-        the link we send.
+        It uses your rhythm<span className="rhythm-where"> (beside this)</span>. We keep names, emails and times, and a locked copy of your jar only if you choose. Pause
+        or delete it any time from the link we send.
       </p>
       <div className="person-grid">
         <label className="field">
@@ -288,7 +292,7 @@ export function StartWatch({ config }: { config: WatchConfig }) {
             <input type="checkbox" checked={keep} onChange={(e) => setKeep(e.target.checked)} />
             <span>
               Keep a locked copy of {jar.owner}’s jar{versionOf(jar) > 1 ? ` (version ${versionOf(jar)})` : ''}. If your friends are ever asked, each
-              gets a link to it, so no one has to keep the file for years. Without their cards it can’t be read, by us or anyone.
+              gets a link to it, so no one has to keep the file for years. Without their cards (or your key) it can’t be read, by us or anyone.
             </span>
           </label>
         ) : (

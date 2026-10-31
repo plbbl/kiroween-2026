@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import type { Buddy, Emblem } from '../../core/buddy.ts';
 import { CardError, parseCard } from '../../core/cards.ts';
 import { openLetter, type JarFile, type JarHolder, type Letter, type OpenedJar } from '../../core/jar.ts';
@@ -9,10 +9,11 @@ import { Ghost, GhostHand } from '../../ui/art/Ghost.tsx';
 import { Jar } from '../../ui/art/Jar.tsx';
 import { WaxSeal, initialsOf } from '../../ui/art/WaxSeal.tsx';
 import { CardInput } from '../../ui/components/CardInput.tsx';
-import { href } from '../../ui/shell.tsx';
+import { href, useLeaveWarning } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
 
 const WISH_LABELS: Record<string, string> = {
+  decide: 'Up to you',
   close: 'Close it',
   memorialize: 'Keep as a memorial',
   keep: 'Keep it running',
@@ -56,9 +57,17 @@ export function Reveal({ jar, opened, circle, buddies }: { jar: JarFile; opened:
   const first = jar.owner.split(/\s+/)[0] ?? jar.owner;
   const wishes = WISHES.filter(([k]) => c.wishes[k].trim());
   const letters = jar.holders.filter((h) => h.hasLetter);
+  // An open jar can only be opened again with the cards: leaving asks first.
+  const [closing, setClosing] = useState(false);
+  useLeaveWarning(
+    isDemo(jar) || closing ? null : `Leaving closes ${first}’s jar. To read it again, the cards would be needed again. Leave anyway?`,
+  );
+  useEffect(() => {
+    if (closing) window.location.reload();
+  }, [closing]);
 
   return (
-    <div className="page reveal-page">
+    <div className="page reveal-page print-self">
       <header className="narrow center reveal-head">
         <div className="reveal-jar">
           <Jar initials={initialsOf(jar.owner)} state="open" wax="broken" warmth={1} notes={false} size={150} label={`${first}’s jar, open`} />
@@ -155,23 +164,34 @@ export function Reveal({ jar, opened, circle, buddies }: { jar: JarFile; opened:
                 <a className="btn primary" href={href('seal')}>
                   Seal your own jar
                 </a>
-                <a className="btn" href={`${href('guides')}#after`}>
+                <a className="btn" href={`${href('guides')}#after`} target="_blank" rel="noopener">
                   For the days that follow
                 </a>
               </div>
             </>
           ) : (
             <>
-              <p className="muted">There is a gentle checklist for the days that follow.</p>
+              <p className="muted">There is a gentle checklist for the days that follow. It opens in a new tab, so this stays open.</p>
               <div className="row centered">
-                <a className="btn primary" href={`${href('guides')}#after`}>
+                <a className="btn primary" href={`${href('guides')}#after`} target="_blank" rel="noopener">
                   For the days that follow
                 </a>
-                <button type="button" className="btn" onClick={() => window.location.reload()}>
-                  Close the jar
+                <button type="button" className="btn" onClick={() => window.print()}>
+                  Print what {first} left
                 </button>
               </div>
-              <p className="faint">Closing forgets everything that was opened. Nothing was saved.</p>
+              <p className="faint">
+                Nothing was saved.{' '}
+                <button
+                  type="button"
+                  className="text-btn quiet"
+                  onClick={() => {
+                    if (window.confirm(`Close ${first}’s jar? To read it again, the cards would be needed again.`)) setClosing(true);
+                  }}
+                >
+                  Close the jar
+                </button>
+              </p>
             </>
           )}
         </section>
@@ -252,13 +272,9 @@ function Letters({ jar, opened, holders, buddies }: { jar: JarFile; opened: Open
       )}
 
       {order.map((h) => {
-        const buddy = buddies.get(h.x)!;
         const letter = read[h.x]!;
         return (
           <article key={h.x} id={`letter-${h.x}`} className="letter">
-            <span className="letter-buddy">
-              <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} mood="happy" size={64} float />
-            </span>
             <p className="paper-tag">for {letter.to}</p>
             <Paragraphs text={letter.text} start={900} step={260} />
           </article>

@@ -105,11 +105,11 @@ const firstOf = (name: string) => name.trim().split(/\s+/)[0] ?? name;
  * The words holders receive. It asks them to look in on someone, with how
  * long the silence has been; it never says anyone has died.
  */
-export function holderMessage(owner: string, holder: string, silence?: { days: number; reminders: number }): { subject: string; body: string } {
+export function holderMessage(owner: string, holder: string, silence?: { days: number; asked: number }): { subject: string; body: string } {
   const first = firstOf(owner);
   const quiet = silence
-    ? `We have not heard from ${first} for ${Math.round(silence.days)} days, and ${silence.reminders === 1 ? 'a reminder' : `${silence.reminders} reminders`} went unanswered.`
-    : `We have not heard from ${first} for a while, and our reminders went unanswered.`;
+    ? `We have not heard from ${first} for ${Math.round(silence.days)} days, and ${silence.asked === 1 ? 'our message' : `${silence.asked} messages from us`} went unanswered.`
+    : `We have not heard from ${first} for a while, and our messages went unanswered.`;
   return {
     subject: `Please check on ${owner}`,
     body:

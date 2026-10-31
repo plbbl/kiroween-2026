@@ -99,6 +99,8 @@ export function Watch({ params }: { params: URLSearchParams }) {
 
   // Opened from an emailed link: that link is the page; the preview follows.
   const linked = !!linkActionOf(params);
+  // Where the watch service runs, starting a real watch comes first, beside the rhythm it will use.
+  const realFirst = service === true && !linked;
 
   return (
     <div className="page watch-page">
@@ -139,13 +141,13 @@ export function Watch({ params }: { params: URLSearchParams }) {
             onChange={(cadenceDays) => setConfig({ ...config, cadenceDays })}
           />
           <Segmented
-            label="Then wait"
+            label="Wait for my answer"
             value={config.graceDays}
             options={[2, 4, 7, 14].map((v) => ({ value: v, label: `${v}d` }))}
             onChange={(graceDays) => setConfig({ ...config, graceDays })}
           />
           <Segmented
-            label="Reminding me"
+            label="Remind me"
             value={config.reminders}
             options={[1, 2, 3, 5].map((v) => ({ value: v, label: `${v}×` }))}
             onChange={(reminders) => setConfig({ ...config, reminders })}
@@ -157,6 +159,12 @@ export function Watch({ params }: { params: URLSearchParams }) {
         </div>
 
         <div className="watch-main">
+          {realFirst && (
+            <>
+              <StartWatch config={config} />
+              <h2 className="section-title how-title">See how it works</h2>
+            </>
+          )}
           <div className="card timeline">
             <div className="spread">
               <h2 className="card-title">
@@ -236,15 +244,14 @@ export function Watch({ params }: { params: URLSearchParams }) {
               </ol>
             )}
             <p className="inbox-foot faint">
-              A preview with June’s demo jar: nothing here is really sent. A real watch only ever knows names, email addresses and times, never what is
-              inside a jar.
+              A preview with June’s demo jar: nothing here is really sent. A real watch knows names, email addresses and times, never what your jar
+              says.
             </p>
           </section>
         </div>
       </section>
 
       <div className="narrow service">
-        {service === true && <StartWatch config={config} />}
         {service === false && (
           <p className="note">
             <Ghost size={30} mood="sleep" />
@@ -294,7 +301,7 @@ function Message({ event, of, silentDays, afterNotify = false }: { event: WatchE
       </li>
     );
   }
-  const m = holderMessage(OWNER, HOLDERS[0]!, { days: silentDays, reminders: of });
+  const m = holderMessage(OWNER, HOLDERS[0]!, { days: silentDays, asked: of + 1 });
   return (
     <li className="msg to-friends pop">
       <span className="msg-meta">

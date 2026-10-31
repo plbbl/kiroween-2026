@@ -69,6 +69,8 @@ export function BuddyCard({
 
 interface PrintProps {
   owner: string;
+  /** Everyone who holds a card, so each card says who to gather with. */
+  circle: string[];
   card: HolderCards;
   buddy: Buddy;
   index: number;
@@ -98,7 +100,10 @@ function WordGrid({ words, columns }: { words: string[]; columns: number }) {
   );
 }
 
-function ShardFace({ owner, card, buddy, index, total, threshold }: PrintProps) {
+const listNames = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : (names[0] ?? ''));
+
+function ShardFace({ owner, circle, card, buddy, index, total, threshold }: PrintProps) {
+  const first = owner.split(/\s+/)[0];
   return (
     <section className="card-face" aria-label={`Card for ${card.name}`}>
       <header className="card-head">
@@ -113,16 +118,17 @@ function ShardFace({ owner, card, buddy, index, total, threshold }: PrintProps) 
           <p className="card-held">Kept by</p>
           <p className="card-name">{card.name}</p>
           <p className="card-rule">
-            Any {numberWord(threshold)} of the {numberWord(total)} cards open the jar. Fewer reveal nothing.
+            {listNames(circle.map((n) => n.split(/\s+/)[0]!))} each hold one of {numberWord(total)} cards. Any {numberWord(threshold)} of you, together,
+            open the jar. Fewer reveal nothing.
           </p>
         </div>
         <Qr text={cardToQrText(card.shard)} size={128} label={`Code for ${card.name}'s card`} />
       </div>
       <WordGrid words={cardToWords(card.shard)} columns={5} />
       <footer className="card-foot">
-        When the time comes, gather with the others and open {owner.split(/\s+/)[0]}’s jar file
-        {homeAddress() ? `, or go to ${homeAddress()} and choose Séance` : ', or any copy of Phylactery'}, then each offer your card. Keep this card safe,
-        like a house key. Never post a photo of it.
+        You also need {first}’s jar file, which {first} emails to each of you (keep that email). When the time comes, gather, open it
+        {homeAddress() ? ` (or ${homeAddress()}, then Séance)` : ''}, and each offer your card. Keep this card safe, like a house key. Never post a photo
+        of it.
       </footer>
     </section>
   );
@@ -139,11 +145,11 @@ function SealFace({ owner, card, buddy }: PrintProps) {
       <div className="card-body">
         <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} size={70} line mood="wink" title={`${card.name}'s ghost, winking`} />
         <div className="card-who">
-          <p className="card-name small">{card.hasLetter ? `${first} wrote you a letter.` : `In case ${first} writes you a letter.`}</p>
+          <p className="card-name small">{card.hasLetter ? `${first} wrote you a letter.` : 'For a letter, now or later.'}</p>
           <p className="card-rule">
             {card.hasLetter
               ? 'Once the jar is open, this seal opens your letter. Keep it folded. Show no one.'
-              : `${first} can add one later. This seal would open it, so keep it folded with your card.`}
+              : `If ${first} leaves you a private letter, this half opens it once the jar is open. Keep it folded with your card.`}
           </p>
         </div>
         <Qr text={cardToQrText(card.seal)} size={104} label={`Code for ${card.name}'s seal`} />

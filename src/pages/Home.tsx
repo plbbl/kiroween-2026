@@ -66,7 +66,7 @@ export function Home() {
               Phylactery
             </h1>
             <p className="hero-sub rise" style={d(380)}>
-              Write it. Seal it in a jar. Only your friends, together, can open it.
+              Leave your passwords, papers and last words in a jar that only your friends, together, can open.
             </p>
             <div className="row centered rise" style={d(520)}>
               <a className="btn on-purple" href={href('seal')}>
@@ -76,6 +76,9 @@ export function Home() {
                 Try a séance
               </a>
             </div>
+            <p className="hero-trust rise" style={d(620)}>
+              Free · No account · Locked in your browser
+            </p>
           </div>
           <div className="hero-altar">
             <div className="hero-jar pop" style={d(650)}>
@@ -140,8 +143,8 @@ export function Home() {
             <span className="promise-icon" style={{ background: '#ffe7f1', color: '#e0457a' }}>
               <EmblemIcon name="heart" size={26} />
             </span>
-            <h3>Nothing leaves your hands</h3>
-            <p className="muted">No account, no tracking. Your words are locked in your browser before anything is saved.</p>
+            <h3>Nothing leaves unlocked</h3>
+            <p className="muted">Free, no account, no tracking. Your words are locked in your browser before anything is saved or sent.</p>
           </div>
           <div className="promise">
             <span className="promise-icon" style={{ background: '#fff3d6', color: '#e39a14' }}>
@@ -165,7 +168,7 @@ export function Home() {
       </section>
 
       <footer className="footer center faint">
-        Open source under MIT · Made for Kiroween 2026 · No analytics, no tracking · Your jar is never uploaded
+        Free and open source (MIT) · No account, no analytics, no tracking · Your jar never leaves your device unlocked
       </footer>
     </div>
   );

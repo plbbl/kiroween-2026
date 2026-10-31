@@ -187,20 +187,12 @@ a {
 /* A label that reads like Kiroween's {2026}. */
 .tag {
   display: inline-block;
-  font-family: var(--mono);
-  font-size: 0.82rem;
-  letter-spacing: 0.02em;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--accent);
-}
-
-.tag::before {
-  content: '{ ';
-  opacity: 0.6;
-}
-
-.tag::after {
-  content: ' }';
-  opacity: 0.6;
 }
 
 .lede {
@@ -307,7 +299,8 @@ a {
   gap: 6px;
   padding: 7px 8px 7px 14px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  /* Nearly solid: text scrolling underneath must not show through the menu. */
+  background: color-mix(in srgb, var(--surface) 95%, transparent);
   border: 2px solid var(--line);
   box-shadow: var(--shadow);
   backdrop-filter: blur(14px) saturate(1.4);
@@ -317,7 +310,16 @@ a {
 }
 
 [data-theme='night'] .topbar {
-  background: rgba(30, 20, 52, 0.72);
+  background: rgba(30, 20, 52, 0.94);
+}
+
+/* Anything scrolled to sits below the floating menu. */
+h1,
+h2,
+h3,
+section,
+article {
+  scroll-margin-top: 96px;
 }
 
 .wordmark {
@@ -464,6 +466,14 @@ a {
   --b-edge: rgba(205, 184, 255, 0.28);
 }
 
+/* A taller hit area that moves with the button, so lifting it on hover
+   never slips it out from under the pointer (no flicker at the edge). */
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: -4px -2px -9px;
+}
+
 .btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 7px 0 var(--b-edge);
@@ -556,6 +566,7 @@ a {
 
 input[type='text'],
 input[type='email'],
+input[type='url'],
 input[type='number'],
 select,
 textarea {
