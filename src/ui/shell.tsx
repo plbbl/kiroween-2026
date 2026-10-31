@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { parseJar, type JarFile } from '../core/jar.ts';
 
-export type Route = 'home' | 'seal' | 'watch' | 'seance' | 'guides';
+export type Route = 'home' | 'seal' | 'watch' | 'seance' | 'guides' | 'gallery';
 
-const ROUTES: Route[] = ['home', 'seal', 'watch', 'seance', 'guides'];
+const ROUTES: Route[] = ['home', 'seal', 'watch', 'seance', 'guides', 'gallery'];
 
 function readRoute(): { route: Route; anchor: string } {
   const [path = '', anchor = ''] = window.location.hash.replace(/^#\/?/, '').split('#');
@@ -45,7 +45,7 @@ export function embeddedJar(): JarFile | null {
 
 interface Shell {
   setTheme: (t: 'day' | 'night') => void;
-  setMourning: (px: number) => void;
+  /** 0..1, how much warm candlelight fills the night backdrop. */
   setCandlelight: (v: number) => void;
 }
 
@@ -62,12 +62,11 @@ export function useShell(): Shell {
 }
 
 /** Set the page atmosphere while a page is shown. */
-export function useAtmosphere(theme: 'day' | 'night', mourning = 3) {
+export function useAtmosphere(theme: 'day' | 'night') {
   const shell = useShell();
   useEffect(() => {
     shell.setTheme(theme);
-    shell.setMourning(mourning);
-  }, [shell, theme, mourning]);
+  }, [shell, theme]);
 }
 
 export function prefersReducedMotion(): boolean {

@@ -336,3 +336,58 @@ export function emptyContent(): JarContent {
     wishes: { farewell: '', body: '', dependents: '', other: '' },
   };
 }
+
+function combinations<T>(items: T[], k: number): T[][] {
+  const out: T[][] = [];
+  const pick = (start: number, acc: T[]) => {
+    if (acc.length === k) {
+      out.push(acc);
+      return;
+    }
+    for (let i = start; i <= items.length - (k - acc.length); i++) pick(i + 1, [...acc, items[i]!]);
+  };
+  pick(0, []);
+  return out;
+}
+
+export interface CircleCheck {
+  /** Every group of exactly `threshold` cards that was tried, and all opened it. */
+  opened: number;
+  /** Every group one card short that was tried, and none opened it. */
+  refused: number;
+  ok: boolean;
+}
+
+/**
+ * Prove a freshly sealed jar behaves as promised, before anyone prints a
+ * card: every group of `threshold` cards opens it, and no smaller group does.
+ * At most ten cards, so this is at most a few hundred decryptions.
+ */
+export async function verifyCircle(jar: JarFile, cards: HolderCards[]): Promise<CircleCheck> {
+  const shares = cards.map((c) => c.shard.share);
+  let opened = 0;
+  let refused = 0;
+  let ok = true;
+  for (const group of combinations(shares, jar.threshold)) {
+    try {
+      await unlockWithShares(jar, group);
+      opened++;
+    } catch {
+      ok = false;
+    }
+  }
+  if (jar.threshold - 1 >= 2) {
+    for (const group of combinations(shares, jar.threshold - 1)) {
+      try {
+        await unlockWithShares(jar, group);
+        ok = false;
+      } catch {
+        refused++;
+      }
+    }
+  } else {
+    // One card alone cannot even attempt a reconstruction.
+    refused = shares.length;
+  }
+  return { opened, refused, ok };
+}

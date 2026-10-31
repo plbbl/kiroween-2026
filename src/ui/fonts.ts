@@ -2,22 +2,22 @@
 // and every downloaded jar work offline and leak nothing. Only the Latin
 // subset in woff2 is included to keep the single file small.
 
-import cg500 from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-500-normal.woff2';
-import cg500i from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-500-italic.woff2';
-import cg600 from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-600-normal.woff2';
-import eb400 from '@fontsource/eb-garamond/files/eb-garamond-latin-400-normal.woff2';
-import eb400i from '@fontsource/eb-garamond/files/eb-garamond-latin-400-italic.woff2';
-import eb500 from '@fontsource/eb-garamond/files/eb-garamond-latin-500-normal.woff2';
-import plex400 from '@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2';
+import fredoka500 from '@fontsource/fredoka/files/fredoka-latin-500-normal.woff2';
+import fredoka600 from '@fontsource/fredoka/files/fredoka-latin-600-normal.woff2';
+import mono400 from '@fontsource/fragment-mono/files/fragment-mono-latin-400-normal.woff2';
+import nunito400 from '@fontsource/nunito/files/nunito-latin-400-normal.woff2';
+import nunito400i from '@fontsource/nunito/files/nunito-latin-400-italic.woff2';
+import nunito700 from '@fontsource/nunito/files/nunito-latin-700-normal.woff2';
+import nunito800 from '@fontsource/nunito/files/nunito-latin-800-normal.woff2';
 
 const faces: [family: string, weight: number, style: 'normal' | 'italic', url: string][] = [
-  ['Cormorant Garamond', 500, 'normal', cg500],
-  ['Cormorant Garamond', 500, 'italic', cg500i],
-  ['Cormorant Garamond', 600, 'normal', cg600],
-  ['EB Garamond', 400, 'normal', eb400],
-  ['EB Garamond', 400, 'italic', eb400i],
-  ['EB Garamond', 500, 'normal', eb500],
-  ['IBM Plex Mono', 400, 'normal', plex400],
+  ['Fredoka', 500, 'normal', fredoka500],
+  ['Fredoka', 600, 'normal', fredoka600],
+  ['Nunito', 400, 'normal', nunito400],
+  ['Nunito', 400, 'italic', nunito400i],
+  ['Nunito', 700, 'normal', nunito700],
+  ['Nunito', 800, 'normal', nunito800],
+  ['Fragment Mono', 400, 'normal', mono400],
 ];
 
 export function installFonts(): void {

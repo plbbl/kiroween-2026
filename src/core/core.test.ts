@@ -20,10 +20,11 @@ import {
   parseJar,
   sealJar,
   unlockWithShares,
+  verifyCircle,
   type JarContent,
   type SealInput,
 } from './jar.ts';
-import { sigilSeed, sigilShape } from './sigil.ts';
+import { circleBuddies, COSTUMES, EMBLEMS } from './buddy.ts';
 import { holderMessage, runWatch, type OwnerAction, type WatchConfig } from './watch.ts';
 import { bytesToWords, wordsToBytes } from './words.ts';
 
@@ -154,10 +155,24 @@ describe('cards', () => {
     );
   });
 
-  it('a sigil depends only on the card identity', () => {
+  it('a buddy depends only on the jar and the circle, never on order', () => {
     fc.assert(
-      fc.property(bytes(4, 4), fc.integer({ min: 1, max: 255 }), (jarId, x) => {
-        expect(sigilShape(sigilSeed(jarId, x))).toEqual(sigilShape(sigilSeed(jarId, x)));
+      fc.property(bytes(4, 4), fc.uniqueArray(fc.integer({ min: 1, max: 255 }), { minLength: 2, maxLength: 10 }), (jarId, xs) => {
+        const a = circleBuddies(jarId, xs);
+        const b = circleBuddies(jarId, [...xs].reverse());
+        expect([...a.entries()].sort()).toEqual([...b.entries()].sort());
+      }),
+    );
+  });
+
+  it('buddies in one circle wear different costumes and carry different emblems', () => {
+    fc.assert(
+      fc.property(bytes(4, 4), fc.uniqueArray(fc.integer({ min: 1, max: 255 }), { minLength: 2, maxLength: 10 }), (jarId, xs) => {
+        const buddies = [...circleBuddies(jarId, xs).values()];
+        const costumes = new Set(buddies.map((b) => b.costume));
+        const emblems = new Set(buddies.map((b) => b.emblem));
+        expect(costumes.size).toBe(Math.min(xs.length, COSTUMES.length));
+        expect(emblems.size).toBe(Math.min(xs.length, EMBLEMS.length));
       }),
     );
   });
@@ -298,6 +313,18 @@ describe('jar', () => {
     const { jar, cards } = await sealJar(fc.sample(sealInputArb, 1)[0]!);
     const back = parseJar(JSON.stringify(jar));
     await expect(openJar(back, cards.slice(0, back.threshold).map((c) => c.shard))).resolves.toBeDefined();
+  });
+
+  it('the self-check after sealing passes for every circle', async () => {
+    await fc.assert(
+      fc.asyncProperty(sealInputArb, async (input) => {
+        const { jar, cards } = await sealJar(input);
+        const check = await verifyCircle(jar, cards);
+        expect(check.ok).toBe(true);
+        expect(check.opened).toBeGreaterThan(0);
+      }),
+      { numRuns: 15 },
+    );
   });
 
   it('rejects impossible circles', async () => {
