@@ -141,7 +141,9 @@ function CameraScanner({ onCode, disabled }: { onCode: (text: string) => Promise
   const stream = useRef<MediaStream | null>(null);
   // The scan loop reads the latest callback without restarting the camera.
   const latest = useRef({ onCode, disabled });
-  latest.current = { onCode, disabled };
+  useEffect(() => {
+    latest.current = { onCode, disabled };
+  }, [onCode, disabled]);
 
   const stop = () => {
     stream.current?.getTracks().forEach((t) => t.stop());

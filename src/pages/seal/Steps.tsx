@@ -4,7 +4,7 @@ import type { Account, AccountWish, DocumentPlace, JarContent } from '../../core
 import { Candle } from '../../ui/art/Candle.tsx';
 import { EmblemIcon } from '../../ui/art/Emblem.tsx';
 import { Ghost } from '../../ui/art/Ghost.tsx';
-import { capitalised, numberWord } from '../../ui/components/Cards.tsx';
+import { capitalised, numberWord } from '../../ui/text.ts';
 import { sound } from '../../ui/sound.ts';
 
 export interface HolderDraft {

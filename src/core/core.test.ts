@@ -56,7 +56,7 @@ describe('encodings', () => {
         const wordlistWord = bytesToWords(Uint8Array.of(replacement >> 3, (replacement & 7) << 5))[0]!;
         if (wordlistWord === words[i]) return;
         words[i] = wordlistWord;
-        let decoded: Uint8Array | null = null;
+        let decoded: Uint8Array;
         try {
           decoded = wordsToBytes(words, b.length);
         } catch {

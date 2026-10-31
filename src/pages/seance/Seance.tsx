@@ -8,7 +8,8 @@ import { Sparkles } from '../../ui/art/Decor.tsx';
 import { Ghost } from '../../ui/art/Ghost.tsx';
 import { Jar, type JarState } from '../../ui/art/Jar.tsx';
 import { initialsOf, type WaxState } from '../../ui/art/WaxSeal.tsx';
-import { BuddyCard, capitalised, numberWord } from '../../ui/components/Cards.tsx';
+import { BuddyCard } from '../../ui/components/Cards.tsx';
+import { capitalised, numberWord } from '../../ui/text.ts';
 import { CardInput } from '../../ui/components/CardInput.tsx';
 import { useAtmosphere, useShell, wait } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
@@ -176,8 +177,11 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
   const [burst, setBurst] = useState(0);
   const [flight, setFlight] = useState<Flight | null>(null);
   const candleRefs = useRef<(HTMLDivElement | null)[]>([]);
+  // The latest circle, readable from callbacks without re-creating them.
   const offeredRef = useRef<Offered[]>([]);
-  offeredRef.current = offered;
+  useEffect(() => {
+    offeredRef.current = offered;
+  }, [offered]);
 
   const k = jar.threshold;
   const demo = isDemo(jar);

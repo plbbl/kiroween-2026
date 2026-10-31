@@ -13,7 +13,9 @@
   --lilac-soft: #f7f3ff;
   --ink: #1a1420;
   --ink-soft: #5d5170;
-  --ink-faint: #8f84a3;
+  --ink-faint: #716787;
+  /* Purple for text: the brand purple is a little light for small type on lilac. */
+  --purple-text: #7a35e8;
   --ghost: #f8f6f2;
   --franken: #c9cd98;
   --pumpkin: #ff8f3f;
@@ -42,7 +44,7 @@
   --surface-2: #faf7ff;
   --line: #e9dfff;
   --line-strong: #d9c8ff;
-  --accent: var(--purple);
+  --accent: var(--purple-text);
   --shadow: 0 18px 40px -24px rgba(74, 28, 160, 0.35);
   color-scheme: light;
 }
@@ -601,7 +603,7 @@ select {
 }
 
 .error {
-  color: #d93a6a;
+  color: #b0285a;
   font-weight: 700;
 }
 
@@ -1229,7 +1231,7 @@ select {
     gap: 2px;
   }
 
-  .wordmark span {
+  .wordmark > span:last-child {
     display: none;
   }
 

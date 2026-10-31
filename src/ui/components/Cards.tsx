@@ -3,17 +3,8 @@ import type { Buddy } from '../../core/buddy.ts';
 import { cardToQrText, cardToWords } from '../../core/cards.ts';
 import type { HolderCards } from '../../core/jar.ts';
 import { Ghost } from '../art/Ghost.tsx';
+import { numberWord } from '../text.ts';
 import { Qr } from './Qr.tsx';
-
-const NUMBER_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
-
-export function numberWord(n: number): string {
-  return NUMBER_WORDS[n] ?? String(n);
-}
-
-export function capitalised(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
 
 /** The card as it appears on screen: a little ghost and a name. */
 export function BuddyCard({

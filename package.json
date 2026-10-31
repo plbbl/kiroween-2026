@@ -13,7 +13,9 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "demo:jar": "node --experimental-strip-types scripts/make-demo-jar.ts",
-    "e2e": "node e2e/run.mjs"
+    "e2e": "node e2e/run.mjs",
+    "lint": "eslint .",
+    "check": "npm run typecheck && npm run lint && npm test && npm run build && npm run e2e"
   },
   "dependencies": {
     "@fontsource/fragment-mono": "5.3.0",
@@ -28,12 +30,18 @@
     "shamir-secret-sharing": "0.0.4"
   },
   "devDependencies": {
+    "@eslint/js": "10.0.1",
     "@types/qrcode": "1.5.6",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.2",
+    "axe-core": "4.14.0",
+    "eslint": "10.14.0",
+    "eslint-plugin-react-hooks": "7.1.1",
     "fast-check": "4.10.2",
+    "globals": "17.13.0",
     "typescript": "5.9.3",
+    "typescript-eslint": "8.72.1",
     "vite": "8.3.5",
     "vite-plugin-singlefile": "2.3.4",
     "vitest": "5.0.5"

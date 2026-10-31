@@ -12,7 +12,9 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 // Playwright may be installed globally rather than in this project.
-const { chromium } = createRequire(import.meta.url)('playwright');
+const require = createRequire(import.meta.url);
+const { chromium } = require('playwright');
+const axeSource = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
@@ -37,10 +39,25 @@ const shot = (name, full = true) => page.screenshot({ path: join(shots, `${name}
 const settle = (ms = 1500) => page.waitForTimeout(ms);
 const next = () => page.getByRole('button', { name: /^(Next|Almost done)/ }).click();
 
+// Accessibility: no serious or critical WCAG 2 A/AA violations on key screens.
+const audits = [];
+async function audit(pg, name) {
+  await pg.addScriptTag({ content: axeSource });
+  const violations = await pg.evaluate(async () => {
+    // eslint-disable-next-line no-undef
+    const r = await axe.run(document, { runOnly: ['wcag2a', 'wcag2aa'] });
+    return r.violations
+      .filter((v) => v.impact === 'serious' || v.impact === 'critical')
+      .map((v) => `${v.id} (${v.nodes.length}): ${v.nodes.slice(0, 2).map((n) => n.target.join(' ')).join(' | ')}`);
+  });
+  audits.push(...violations.map((v) => `${name}: ${v}`));
+}
+
 // Home
 await page.goto(app);
 await settle(2600);
 await shot('01-home');
+await audit(page, 'home');
 check(await page.getByRole('heading', { name: 'Phylactery' }).isVisible(), 'home shows the title');
 
 // Seal a jar
@@ -48,6 +65,7 @@ await page.goto(`${app}#/seal`);
 await settle(900);
 await page.getByLabel('Your name').fill('Ada Lovelace');
 await shot('02-seal-name', false);
+await audit(page, 'seal');
 await next();
 await settle(500);
 await page.getByLabel('Your note to everyone').fill('If you are reading this, thank you for coming.\n\nBe gentle with each other.');
@@ -74,6 +92,7 @@ await page.getByPlaceholder('Dear Charles,').fill('Dear Charles,\n\nThe engine w
 await page.getByRole('radio', { name: '2 cards' }).click();
 await settle(1200);
 await shot('06-seal-circle');
+await audit(page, 'seal circle');
 await next();
 await settle(900);
 await shot('07-seal-press', false);
@@ -82,6 +101,7 @@ await page.getByRole('heading', { name: /Sealed!/ }).waitFor({ timeout: 10000 })
 await page.getByText(/^Checked:/).waitFor({ timeout: 10000 });
 await settle(2200);
 await shot('08-sealed');
+await audit(page, 'sealed');
 check(await page.getByText('Three cards were made. Any two of them open the jar.').isVisible(), 'sealing makes three cards');
 check(await page.getByText('Checked: all 3 groups of two open it, and no one can alone.').isVisible(), 'the self-check proves every pair opens it');
 
@@ -130,6 +150,7 @@ await shot('10-seance-choose');
 await page.getByRole('button', { name: /June’s jar/ }).click();
 await settle(1800);
 await shot('11-seance-circle');
+await audit(page, 'seance');
 const table = page.locator('.demo-card');
 await table.nth(0).click();
 await settle(1600);
@@ -145,6 +166,7 @@ await shot('13-seance-waking', false);
 await page.getByText(/opened by/).waitFor({ timeout: 15000 });
 await settle(3000);
 await shot('14-reveal');
+await audit(page, 'reveal');
 check(await page.getByText('If you are reading this, you found each other.').isVisible(), 'the demo jar opens with three cards');
 await page.getByRole('button', { name: 'Open with Clara’s seal' }).click();
 await page.getByRole('button', { name: /from the demo/ }).first().click();
@@ -157,6 +179,7 @@ check(await page.getByText('I always thought you were the brave one.').isVisible
 await page.goto(`${app}#/watch`);
 await settle(1200);
 await shot('16-watch');
+await audit(page, 'watch');
 await page.getByRole('button', { name: 'Let time pass' }).click();
 await page.getByText('I’ve asked your friends to check on you.').waitFor({ timeout: 30000 });
 await page.getByRole('button', { name: 'Pause time' }).click();
@@ -170,6 +193,7 @@ await settle(1200);
 await page.locator('.check').first().click();
 await settle(600);
 await shot('18-guides');
+await audit(page, 'guides');
 
 // Phone
 const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true });
@@ -189,6 +213,8 @@ await p.screenshot({ path: join(shots, '21-phone-seal.png'), fullPage: true });
 
 await browser.close();
 
+for (const a of audits) console.log(`  a11y: ${a}`);
+check(audits.length === 0, `no serious accessibility violations (${audits.length})`);
 check(errors.length === 0, `no page errors${errors.length ? `: ${errors.join(' | ')}` : ''}`);
 writeFileSync(join(shots, 'result.txt'), failures.length ? failures.join('\n') : 'all passed');
 if (failures.length) {

@@ -5,7 +5,8 @@ import { Sparkles } from '../../ui/art/Decor.tsx';
 import { EmblemIcon } from '../../ui/art/Emblem.tsx';
 import { Jar } from '../../ui/art/Jar.tsx';
 import { initialsOf } from '../../ui/art/WaxSeal.tsx';
-import { BuddyCard, capitalised, numberWord, PrintableCard } from '../../ui/components/Cards.tsx';
+import { BuddyCard, PrintableCard } from '../../ui/components/Cards.tsx';
+import { capitalised, numberWord } from '../../ui/text.ts';
 import { canMakeGrimoire, download, makeGrimoire, safeFilename } from '../../ui/grimoire.ts';
 import { href } from '../../ui/shell.tsx';
 

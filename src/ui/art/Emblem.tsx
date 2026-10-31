@@ -41,7 +41,7 @@ export function Emblem({ name, size = 20, color = 'currentColor' }: { name: Embl
 
 export function EmblemIcon({ name, size = 18, color = 'currentColor', title }: { name: EmblemName; size?: number; color?: string; title?: string }) {
   return (
-    <svg viewBox="0 0 20 20" width={size} height={size} role="img" aria-label={title ?? name}>
+    <svg viewBox="0 0 20 20" width={size} height={size} {...(title === '' ? { 'aria-hidden': true } : { role: 'img', 'aria-label': title ?? name })}>
       <Emblem name={name} color={color} />
     </svg>
   );

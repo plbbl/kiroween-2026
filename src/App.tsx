@@ -31,7 +31,7 @@ function SoundIcon({ on }: { on: boolean }) {
 }
 
 export function App() {
-  const embedded = useMemo(embeddedJar, []);
+  const embedded = useMemo(() => embeddedJar(), []);
   const { route: hashRoute, anchor } = useHashRoute();
   // A downloaded Grimoire opens straight into its séance.
   const route: Route = embedded && hashRoute === 'home' ? 'seance' : hashRoute;

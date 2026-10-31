@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { DEFAULT_WATCH, holderMessage, ownerReminder, runWatch, type OwnerAction, type WatchConfig, type WatchEvent, type WatchStatus } from '../core/watch.ts';
 import { DEMO_JAR } from '../demo/demo.ts';
 import { Ghost, type Mood } from '../ui/art/Ghost.tsx';
-import { numberWord } from '../ui/components/Cards.tsx';
+import { numberWord } from '../ui/text.ts';
 import { useAtmosphere } from '../ui/shell.tsx';
 import { sound } from '../ui/sound.ts';
 

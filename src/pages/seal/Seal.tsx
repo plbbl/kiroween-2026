@@ -4,7 +4,7 @@ import { Sparkles } from '../../ui/art/Decor.tsx';
 import { Ghost } from '../../ui/art/Ghost.tsx';
 import { Jar } from '../../ui/art/Jar.tsx';
 import { initialsOf, type WaxState } from '../../ui/art/WaxSeal.tsx';
-import { capitalised, numberWord } from '../../ui/components/Cards.tsx';
+import { capitalised, numberWord, plural } from '../../ui/text.ts';
 import { useAtmosphere, wait } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
 import { Sealed } from './Sealed.tsx';
@@ -178,21 +178,17 @@ export function Seal() {
             {step === 5 && (
               <div className="seal-stage">
                 <ul className="summary" aria-label="What goes in the jar">
-                  <li>
-                    <b>{draft.content.message.trim() ? draft.content.message.trim().split(/\s+/).length : 0}</b> words for everyone
-                  </li>
-                  <li>
-                    <b>{draft.content.accounts.length}</b> accounts
-                  </li>
-                  <li>
-                    <b>{draft.content.documents.length}</b> places
-                  </li>
-                  <li>
-                    <b>{Object.values(draft.content.wishes).filter((w) => w.trim()).length}</b> wishes
-                  </li>
-                  <li>
-                    <b>{draft.holders.filter((h) => h.writing && h.letter.trim()).length}</b> private letters
-                  </li>
+                  {[
+                    [draft.content.message.trim() ? draft.content.message.trim().split(/\s+/).length : 0, 'word for everyone', 'words for everyone'],
+                    [draft.content.accounts.length, 'account'],
+                    [draft.content.documents.length, 'place'],
+                    [Object.values(draft.content.wishes).filter((w) => w.trim()).length, 'wish', 'wishes'],
+                    [draft.holders.filter((h) => h.writing && h.letter.trim()).length, 'private letter'],
+                  ].map(([n, one, many]) => (
+                    <li key={one as string}>
+                      <b>{n}</b> {plural(n as number, one as string, many as string | undefined)}
+                    </li>
+                  ))}
                   <li>
                     <b>{capitalised(numberWord(draft.threshold))}</b> of {numberWord(draft.holders.length)} to open
                   </li>
