@@ -127,7 +127,7 @@ export function App() {
       <main id="main">
         <div className="route" key={route}>
           {route === 'home' && <Home />}
-          {route === 'seal' && <Seal />}
+          {route === 'seal' && <Seal params={params} embedded={embedded} />}
           {route === 'watch' && <Watch params={params} />}
           {route === 'seance' && <Seance embedded={embedded} />}
           {route === 'guides' && <Guides anchor={anchor} />}

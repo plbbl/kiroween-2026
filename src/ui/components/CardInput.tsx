@@ -1,12 +1,12 @@
 import jsQR from 'jsqr';
 import { useEffect, useRef, useState } from 'react';
-import { SEAL_WORDS, SHARD_WORDS } from '../../core/cards.ts';
+import { KEY_WORDS, SEAL_WORDS, SHARD_WORDS } from '../../core/cards.ts';
 import { isKnownWord, splitWords, suggest } from '../../core/words.ts';
 
 type Mode = 'words' | 'camera' | 'photo';
 
 interface CardInputProps {
-  kind: 'shard' | 'seal';
+  kind: 'shard' | 'seal' | 'key';
   /** Returns an error message, or null when the card was accepted. */
   onCard: (text: string) => string | null | Promise<string | null>;
   disabled?: boolean;
@@ -37,7 +37,9 @@ export function CardInput({ kind, onCard, disabled = false }: CardInputProps) {
   const [text, setText] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const expected = kind === 'shard' ? SHARD_WORDS : SEAL_WORDS;
+  const expected = kind === 'shard' ? SHARD_WORDS : kind === 'seal' ? SEAL_WORDS : KEY_WORDS;
+  const where = kind === 'shard' ? 'on the outside of the card' : kind === 'seal' ? 'on the inside, your seal' : 'on your key';
+  const action = kind === 'shard' ? 'Offer this card' : kind === 'seal' ? 'Break this seal' : 'Use my key';
 
   const submit = async (value: string) => {
     if (busy) return false;
@@ -86,7 +88,7 @@ export function CardInput({ kind, onCard, disabled = false }: CardInputProps) {
         >
           <label className="field">
             <span>
-              The {expected} words on the {kind === 'shard' ? 'outside of the card' : 'inside, your seal'}
+              The {expected} words {where}
             </span>
             <textarea
               className="mono-input"
@@ -121,7 +123,7 @@ export function CardInput({ kind, onCard, disabled = false }: CardInputProps) {
             )}
           </div>
           <button className="btn primary" type="submit" disabled={disabled || busy || words.length !== expected}>
-            {kind === 'shard' ? 'Offer this card' : 'Break this seal'}
+            {action}
           </button>
         </form>
       )}

@@ -2,7 +2,7 @@
 // inside it. It runs without a network and can be kept anywhere, because
 // the jar in it is encrypted.
 
-import type { JarFile } from '../core/jar.ts';
+import { parseJar, type JarFile } from '../core/jar.ts';
 
 let pristine: string | null = null;
 
@@ -38,6 +38,12 @@ export function makeGrimoire(jar: JarFile): string {
   return pristine
     .replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(jar.owner)}’s jar · Phylactery</title>`)
     .replace(/<head>/i, `<head>\n${head}`);
+}
+
+/** Read a jar from a jar file (this app as HTML) or from its bare JSON. */
+export function jarFromText(text: string): JarFile {
+  const inner = /<script id="phylactery-jar" type="application\/json">([\s\S]*?)<\/script>/.exec(text)?.[1];
+  return parseJar(inner ?? text);
 }
 
 export function download(filename: string, text: string, type: string): void {

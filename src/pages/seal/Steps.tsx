@@ -5,6 +5,7 @@ import { Candle } from '../../ui/art/Candle.tsx';
 import { EmblemIcon } from '../../ui/art/Emblem.tsx';
 import { Ghost } from '../../ui/art/Ghost.tsx';
 import { capitalised, numberWord } from '../../ui/text.ts';
+import { href } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
 
 export interface HolderDraft {
@@ -35,6 +36,9 @@ export function StepName({ draft, setOwner }: { draft: Draft; setOwner: (s: stri
       <p className="note">
         <Ghost size={30} mood="wink" />
         <span>Nothing is saved until you seal the jar. If you close this page, your words vanish. That is on purpose.</span>
+      </p>
+      <p className="faint update-link">
+        Sealed one before? <a href={`${href('seal')}?update`}>Change what’s inside</a> with your key.
       </p>
     </>
   );
@@ -191,7 +195,12 @@ export function StepWishes({ content, setContent }: { content: JarContent; setCo
   );
 }
 
-export function StepCircle({ draft, setDraft }: { draft: Draft; setDraft: (d: Draft) => void }) {
+/**
+ * `locked` when updating a jar: the circle and the threshold are part of
+ * every printed card, so only the letters can change; `costumes` are then
+ * the real buddies on those cards.
+ */
+export function StepCircle({ draft, setDraft, locked = false, costumes = PREVIEW_COSTUMES }: { draft: Draft; setDraft: (d: Draft) => void; locked?: boolean; costumes?: Costume[] }) {
   const n = draft.holders.length;
   const key = (name: string) => name.trim().toLowerCase();
   const twice = (name: string) => !!key(name) && draft.holders.filter((h) => key(h.name) === key(name)).length > 1;
@@ -205,7 +214,7 @@ export function StepCircle({ draft, setDraft }: { draft: Draft; setDraft: (d: Dr
           <li key={i} className="person pop" style={{ '--d': `${i * 60}ms` } as CSSProperties}>
             <div className="person-row">
               <span className="person-ghost" aria-hidden="true">
-                <Ghost costume={PREVIEW_COSTUMES[i]} mood={h.name.trim() ? 'happy' : 'open'} size={46} float phase={i * 0.5} />
+                <Ghost costume={costumes[i]} mood={h.name.trim() ? 'happy' : 'open'} size={46} float phase={i * 0.5} />
               </span>
               <label className="field">
                 <span className="visually-hidden">Name of person {i + 1}</span>
@@ -213,6 +222,7 @@ export function StepCircle({ draft, setDraft }: { draft: Draft; setDraft: (d: Dr
                   type="text"
                   value={h.name}
                   placeholder={`Friend ${i + 1}`}
+                  readOnly={locked}
                   aria-invalid={twice(h.name) || undefined}
                   aria-describedby={twice(h.name) ? 'same-name' : undefined}
                   onChange={(e) => update(i, { name: e.target.value })}
@@ -221,7 +231,7 @@ export function StepCircle({ draft, setDraft }: { draft: Draft; setDraft: (d: Dr
               <button type="button" className={`chip${h.writing ? ' on' : ''}`} onClick={() => update(i, { writing: !h.writing })} aria-expanded={h.writing}>
                 {h.writing ? '✓ Letter' : '+ Letter'}
               </button>
-              {n > 2 && (
+              {n > 2 && !locked && (
                 <button type="button" className="icon-btn small" onClick={() => setHolders(draft.holders.filter((_, j) => j !== i))} aria-label={`Remove ${h.name || `friend ${i + 1}`}`}>
                   ×
                 </button>
@@ -241,7 +251,7 @@ export function StepCircle({ draft, setDraft }: { draft: Draft; setDraft: (d: Dr
           </li>
         ))}
       </ul>
-      {n < 10 && (
+      {n < 10 && !locked && (
         <button type="button" className="btn small" onClick={() => setHolders([...draft.holders, { name: '', letter: '', writing: false }])}>
           + Add a friend
         </button>
@@ -249,7 +259,9 @@ export function StepCircle({ draft, setDraft }: { draft: Draft; setDraft: (d: Dr
 
       <div className="threshold" data-theme="night">
         <h3>How many must gather?</h3>
-        <p className="faint">Tap a candle. Fewer is easier to gather; more is safer if a card goes missing.</p>
+        <p className="faint">
+          {locked ? 'Set when the jar was sealed, and printed on every card.' : 'Tap a candle. Fewer is easier to gather; more is safer if a card goes missing.'}
+        </p>
         <div className="threshold-candles" role="radiogroup" aria-label="Cards needed to open the jar">
           {draft.holders.map((h, i) => {
             const k = i + 1;
@@ -261,7 +273,7 @@ export function StepCircle({ draft, setDraft }: { draft: Draft; setDraft: (d: Dr
                 role="radio"
                 aria-checked={draft.threshold === k}
                 aria-label={`${k} cards`}
-                disabled={k < 2}
+                disabled={k < 2 || locked}
                 onClick={() => {
                   setDraft({ ...draft, threshold: k });
                   sound.strike();

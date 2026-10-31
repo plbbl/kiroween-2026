@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
-import { emptyContent, sealJar, validateSealInput, type JarContent, type SealResult } from '../../core/jar.ts';
+import { circleBuddies } from '../../core/buddy.ts';
+import type { KeyCard } from '../../core/cards.ts';
+import { emptyContent, jarIdBytes, resealJar, sealJar, validateSealInput, type JarContent, type JarFile, type OwnedJar, type SealResult } from '../../core/jar.ts';
 import { Sparkles } from '../../ui/art/Decor.tsx';
 import { Ghost } from '../../ui/art/Ghost.tsx';
 import { Jar } from '../../ui/art/Jar.tsx';
@@ -7,7 +9,8 @@ import { initialsOf, type WaxState } from '../../ui/art/WaxSeal.tsx';
 import { capitalised, numberWord, plural } from '../../ui/text.ts';
 import { useAtmosphere, wait } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
-import { Sealed } from './Sealed.tsx';
+import { Sealed, Updated } from './Sealed.tsx';
+import { OpenForUpdate } from './Update.tsx';
 import { StepCircle, StepLeave, StepMessage, StepName, StepWishes, type Draft } from './Steps.tsx';
 
 const STEPS: { label: string; title: (d: Draft) => string; sub: string; art: ReactNode }[] = [
@@ -55,6 +58,36 @@ const STEPS: { label: string; title: (d: Draft) => string; sub: string; art: Rea
   },
 ];
 
+// When updating, the circle and the name are fixed: only these two steps read differently.
+const UPDATE_STEPS: Partial<Record<number, (typeof STEPS)[number]>> = {
+  4: {
+    ...STEPS[4]!,
+    title: () => 'Letters for your circle',
+    sub: 'The circle stays the same, so every card still works. To change who holds one, seal a new jar.',
+  },
+  5: {
+    ...STEPS[5]!,
+    title: (d) => `Ready, ${d.owner.trim().split(/\s+/)[0] || 'friend'}?`,
+    sub: 'The same cards will open the new words. Nothing new to print.',
+  },
+};
+
+/** A jar opened by its owner with their key, to seal new words into it. */
+export interface Existing {
+  jar: JarFile;
+  key: KeyCard;
+  owned: OwnedJar;
+}
+
+function draftFrom({ jar, owned }: Existing): Draft {
+  return {
+    owner: jar.owner,
+    content: owned.content,
+    holders: jar.holders.map((h) => ({ name: h.name, letter: owned.letters[h.x] ?? '', writing: !!owned.letters[h.x] })),
+    threshold: jar.threshold,
+  };
+}
+
 function initialDraft(): Draft {
   return {
     owner: '',
@@ -68,16 +101,29 @@ function initialDraft(): Draft {
   };
 }
 
-export function Seal() {
+export function Seal({ params, embedded }: { params: URLSearchParams; embedded: JarFile | null }) {
   useAtmosphere('day');
-  const [draft, setDraft] = useState<Draft>(initialDraft);
-  const [step, setStep] = useState(0);
-  const [reached, setReached] = useState(0);
+  const [existing, setExisting] = useState<Existing | null>(null);
+  if (params.has('update') && !existing) return <OpenForUpdate jar={embedded} onOpen={setExisting} />;
+  return <Wizard existing={existing} key={existing?.jar.jarId ?? 'new'} />;
+}
+
+function Wizard({ existing }: { existing: Existing | null }) {
+  const updating = existing !== null;
+  const costumes = useMemo(() => {
+    if (!existing) return undefined;
+    const buddies = circleBuddies(jarIdBytes(existing.jar), existing.jar.holders.map((h) => h.x));
+    return existing.jar.holders.map((h) => buddies.get(h.x)!.costume);
+  }, [existing]);
+  const [draft, setDraft] = useState<Draft>(() => (existing ? draftFrom(existing) : initialDraft()));
+  const [step, setStep] = useState(updating ? 1 : 0);
+  const [reached, setReached] = useState(updating ? STEPS.length - 1 : 0);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [wax, setWax] = useState<WaxState | 'none'>('none');
   const [corked, setCorked] = useState(false);
   const [burst, setBurst] = useState(0);
   const [result, setResult] = useState<SealResult | null>(null);
+  const [updated, setUpdated] = useState<JarFile | null>(null);
   const [error, setError] = useState('');
 
   const input = useMemo(
@@ -93,11 +139,11 @@ export function Seal() {
 
   // Nothing is stored anywhere, so ask before the page is closed.
   useEffect(() => {
-    if (result || !(draft.owner || draft.content.message)) return;
+    if (result || updated || !(draft.owner || draft.content.message)) return;
     const on = (e: BeforeUnloadEvent) => e.preventDefault();
     window.addEventListener('beforeunload', on);
     return () => window.removeEventListener('beforeunload', on);
-  }, [draft, result]);
+  }, [draft, result, updated]);
 
   const goTo = (n: number) => {
     setDirection(n >= step ? 1 : -1);
@@ -118,7 +164,12 @@ export function Seal() {
     // The cork drops in, the wax is stamped, the ghost falls asleep.
     setCorked(true);
     setTimeout(() => sound.cork(), 260);
-    const sealing = sealJar(input);
+    const sealing: Promise<SealResult | JarFile> = existing
+      ? resealJar(existing.jar, existing.key, {
+          content: draft.content,
+          letters: Object.fromEntries(existing.jar.holders.map((h, i) => [h.x, draft.holders[i]!.writing ? draft.holders[i]!.letter : ''])),
+        })
+      : sealJar(input);
     sealing.catch(() => undefined); // handled below, once the wax is down
     await wait(380);
     setWax('pressing');
@@ -126,7 +177,8 @@ export function Seal() {
     setTimeout(() => setBurst((b) => b + 1), 420);
     try {
       const [sealed] = await Promise.all([sealing, wait(1700)]);
-      setResult(sealed);
+      if ('cards' in sealed) setResult(sealed);
+      else setUpdated(sealed);
       window.scrollTo({ top: 0 });
     } catch (e) {
       setCorked(false);
@@ -136,8 +188,9 @@ export function Seal() {
   };
 
   if (result) return <Sealed result={result} />;
+  if (updated) return <Updated jar={updated} />;
 
-  const current = STEPS[step]!;
+  const current = updating ? (UPDATE_STEPS[step] ?? STEPS[step]!) : STEPS[step]!;
   const progress = step / (STEPS.length - 1);
 
   return (
@@ -156,7 +209,7 @@ export function Seal() {
                 <button
                   type="button"
                   className={`trail-dot${i <= step ? ' done' : ''}${i === step ? ' current' : ''}`}
-                  disabled={i > reached}
+                  disabled={i > reached || (updating && i === 0)}
                   onClick={() => goTo(i)}
                   aria-current={i === step ? 'step' : undefined}
                   aria-label={`Step ${i + 1}: ${s.label}`}
@@ -182,7 +235,7 @@ export function Seal() {
             {step === 1 && <StepMessage content={draft.content} setContent={setContent} />}
             {step === 2 && <StepLeave content={draft.content} setContent={setContent} />}
             {step === 3 && <StepWishes content={draft.content} setContent={setContent} />}
-            {step === 4 && <StepCircle draft={draft} setDraft={setDraft} />}
+            {step === 4 && <StepCircle draft={draft} setDraft={setDraft} locked={updating} costumes={costumes} />}
             {step === 5 && (
               <div className="seal-stage">
                 <ul className="summary" aria-label="What goes in the jar">
@@ -208,7 +261,7 @@ export function Seal() {
                   <Sparkles burst={burst} radius={130} count={16} />
                 </div>
                 <button type="button" className="btn primary big" onClick={seal} disabled={corked}>
-                  {corked ? 'Sealing…' : 'Seal the jar'}
+                  {corked ? 'Sealing…' : updating ? 'Seal the new words' : 'Seal the jar'}
                 </button>
                 {error && (
                   <p className="error" role="alert">
@@ -228,7 +281,7 @@ export function Seal() {
 
           {step < 5 && (
             <div className="step-nav">
-              {step > 0 ? (
+              {step > (updating ? 1 : 0) ? (
                 <button type="button" className="text-btn quiet" onClick={() => goTo(step - 1)}>
                   ← Back
                 </button>

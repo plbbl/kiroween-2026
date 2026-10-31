@@ -717,6 +717,75 @@ input[aria-invalid='true'] {
   font-size: 1.25rem;
 }
 
+/* ── Update ───────────────────────────────────────────────── */
+
+.update-link {
+  margin: 4px 0 0;
+  font-size: 0.95rem;
+}
+
+.update-steps {
+  display: grid;
+  gap: 16px;
+  margin-top: 30px;
+}
+
+.update-step {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 16px;
+  align-items: start;
+  transition: opacity 300ms var(--soft);
+}
+
+.update-step.waiting {
+  opacity: 0.55;
+}
+
+.update-step h3 {
+  margin-bottom: 4px;
+}
+
+.update-jar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.update-jar .muted {
+  margin: 0 0 4px;
+}
+
+.update-drop {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 20px;
+  border: 2px dashed var(--line-strong);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: border-color 250ms, background-color 250ms;
+}
+
+.update-drop:hover,
+.update-drop.over,
+.update-drop:has(input:focus-visible) {
+  border-color: var(--purple);
+  background: var(--lilac-soft);
+}
+
+.update-drop input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.todo.todo-two {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 760px;
+}
+
 /* ── Sealed ───────────────────────────────────────────────── */
 
 .sealed-hero h1 {
@@ -2513,7 +2582,8 @@ textarea.mono-input {
     padding: 22px 20px;
   }
 
-  .todo {
+  .todo,
+  .todo.todo-two {
     grid-template-columns: 1fr;
   }
 

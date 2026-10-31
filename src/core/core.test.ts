@@ -4,11 +4,13 @@ import { fromBase32, fromBase64Url, toBase32, toBase64Url } from './bytes.ts';
 import {
   cardToQrText,
   cardToWords,
+  KEY_WORDS,
   parseCard,
   SEAL_WORDS,
   SHARD_WORDS,
   shardX,
   type Card,
+  type KeyCard,
   type Seal,
   type Shard,
 } from './cards.ts';
@@ -17,7 +19,9 @@ import {
   emptyContent,
   openJar,
   openLetter,
+  openWithKey,
   parseJar,
+  resealJar,
   sealJar,
   unlockWithShares,
   verifyCircle,
@@ -109,10 +113,16 @@ const sealArb: fc.Arbitrary<Seal> = fc.record({
   secret: bytes(16, 16),
 });
 
+const keyArb: fc.Arbitrary<KeyCard> = fc.record({
+  kind: fc.constant('key' as const),
+  jarId: bytes(4, 4),
+  seed: bytes(32, 32),
+});
+
 describe('cards', () => {
   it('a card read from its QR code or its words is the same card', () => {
     fc.assert(
-      fc.property(fc.oneof(shardArb, sealArb), (card: Card) => {
+      fc.property(fc.oneof(shardArb, sealArb, keyArb), (card: Card) => {
         expect(parseCard(cardToQrText(card))).toEqual(card);
         expect(parseCard(cardToWords(card).join(' '))).toEqual(card);
       }),
@@ -130,6 +140,12 @@ describe('cards', () => {
         expect(cardToWords(s)).toHaveLength(SEAL_WORDS);
       }),
     );
+    fc.assert(
+      fc.property(keyArb, (k) => {
+        expect(cardToWords(k)).toHaveLength(KEY_WORDS);
+      }),
+    );
+    expect(new Set([SHARD_WORDS, SEAL_WORDS, KEY_WORDS]).size).toBe(3);
   });
 
   it('accepts sloppy typing: case, numbering, commas, line breaks', () => {
@@ -325,6 +341,65 @@ describe('jar', () => {
       }),
       { numRuns: 15 },
     );
+  });
+
+  it('the owner’s key reads back exactly what was sealed, letters included', async () => {
+    await fc.assert(
+      fc.asyncProperty(sealInputArb, async (input) => {
+        const { jar, key } = await sealJar(input);
+        const owned = await openWithKey(jar, key);
+        expect(owned.content).toEqual(input.content);
+        for (const h of jar.holders) {
+          const written = input.holders.find((i) => i.name === h.name)!.letter.trim();
+          expect(owned.letters[h.x] ?? '').toBe(written);
+        }
+      }),
+      { numRuns: 25 },
+    );
+  });
+
+  it('after an update with the key, the same cards open the new words and the same seals open the new letters', async () => {
+    await fc.assert(
+      fc.asyncProperty(sealInputArb, contentArb, fc.array(fc.string({ maxLength: 60 }), { minLength: 6, maxLength: 6 }), fc.nat(), async (input, next, texts, pick) => {
+        const { jar, cards, key } = await sealJar(input);
+        const letters: Record<number, string> = {};
+        jar.holders.forEach((h, i) => {
+          letters[h.x] = texts[i]!;
+        });
+        const updated = await resealJar(jar, key, { content: next, letters });
+        expect(updated.jarId).toBe(jar.jarId);
+        expect(updated.revision).toBe(2);
+        expect(updated.holders.map((h) => [h.x, h.name])).toEqual(jar.holders.map((h) => [h.x, h.name]));
+
+        // Any group of the old cards opens the new jar.
+        const start = pick % cards.length;
+        const circle = Array.from({ length: jar.threshold }, (_, i) => cards[(start + i) % cards.length]!.shard);
+        const opened = await openJar(updated, circle);
+        expect(opened.content).toEqual(next);
+        for (const c of cards) {
+          const text = letters[c.x]!.trim();
+          if (text) expect((await openLetter(updated, opened, c.seal)).text).toBe(text);
+          else await expect(openLetter(updated, opened, c.seal)).rejects.toThrow();
+        }
+        // The old jar file still holds only the old words.
+        expect((await openJar(jar, circle)).content).toEqual(input.content);
+      }),
+      { numRuns: 25 },
+    );
+  });
+
+  it('a key opens only its own jar, and an updated jar is still bound to its header', async () => {
+    const a = await sealJar({ owner: 'Ada', content: emptyContent(), threshold: 2, holders: [{ name: 'A', letter: '' }, { name: 'B', letter: '' }] });
+    const b = await sealJar({ owner: 'Ada', content: emptyContent(), threshold: 2, holders: [{ name: 'A', letter: '' }, { name: 'B', letter: '' }] });
+    await expect(openWithKey(a.jar, b.key)).rejects.toThrow();
+    await expect(resealJar(a.jar, b.key, { content: emptyContent(), letters: {} })).rejects.toThrow();
+    // A key with the right jar id but the wrong seed is refused too.
+    await expect(openWithKey(a.jar, { ...b.key, jarId: a.key.jarId })).rejects.toThrow();
+
+    const updated = await resealJar(a.jar, a.key, { content: { ...emptyContent(), message: 'new' }, letters: {} });
+    const tampered = { ...updated, revision: 1 };
+    await expect(openJar(tampered, a.cards.map((c) => c.shard))).rejects.toThrow();
+    expect(parseJar(JSON.stringify(updated))).toEqual(updated);
   });
 
   it('rejects impossible circles', async () => {

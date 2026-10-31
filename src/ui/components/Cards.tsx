@@ -1,6 +1,7 @@
 import type { CSSProperties, MouseEvent } from 'react';
 import type { Buddy } from '../../core/buddy.ts';
 import { cardToQrText, cardToWords } from '../../core/cards.ts';
+import type { KeyCard } from '../../core/cards.ts';
 import type { HolderCards } from '../../core/jar.ts';
 import { Ghost } from '../art/Ghost.tsx';
 import { numberWord } from '../text.ts';
@@ -128,11 +129,11 @@ function SealFace({ owner, card, buddy }: PrintProps) {
       <div className="card-body">
         <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} size={70} line mood="wink" title={`${card.name}'s ghost, winking`} />
         <div className="card-who">
-          <p className="card-name small">{card.hasLetter ? `${first} wrote you a letter.` : 'No separate letter for you.'}</p>
+          <p className="card-name small">{card.hasLetter ? `${first} wrote you a letter.` : `In case ${first} writes you a letter.`}</p>
           <p className="card-rule">
             {card.hasLetter
               ? 'Once the jar is open, this seal opens your letter. Keep it folded. Show no one.'
-              : 'Keep this half anyway. It belongs with your card.'}
+              : `${first} can add one later. This seal would open it, so keep it folded with your card.`}
           </p>
         </div>
         <Qr text={cardToQrText(card.seal)} size={104} label={`Code for ${card.name}'s seal`} />
@@ -150,6 +151,34 @@ export function PrintableCard(props: PrintProps) {
         <span>fold here · the half below is yours alone</span>
       </div>
       <SealFace {...props} />
+    </article>
+  );
+}
+
+/** The owner's own page: the key that lets them change the jar later. */
+export function PrintableKey({ owner, keyCard }: { owner: string; keyCard: KeyCard }) {
+  return (
+    <article className="print-card print-key">
+      <section className="card-face" aria-label={`Key to ${owner}'s jar`}>
+        <header className="card-head">
+          <span>{owner}’s jar</span>
+          <span>your key · keep it, don’t give it</span>
+        </header>
+        <div className="card-body">
+          <Ghost mood="happy" emblem="key" size={118} line title="The ghost in your jar" />
+          <div className="card-who">
+            <p className="card-held">For you, {owner.split(/\s+/)[0]}</p>
+            <p className="card-name">Your key</p>
+            <p className="card-rule">
+              With this you can change what is in the jar later, and your friends keep their cards. It also opens the jar on its own, so keep
+              it like a passport: not with the cards, not in a photo.
+            </p>
+          </div>
+          <Qr text={cardToQrText(keyCard)} size={128} label={`Code for ${owner}'s key`} />
+        </div>
+        <WordGrid words={cardToWords(keyCard)} columns={4} />
+        <footer className="card-foot">To change the jar: open Phylactery, choose Seal, then “Change what’s inside”, and give it your jar file and this key.</footer>
+      </section>
     </article>
   );
 }

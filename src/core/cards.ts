@@ -6,6 +6,10 @@
 // the people at the circle never learn each other's seals.
 //
 // Both are encoded twice: as a QR code and as a list of words.
+//
+// The owner also gets a key card of their own. It carries the seed every
+// key in the jar is derived from, so the owner can seal new words into the
+// same jar later, and the friends' cards keep working.
 
 import { sha256 } from '@noble/hashes/sha2.js';
 import { concat, equal, fromBase32, toBase32 } from './bytes.ts';
@@ -17,15 +21,20 @@ export const SHARE_LENGTH = KEY_LENGTH + 1; // Shamir appends the x coordinate
 export const SEAL_SECRET_LENGTH = 16;
 export const MAX_CARDS = 10;
 
+export const SEED_LENGTH = 32;
+
 const SHARD_KIND = 0x01;
 const SEAL_KIND = 0x02;
+const KEY_KIND = 0x03;
 const SHARD_LENGTH = SHARE_LENGTH + JAR_ID_LENGTH + 2 + 1; // 40 bytes, 30 words
 const SEAL_LENGTH = SEAL_SECRET_LENGTH + JAR_ID_LENGTH + 1 + 1; // 22 bytes, 17 words
+const KEY_LENGTH_BYTES = SEED_LENGTH + JAR_ID_LENGTH + 1; // 37 bytes, 28 words
 const QR_PREFIX = 'PH1-';
 const QR_CHECKSUM_LENGTH = 2;
 
 export const SHARD_WORDS = wordCountFor(SHARD_LENGTH);
 export const SEAL_WORDS = wordCountFor(SEAL_LENGTH);
+export const KEY_WORDS = wordCountFor(KEY_LENGTH_BYTES);
 
 export interface Shard {
   kind: 'shard';
@@ -44,7 +53,14 @@ export interface Seal {
   secret: Uint8Array;
 }
 
-export type Card = Shard | Seal;
+/** The owner's own card: the seed of every key in the jar. */
+export interface KeyCard {
+  kind: 'key';
+  jarId: Uint8Array;
+  seed: Uint8Array;
+}
+
+export type Card = Shard | Seal | KeyCard;
 
 export class CardError extends Error {}
 
@@ -59,7 +75,8 @@ export function encodeCard(card: Card): Uint8Array {
   if (card.kind === 'shard') {
     return concat(card.share, card.jarId, Uint8Array.of(card.threshold, card.total, SHARD_KIND));
   }
-  return concat(card.secret, card.jarId, Uint8Array.of(card.x, SEAL_KIND));
+  if (card.kind === 'seal') return concat(card.secret, card.jarId, Uint8Array.of(card.x, SEAL_KIND));
+  return concat(card.seed, card.jarId, Uint8Array.of(KEY_KIND));
 }
 
 export function decodeCard(bytes: Uint8Array): Card {
@@ -81,6 +98,9 @@ export function decodeCard(bytes: Uint8Array): Card {
     const x = bytes[SEAL_SECRET_LENGTH + JAR_ID_LENGTH]!;
     if (x === 0) throw new CardError('This seal is damaged.');
     return { kind: 'seal', jarId, x, secret };
+  }
+  if (kind === KEY_KIND && bytes.length === KEY_LENGTH_BYTES) {
+    return { kind: 'key', seed: bytes.slice(0, SEED_LENGTH), jarId: bytes.slice(SEED_LENGTH, SEED_LENGTH + JAR_ID_LENGTH) };
   }
   throw new CardError('This is not a Phylactery card.');
 }
@@ -115,10 +135,16 @@ export function parseCard(input: string): Card {
   }
   const words = splitWords(text);
   const length =
-    words.length === SHARD_WORDS ? SHARD_LENGTH : words.length === SEAL_WORDS ? SEAL_LENGTH : null;
+    words.length === SHARD_WORDS
+      ? SHARD_LENGTH
+      : words.length === SEAL_WORDS
+        ? SEAL_LENGTH
+        : words.length === KEY_WORDS
+          ? KEY_LENGTH_BYTES
+          : null;
   if (length === null) {
     throw new CardError(
-      `A shard has ${SHARD_WORDS} words and a seal has ${SEAL_WORDS}. You entered ${words.length}.`,
+      `A card has ${SHARD_WORDS} words, a seal ${SEAL_WORDS} and a key ${KEY_WORDS}. You entered ${words.length}.`,
     );
   }
   try {

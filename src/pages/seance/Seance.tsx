@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { circleBuddies, type Buddy } from '../../core/buddy.ts';
 import { CardError, parseCard, type Shard } from '../../core/cards.ts';
-import { checkShard, JarError, jarIdBytes, openJar, parseJar, type JarFile, type JarHolder, type OpenedJar } from '../../core/jar.ts';
+import { checkShard, JarError, jarIdBytes, openJar, type JarFile, type JarHolder, type OpenedJar } from '../../core/jar.ts';
 import { DEMO_CARDS, DEMO_JAR, isDemo } from '../../demo/demo.ts';
 import { Candle } from '../../ui/art/Candle.tsx';
 import { Sparkles } from '../../ui/art/Decor.tsx';
@@ -11,6 +11,7 @@ import { initialsOf, type WaxState } from '../../ui/art/WaxSeal.tsx';
 import { BuddyCard } from '../../ui/components/Cards.tsx';
 import { capitalised, numberWord } from '../../ui/text.ts';
 import { CardInput } from '../../ui/components/CardInput.tsx';
+import { jarFromText } from '../../ui/grimoire.ts';
 import { useAtmosphere, useShell, wait } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
 import { Reveal } from './Reveal.tsx';
@@ -45,10 +46,7 @@ function Choose({ onChoose }: { onChoose: (jar: JarFile) => void }) {
   const readFile = async (file: File) => {
     setError('');
     try {
-      const text = await file.text();
-      // A jar file is this app as an HTML page with the jar inside it.
-      const inner = /<script id="phylactery-jar" type="application\/json">([\s\S]*?)<\/script>/.exec(text)?.[1];
-      onChoose(parseJar(inner ?? text));
+      onChoose(jarFromText(await file.text()));
     } catch (e) {
       setError(e instanceof JarError ? e.message : 'That file isn’t a jar.');
     }
@@ -232,6 +230,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
         return e instanceof CardError ? e.message : 'That card could not be read.';
       }
       if (card.kind === 'seal') return 'That’s a private seal, from the inside of a card. Keep it for the letters.';
+      if (card.kind === 'key') return `That’s ${first}’s own key, for updating the jar. The circle opens it with their cards.`;
       const current = offeredRef.current;
       if (current.length >= k) return 'Every candle is already lit.';
       const check = checkShard(jar, card, current.map((o) => o.shard));
@@ -256,7 +255,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
       }
       return null;
     },
-    [jar, k, open, buddies],
+    [jar, k, open, buddies, first],
   );
 
   const endFlight = useCallback(() => setFlight(null), []);

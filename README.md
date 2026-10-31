@@ -14,7 +14,7 @@ Phylactery joins the pieces, and makes a heavy subject gentle: death as a reunio
 
 ## Three acts
 
-**I. Seal.** Write a note for everyone, the accounts you keep and how to get in, where things are, and your wishes. Add a private letter for anyone. Everything is encrypted in your browser and the key is split into one card per friend. You choose how many must gather. Before you print, Phylactery proves it works: every group of that size opens the jar, and no smaller group does.
+**I. Seal.** Write a note for everyone, the accounts you keep and how to get in, where things are, and your wishes. Add a private letter for anyone. Everything is encrypted in your browser and the key is split into one card per friend. You choose how many must gather. Before you print, Phylactery proves it works: every group of that size opens the jar, and no smaller group does. You also get a page of your own, your key: with it you can change what is inside later, and everyone keeps the card they have.
 
 **II. Watch.** Every so often, one gentle question: *still here?* One tap answers it. Go quiet, and you are reminded. Only then are your friends asked to *check on you*, never told you are gone. Answer late, and they hear that all is well. Once a year, on the Day of the Dead (November 2), the watch also asks whether your jar is still up to date.
 
@@ -50,14 +50,15 @@ Motion marks a change of state, and is springy and small: the cork drops in and 
 
 ## Three promises
 
-1. **No one opens it alone.** Not one friend, not a company, not us. The 256-bit key is split with Shamir's Secret Sharing; fewer cards than the threshold reveal nothing.
+1. **No one opens it alone.** Not one friend, not a company, not us. The 256-bit key is split with Shamir's Secret Sharing; fewer cards than the threshold reveal nothing. (You can, with your own key, to change it.)
 2. **Nothing leaves your hands.** No accounts, no analytics, no requests to other servers. The watch service only ever knows names, email addresses and times.
 3. **It outlives us.** Sealing makes a jar file: this whole app as one HTML file with your encrypted jar inside, under a Content Security Policy that forbids any network access. It opens offline, years from now, even if this website is gone.
 
 ## Try it
 
 - **June's jar.** Open *Séance* and choose *June's jar*. Click any three cards on the table, or type a card's 30 words. Then open a letter with that person's seal.
-- **Seal your own.** Open *Seal*, write, choose your circle, seal, and print the cards (one page per friend; fold the seal half inward).
+- **Seal your own.** Open *Seal*, write, choose your circle, seal, and print the cards (one page per friend; fold the seal half inward) and your key.
+- **Change it later.** Open *Seal*, choose *Change what's inside*, give it your jar file and your key, edit, and seal again. The same cards open the new words.
 - **The watch.** Open *Watch* and press *Let time pass* to see the rhythm. Where the watch service runs, start a real watch below it.
 
 ### Run it locally
@@ -87,8 +88,9 @@ Node 22 or later. `npm run serve` keeps watches in `.data/watches.json` and writ
 | The circle, once gathered | The jar, but not the private letters: each needs its reader's seal |
 | The watch service | Names, email addresses, the rhythm and the times you checked in. Never a jar, a card or a key |
 | Someone who steals enough cards | The jar, but still not the letters. Keep cards like house keys |
+| Someone who finds your key | Everything, as you could, letters included. It is meant for you alone: keep it like a passport, apart from the cards |
 
-The readable header of a jar is bound to every ciphertext as additional authenticated data, so editing it breaks decryption. Every card carries a SHA-256 checksum, in its QR code and in its words, so a mistyped word is caught.
+The readable header of a jar is bound to every ciphertext as additional authenticated data, so editing it breaks decryption. Every key in a jar (the master key that the cards share, and each holder's seal) is derived with HKDF from one random seed, which is printed only on your key. That is what lets you reseal new words under the same master key and the same seals; a new jar file carries a higher revision number. Every card carries a SHA-256 checksum, in its QR code and in its words, so a mistyped word is caught.
 
 The watch service sends nothing until the owner confirms their address, stores its tokens only as SHA-256 hashes, rotates check-in links with each batch of questions, gives friends an opt-out link, and allows at most three watches per address.
 
@@ -107,9 +109,10 @@ Limits worth knowing: this is browser cryptography; the app as a whole has not h
 
 ### Tests
 
-`npm test` runs 35 tests, most of them property-based (fast-check), among them:
+`npm test` runs 38 tests, most of them property-based (fast-check), among them:
 
 - any set of cards at or above the threshold opens the jar and returns exactly what was sealed; one card short reveals nothing;
+- after the owner changes the jar with their key, any group of the original cards opens the new words, the original seals open the new letters, and the old file still holds only the old words; a key from another jar is refused;
 - each letter opens only with its own seal, never with another holder's seal relabelled;
 - editing the readable header or the ciphertext breaks the jar;
 - every card survives the round trip through its QR text and its words, including sloppy typing;
@@ -119,7 +122,7 @@ Limits worth knowing: this is browser cryptography; the app as a whole has not h
 
 The property tests caught a real bug: the base32 decoder accepted non-canonical padding bits, so a damaged QR code could decode to the same card. Decoding is now strict.
 
-`npm run e2e` seals a jar, checks the self-check, prints the cards, downloads the jar file and opens it from disk with two typed cards, opens a letter with a typed seal, runs June's séance and the watch preview, does a whole seal, séance and letter with the keyboard alone, starts and confirms a real watch against a local server, checks phone layouts, and runs axe-core accessibility audits on eight screens (no serious or critical WCAG 2 A/AA issues allowed).
+`npm run e2e` seals a jar, checks the self-check, prints the cards, downloads the jar file and opens it from disk with two typed cards, opens a letter with a typed seal, runs June's séance and the watch preview, changes the jar with the printed key and opens the new file with the original cards, does a whole seal, séance and letter with the keyboard alone, starts and confirms a real watch against a local server, checks phone layouts, and runs axe-core accessibility audits on eight screens (no serious or critical WCAG 2 A/AA issues allowed).
 
 ## Project layout
 

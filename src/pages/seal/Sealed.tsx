@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { circleBuddies } from '../../core/buddy.ts';
-import { verifyCircle, type CircleCheck, type SealResult } from '../../core/jar.ts';
+import { verifyCircle, type CircleCheck, type JarFile, type SealResult } from '../../core/jar.ts';
 import { Sparkles } from '../../ui/art/Decor.tsx';
 import { EmblemIcon } from '../../ui/art/Emblem.tsx';
 import { Jar } from '../../ui/art/Jar.tsx';
 import { initialsOf } from '../../ui/art/WaxSeal.tsx';
-import { BuddyCard, EnvelopeMark, PrintableCard } from '../../ui/components/Cards.tsx';
+import { BuddyCard, EnvelopeMark, PrintableCard, PrintableKey } from '../../ui/components/Cards.tsx';
 import { capitalised, numberWord } from '../../ui/text.ts';
 import { canMakeGrimoire, download, makeGrimoire, safeFilename } from '../../ui/grimoire.ts';
 import { href } from '../../ui/shell.tsx';
@@ -84,7 +84,7 @@ export function Sealed({ result }: { result: SealResult }) {
           <span className="todo-num">1</span>
           <div>
             <h3>Print the cards</h3>
-            <p className="muted">One page per friend. Fold the bottom half in: that is their private seal.</p>
+            <p className="muted">One page per friend, folded so the seal is inside. And one page for you: your key, to change the jar later.</p>
             <button type="button" className="btn primary" onClick={() => window.print()}>
               Print the cards
             </button>
@@ -122,7 +122,53 @@ export function Sealed({ result }: { result: SealResult }) {
         {cards.map((c, i) => (
           <PrintableCard key={c.x} owner={jar.owner} card={c} buddy={buddies.get(c.x)!} index={i} total={n} threshold={k} />
         ))}
+        <PrintableKey owner={jar.owner} keyCard={result.key} />
       </div>
+    </div>
+  );
+}
+
+/** After the owner changed what is inside: the same cards, a new jar file. */
+export function Updated({ jar }: { jar: JarFile }) {
+  const grimoireOk = canMakeGrimoire();
+  const base = safeFilename(`${jar.owner}'s jar`);
+  const first = jar.owner.split(/\s+/)[0];
+  return (
+    <div className="page sealed-page">
+      <section className="narrow center sealed-hero">
+        <div className="sealed-jar pop">
+          <Jar initials={initialsOf(jar.owner)} size={250} warmth={0.6} />
+          <Sparkles burst="updated" radius={150} count={18} />
+        </div>
+        <h1 className="sealed-title">Updated!</h1>
+        <p className="lede">
+          Version {jar.revision ?? 2} of {first}’s jar. Every card still opens it, and nothing new needs printing.
+        </p>
+      </section>
+
+      <section className="todo wrap todo-two">
+        <article className="todo-item card">
+          <span className="todo-num">1</span>
+          <div>
+            <h3>Send the new jar file</h3>
+            <p className="muted">Give it to the same friends. An old file still opens with the cards, but shows the old words.</p>
+            <button type="button" className="btn primary" disabled={!grimoireOk} onClick={() => download(`${base}.html`, makeGrimoire(jar), 'text/html')}>
+              Download the jar
+            </button>
+            {!grimoireOk && <p className="faint">The jar file can only be made from the built app.</p>}
+          </div>
+        </article>
+        <article className="todo-item card">
+          <span className="todo-num">2</span>
+          <div>
+            <h3>Keep your key</h3>
+            <p className="muted">The same key works for the next change. Put it back where you keep it.</p>
+            <a className="btn" href={href('home')}>
+              Done
+            </a>
+          </div>
+        </article>
+      </section>
     </div>
   );
 }

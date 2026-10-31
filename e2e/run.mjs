@@ -110,7 +110,8 @@ check(await page.getByText('Checked: all 3 groups of two open it, and no one can
 await page.emulateMedia({ media: 'print' });
 await settle(600);
 await shot('09-print-cards');
-check((await page.locator('.print-card [aria-label^="Code for"]').count()) === 6, 'each printed card has a card code and a seal code');
+check((await page.locator('.print-card:not(.print-key) [aria-label^="Code for"]').count()) === 6, 'each printed card has a card code and a seal code');
+check((await page.locator('.print-key [aria-label^="Code for"]').count()) === 1, 'the owner’s key is printed on its own page');
 check(
   !(await page.locator('.sealed-hero').isVisible()) && !(await page.locator('.todo').isVisible()) && (await page.locator('.print-card').first().isVisible()),
   'printing shows only the cards',
@@ -121,7 +122,8 @@ const wordsOf = (t) =>
     .map((l) => l.replace(/^\d+\s*/, '').trim())
     .filter(Boolean)
     .join(' ');
-const cardWords = await page.locator('.print-card .card-face:not(.seal-face) .word-grid').allInnerTexts();
+const cardWords = await page.locator('.print-card:not(.print-key) .card-face:not(.seal-face) .word-grid').allInnerTexts();
+const keyWords = await page.locator('.print-key .word-grid').innerText();
 const sealWords = await page.locator('.print-card .seal-face .word-grid').first().innerText();
 await page.emulateMedia({ media: 'screen' });
 
@@ -146,6 +148,37 @@ await g.getByLabel(/The 17 words/).fill(wordsOf(sealWords));
 await g.getByRole('button', { name: 'Break this seal' }).click();
 await g.getByText('The engine was always yours.').waitFor({ timeout: 6000 });
 check(true, 'the private seal opens its letter');
+
+// The owner changes what is inside with their key; the same cards open the new words.
+try {
+  await g.goto(`${pathToFileURL(jarPath).href}#/seal?update`);
+  await g.getByLabel(/The 28 words/).fill(wordsOf(keyWords));
+  await g.getByRole('button', { name: 'Use my key' }).click();
+  await g.getByRole('heading', { name: 'A note for everyone' }).waitFor({ timeout: 6000 });
+  check((await g.getByLabel('Your note to everyone').inputValue()).includes('Be gentle with each other.'), 'the key opens the jar for its owner, words and all');
+  await g.getByLabel('Your note to everyone').fill('Version two: the spare key moved to the blue bowl.');
+  for (let i = 0; i < 3; i++) await g.getByRole('button', { name: /^Next/ }).click();
+  await g.getByRole('button', { name: /^Almost done/ }).click();
+  await g.getByRole('button', { name: 'Seal the new words' }).click();
+  await g.getByRole('heading', { name: 'Updated!' }).waitFor({ timeout: 10000 });
+  const [dl2] = await Promise.all([g.waitForEvent('download'), g.getByRole('button', { name: 'Download the jar' }).click()]);
+  const jar2Path = join(shots, 'jar-v2.html');
+  await dl2.saveAs(jar2Path);
+  const h = await context.newPage();
+  h.on('pageerror', (e) => errors.push(`updated jar file: ${e}`));
+  await h.goto(pathToFileURL(jar2Path).href);
+  await h.waitForTimeout(1200);
+  for (const words of cardWords.slice(1, 3)) {
+    await h.getByLabel(/The 30 words/).fill(wordsOf(words));
+    await h.getByRole('button', { name: 'Offer this card' }).click();
+    await h.waitForTimeout(500);
+  }
+  await h.getByText(/opened by/).waitFor({ timeout: 15000 });
+  check(await h.getByText('Version two: the spare key moved to the blue bowl.').isVisible(), 'after an update, the same printed cards open the new words');
+  await h.close();
+} catch (e) {
+  check(false, `updating with the key: ${e.message}`);
+}
 await g.close();
 
 // Demo séance
