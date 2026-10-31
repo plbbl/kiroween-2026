@@ -9,28 +9,45 @@ interface JarProps {
   /** 0..1: how warm the light inside is; follows the candles. */
   warmth?: number;
   initials: string;
-  wax?: WaxState;
+  /** 'none' before the jar is sealed: no wax yet. */
+  wax?: WaxState | 'none';
+  /** False before sealing: the cork is not in yet. */
+  corked?: boolean;
+  /** Little paper notes fly out when the jar opens. */
+  notes?: boolean;
   size?: number;
   label?: string;
 }
 
-/**
- * A little glass jar with a ghost asleep inside, a cork, and a wax seal.
- * When it opens, the cork pops, the seal falls away, and the ghost wakes
- * up and floats out.
- */
+// Where the little paper notes fly to when the jar opens: x and y (for a
+// 220px jar), and how far each one turns.
+const NOTES: [number, number, number][] = [
+  [-150, -120, -30],
+  [-70, -190, 14],
+  [60, -200, -12],
+  [150, -110, 34],
+  [-120, -40, 22],
+  [130, -30, -26],
+];
+
 // A round-bellied jar with a short neck.
 const GLASS = 'M66 86 C36 94 22 122 22 156 C22 198 48 226 100 226 C152 226 178 198 178 156 C178 122 164 94 134 86 Z';
 
-export function Jar({ state = 'sealed', warmth = 0, initials, wax = 'whole', size = 220, label }: JarProps) {
+/**
+ * A little glass jar with a ghost asleep inside, a cork, and a wax seal.
+ * Before sealing the cork is out and the ghost is awake; when it opens, the
+ * cork pops, the seal falls away, the ghost floats out and the words fly
+ * out with it.
+ */
+export function Jar({ state = 'sealed', warmth = 0, initials, wax = 'whole', corked = true, notes = true, size = 220, label }: JarProps) {
   const id = useId().replace(/[^a-zA-Z0-9]/g, '');
-  const mood: Mood = state === 'open' ? 'happy' : state === 'stirring' ? 'open' : 'sleep';
+  const mood: Mood = state === 'open' || !corked ? 'happy' : state === 'stirring' ? 'open' : 'sleep';
   const style = { width: size, height: (size * 240) / 200, '--warmth': warmth } as CSSProperties;
 
   const url = (n: string) => `url(#${n}${id})`;
 
   return (
-    <div className={`jar jar-${state}`} style={style} role="img" aria-label={label ?? (state === 'open' ? 'The jar is open and the ghost is free' : 'A sealed jar with a ghost asleep inside')}>
+    <div className={`jar jar-${state}${corked ? '' : ' uncorked'}`} style={style} role="img" aria-label={label ?? (state === 'open' ? 'The jar is open and the ghost is free' : 'A sealed jar with a ghost asleep inside')}>
       <svg className="jar-back" viewBox="0 0 200 240" aria-hidden="true">
         <defs>
           <radialGradient id={`inner${id}`} cx="50%" cy="62%" r="55%">
@@ -130,9 +147,18 @@ export function Jar({ state = 'sealed', warmth = 0, initials, wax = 'whole', siz
         <path d="M72 36 L70 64" stroke="#fff" strokeOpacity="0.35" strokeWidth="4" strokeLinecap="round" />
       </svg>
 
-      <div className="jar-seal">
-        <WaxSeal initials={initials} state={wax} size={size * 0.27} />
-      </div>
+      {wax !== 'none' && (
+        <div className="jar-seal">
+          <WaxSeal initials={initials} state={wax} size={size * 0.27} />
+        </div>
+      )}
+      {state === 'open' && notes && (
+        <div className="jar-notes" aria-hidden="true">
+          {NOTES.map(([x, y, r], i) => (
+            <i key={i} style={{ '--x': `${(x * size) / 220}px`, '--y': `${(y * size) / 220}px`, '--r': `${r}deg`, '--i': i } as CSSProperties} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

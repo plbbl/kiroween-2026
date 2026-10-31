@@ -32,7 +32,7 @@ Phylactery joins the pieces, and makes a heavy subject gentle: death as a reunio
 
 ## The costume
 
-Kiroween purple, soft round shapes, and a cast of ghosts drawn as SVG. Every spooky element does a job:
+Kiroween purple and a cast of little ghosts drawn as SVG, shaded like soft vinyl toys. The rules are short: one character, one headline and one action per screen; the Halloween lives in the cast (eight costumes, one per friend), the candles, the jar and the night, never in props added for decoration. Every spooky element does a job:
 
 ![The cast](docs/screenshots/cast.jpg)
 
@@ -40,12 +40,13 @@ Kiroween purple, soft round shapes, and a cast of ghosts drawn as SVG. Every spo
 |---|---|
 | A card's ghost buddy | A visual fingerprint. Each card in a circle gets its own costume and emblem, derived from the jar and the card, so the ghost on screen must match the ghost on paper |
 | Sleepy candles | Unlock progress: each card wakes one candle |
-| The ghost in the jar | Asleep while sealed, stirring as candles light, out and happy when open |
+| The ghost in the jar | Awake while you write; asleep once corked and sealed; stirring as candles light; out and happy when open, with your words flying out as little notes |
+| The ring on the rug | Warms to amber as the circle gathers |
 | The wax seal | Pressed when the jar is encrypted, cracked when it opens |
 | The watch ghost's face | The watch state: happy, asking, worried, or holding up a sign for your friends |
 | Day and night | Lilac paper while you write; a starry night when friends gather |
 
-Motion is springy and small: ghosts bob and blink out of step, candles wobble, buttons press down, cards fly from the table to their candle, envelopes open and letters slide out. All sounds (a match, a flame, wax pressed and cracking, a bell) are synthesised live with the Web Audio API; there are no audio files, and sound is off until you turn it on. With *reduce motion* set, every state is kept and the movement is dropped. Printed cards are black-and-white line art.
+Motion marks a change of state, and is springy and small: the cork drops in and the wax is stamped, a tapped card glows and its ghost flies to a candle, the candle wakes, the seal cracks and the cork spins away, envelopes open and letters slide out. Only the ghost in focus and lit flames move on their own. All sounds (a match, a flame, wax pressed and cracking, a bell) are synthesised live with the Web Audio API; there are no audio files, and sound is off until you turn it on. With *reduce motion* set, every state is kept and the movement is dropped. Printed cards are black-and-white line art.
 
 ## Three promises
 

@@ -253,7 +253,7 @@ export function StepCircle({ draft, setDraft }: { draft: Draft; setDraft: (d: Dr
                   sound.strike();
                 }}
               >
-                <Candle lit={i < draft.threshold} justLit={i === draft.threshold - 1} size={50} phase={i * 0.6} key={`${i}-${i < draft.threshold}`} />
+                <Candle lit={i < draft.threshold} justLit={i === draft.threshold - 1} size={64} phase={i * 0.6} key={`${i}-${i < draft.threshold}`} />
                 <span>{h.name.trim() || `Friend ${k}`}</span>
               </button>
             );

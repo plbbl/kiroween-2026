@@ -1017,8 +1017,55 @@ select {
   z-index: 4;
   transform-origin: 50% 20%;
   transition:
-    transform 1.1s var(--spring),
-    opacity 900ms var(--soft) 500ms;
+    transform 520ms var(--spring),
+    opacity 200ms var(--soft);
+}
+
+/* Before sealing, the cork waits above the jar; it drops in with a squash. */
+.jar.uncorked .jar-cork {
+  transform: translateY(-34%) rotate(-6deg);
+  opacity: 0;
+}
+
+/* The words fly out of an open jar as little paper notes. */
+.jar-notes {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  z-index: 5;
+}
+
+.jar-notes i {
+  position: absolute;
+  width: 22px;
+  height: 27px;
+  margin: -13px 0 0 -11px;
+  border-radius: 3px 8px 3px 3px;
+  background:
+    linear-gradient(225deg, #e9dcc3 0 6px, transparent 6px) top right / 8px 8px no-repeat,
+    repeating-linear-gradient(#fffdf6 0 5px, #d9c6a2 5px 6.5px) 4px 7px / 14px 16px no-repeat,
+    #fffdf6;
+  box-shadow: 0 4px 10px -4px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  animation: note-out 1.8s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  animation-delay: calc(400ms + var(--i) * 90ms);
+}
+
+@keyframes note-out {
+  0% {
+    transform: translate(0, 0) rotate(0) scale(0.4);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(1);
+    opacity: 0;
+  }
 }
 
 .jar-seal {
@@ -1038,8 +1085,11 @@ select {
 }
 
 .jar-open .jar-cork {
-  transform: translate(26%, -42%) rotate(32deg);
+  transform: translate(18%, -58%) rotate(220deg) scale(0.8);
   opacity: 0;
+  transition:
+    transform 900ms cubic-bezier(0.2, 0.9, 0.3, 1),
+    opacity 400ms var(--soft) 450ms;
 }
 
 .jar-open .jar-ghost {
@@ -1234,174 +1284,6 @@ select {
   }
 }
 
-.peekers {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  border-radius: inherit;
-}
-
-.peeker {
-  position: absolute;
-  animation: peek-in 1.1s var(--spring) both;
-  animation-delay: calc(var(--i) * 140ms + 200ms);
-}
-
-@keyframes peek-in {
-  from {
-    opacity: 0;
-    scale: 0.6;
-  }
-  to {
-    opacity: 1;
-    scale: 1;
-  }
-}
-
-/* ── Halloween decor ──────────────────────────────────────── */
-
-.pumpkin,
-.bat,
-.moon,
-.web,
-.lantern,
-.candy {
-  display: block;
-  overflow: visible;
-}
-
-.pumpkin .pumpkin-face,
-.pumpkin .pumpkin-glow,
-.lantern .lantern-glow,
-.bat .bat-wing,
-.web .web-spider {
-  transform-box: view-box;
-}
-
-.pumpkin.lit .pumpkin-face {
-  animation: carved-flicker 2.4s ease-in-out infinite;
-  animation-delay: var(--phase, 0s);
-}
-
-.pumpkin.lit .pumpkin-glow,
-.lantern .lantern-glow {
-  transform-origin: center;
-  animation: glow 2.6s ease-in-out infinite;
-  animation-delay: var(--phase, 0s);
-}
-
-@keyframes carved-flicker {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  40% {
-    opacity: 0.82;
-  }
-  55% {
-    opacity: 0.96;
-  }
-  70% {
-    opacity: 0.86;
-  }
-}
-
-.bat.flap .bat-wing.left {
-  transform-origin: 40px 30px;
-  animation: flap-left 0.34s ease-in-out infinite alternate;
-}
-
-.bat.flap .bat-wing.right {
-  transform-origin: 60px 30px;
-  animation: flap-right 0.34s ease-in-out infinite alternate;
-}
-
-@keyframes flap-left {
-  from {
-    transform: rotate(16deg) scaleY(0.8);
-  }
-  to {
-    transform: rotate(-14deg);
-  }
-}
-
-@keyframes flap-right {
-  from {
-    transform: rotate(-16deg) scaleY(0.8);
-  }
-  to {
-    transform: rotate(14deg);
-  }
-}
-
-/* Bats cross the sky quickly, then stay away for a while. */
-/* Behind the page's content: main is a stacking context above the backdrop. */
-#main {
-  position: relative;
-  z-index: 1;
-}
-
-.flying-bats {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.flying-bat {
-  position: absolute;
-  left: 0;
-  animation: bat-cross linear infinite both;
-}
-
-.flying-bat-bob {
-  animation: bat-bob 1.4s ease-in-out infinite alternate;
-}
-
-@keyframes bat-cross {
-  0% {
-    transform: translateX(-80px);
-  }
-  32%,
-  100% {
-    transform: translateX(calc(100vw + 80px));
-  }
-}
-
-@keyframes bat-bob {
-  from {
-    translate: 0 -10px;
-  }
-  to {
-    translate: 0 10px;
-  }
-}
-
-.web {
-  color: rgba(122, 90, 180, 0.32);
-}
-
-[data-theme='night'] .web {
-  color: rgba(225, 210, 255, 0.28);
-}
-
-.web .web-spider {
-  transform-origin: 74px 52px;
-  animation: spider 5s ease-in-out infinite;
-}
-
-@keyframes spider {
-  0%,
-  100% {
-    transform: scaleY(1);
-  }
-  50% {
-    transform: scaleY(0.72);
-  }
-}
-
 /* ── Reduced motion: keep every state, drop the movement ─── */
 
 @media (prefers-reduced-motion: reduce) {
@@ -1417,8 +1299,7 @@ select {
 
   .candle .z,
   .jar-zzz i,
-  .sparkle,
-  .flying-bats {
+  .sparkle {
     display: none;
   }
 }

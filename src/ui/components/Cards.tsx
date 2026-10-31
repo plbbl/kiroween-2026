@@ -40,9 +40,6 @@ export function BuddyCard({
 }) {
   const body = (
     <>
-      <svg className="buddy-card-corners" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <path d="M10 84 L11 89 L16 90 L11 91 L10 96 L9 91 L4 90 L9 89 Z M90 84 L91 89 L96 90 L91 91 L90 96 L89 91 L84 90 L89 89 Z" />
-      </svg>
       <span className="buddy-card-num mono">
         {index + 1}/{total}
       </span>
@@ -83,7 +80,7 @@ function WordGrid({ words, columns }: { words: string[]; columns: number }) {
     <ol className="word-grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
       {words.map((w, i) => (
         <li key={i}>
-          <span className="n">{i + 1}</span>
+          <span className="n">{String(i + 1).padStart(2, '0')}</span>
           {w}
         </li>
       ))}

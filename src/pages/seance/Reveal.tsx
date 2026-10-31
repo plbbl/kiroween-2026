@@ -5,7 +5,8 @@ import { openLetter, type JarFile, type JarHolder, type Letter, type OpenedJar }
 import { DEMO_CARDS, isDemo } from '../../demo/demo.ts';
 import { Sparkles } from '../../ui/art/Decor.tsx';
 import { EmblemIcon } from '../../ui/art/Emblem.tsx';
-import { Ghost } from '../../ui/art/Ghost.tsx';
+import { Ghost, GhostHand } from '../../ui/art/Ghost.tsx';
+import { Jar } from '../../ui/art/Jar.tsx';
 import { WaxSeal, initialsOf } from '../../ui/art/WaxSeal.tsx';
 import { CardInput } from '../../ui/components/CardInput.tsx';
 import { href } from '../../ui/shell.tsx';
@@ -59,8 +60,8 @@ export function Reveal({ jar, opened, circle, buddies }: { jar: JarFile; opened:
   return (
     <div className="page reveal-page">
       <header className="narrow center reveal-head">
-        <div className="reveal-ghost pop">
-          <Ghost mood="happy" size={120} float />
+        <div className="reveal-jar">
+          <Jar initials={initialsOf(jar.owner)} state="open" wax="broken" warmth={1} notes={false} size={150} label={`${first}’s jar, open`} />
           <Sparkles burst="reveal" radius={120} count={14} />
         </div>
         <p className="tag rise">opened by {names(circle)}</p>
@@ -197,7 +198,11 @@ function Envelope({ jar, opened, holder, buddy }: { jar: JarFile; opened: Opened
     <div className={`envelope-wrap${letter ? ' opened' : ''}${letter || asking ? ' wide' : ''}`}>
       <div className="envelope" aria-hidden={!!letter}>
         <span className="envelope-buddy">
-          <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} mood={asking ? 'happy' : 'open'} size={64} float phase={holder.x * 0.7} />
+          <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} mood={asking ? 'happy' : 'open'} size={64} phase={holder.x * 0.7} />
+        </span>
+        <span className="envelope-hands" aria-hidden="true">
+          <GhostHand costume={buddy.costume} size={17} />
+          <GhostHand costume={buddy.costume} size={17} />
         </span>
         <div className="envelope-back" />
         <div className="envelope-front">

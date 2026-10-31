@@ -1,6 +1,4 @@
 import { useMemo, type CSSProperties } from 'react';
-import type { Costume } from '../../core/buddy.ts';
-import { Ghost, type Mood } from './Ghost.tsx';
 
 /** A burst of little sparkles. Change `burst` to play it again. */
 export function Sparkles({ burst, count = 12, radius = 90, colors = ['#ffe27a', '#ffffff', '#cdb8ff', '#ff8fb8'] }: { burst: number | string; count?: number; radius?: number; colors?: string[] }) {
@@ -46,34 +44,6 @@ export function Stars({ count = 60 }: { count?: number }) {
     <div className="stars" aria-hidden="true">
       {stars.map((s, i) => (
         <i key={i} style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.s, height: s.s, animationDelay: `${-s.d}s`, animationDuration: `${s.t}s` }} />
-      ))}
-    </div>
-  );
-}
-
-export interface Peeker {
-  costume: Costume;
-  mood?: Mood;
-  /** Position of the ghost's centre, in percent of the container. */
-  x: number;
-  y: number;
-  size: number;
-  rotate: number;
-  phase?: number;
-}
-
-/** Ghosts peeking in from the edges of a frame, half out of view. */
-export function Peekers({ ghosts }: { ghosts: Peeker[] }) {
-  return (
-    <div className="peekers" aria-hidden="true">
-      {ghosts.map((g, i) => (
-        <div
-          key={i}
-          className="peeker"
-          style={{ left: `${g.x}%`, top: `${g.y}%`, transform: `translate(-50%, -50%) rotate(${g.rotate}deg)`, '--i': i } as CSSProperties}
-        >
-          <Ghost costume={g.costume} mood={g.mood ?? 'open'} size={g.size} float phase={g.phase ?? i * 0.9} />
-        </div>
       ))}
     </div>
   );

@@ -45,22 +45,9 @@
 .edge-peeker.top {
   left: var(--at);
   top: 0;
-  transform: translate(-50%, -66%) rotate(var(--tilt));
+  /* Eyes and cheeks above the edge, the rest hidden behind it. */
+  transform: translate(-50%, -77%) rotate(var(--tilt));
   animation-name: peek-top;
-}
-
-.edge-peeker.left {
-  left: 0;
-  top: var(--at);
-  transform: translate(-72%, -50%) rotate(var(--tilt));
-  animation-name: peek-left;
-}
-
-.edge-peeker.right {
-  left: 100%;
-  top: var(--at);
-  transform: translate(-28%, -50%) rotate(var(--tilt));
-  animation-name: peek-right;
 }
 
 .edge-grip {
@@ -77,35 +64,9 @@
   transform: translate(-50%, -48%);
 }
 
-.edge-grip.left {
-  left: 0;
-  top: calc(var(--at) + 3%);
-  transform: translate(-45%, 0) rotate(-80deg);
-}
-
-.edge-grip.right {
-  left: 100%;
-  top: calc(var(--at) + 3%);
-  transform: translate(-55%, 0) rotate(80deg);
-}
-
 @keyframes peek-top {
   from {
     translate: 0 50px;
-    opacity: 0;
-  }
-}
-
-@keyframes peek-left {
-  from {
-    translate: 50px 0;
-    opacity: 0;
-  }
-}
-
-@keyframes peek-right {
-  from {
-    translate: -50px 0;
     opacity: 0;
   }
 }
@@ -123,17 +84,6 @@
   text-align: center;
   max-width: 680px;
   margin: 0 auto;
-}
-
-.hero-tag {
-  color: #fff;
-  font-size: 0.98rem;
-}
-
-.hero-twinkles svg {
-  position: absolute;
-  opacity: 0.8;
-  animation: twinkle 3.2s ease-in-out infinite;
 }
 
 .hero-title {
@@ -172,20 +122,6 @@
   margin-bottom: -76px;
 }
 
-.hero-candle {
-  position: relative;
-  z-index: 2;
-  margin-bottom: 2px;
-}
-
-.hero-candle.left {
-  margin-right: -30px;
-}
-
-.hero-candle.right {
-  margin-left: -30px;
-}
-
 .acts {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -194,13 +130,13 @@
 }
 
 .act {
-  display: grid;
-  grid-template-columns: 128px 1fr;
-  gap: 18px;
-  align-items: center;
-  padding: 20px 22px;
+  padding: 18px 18px 24px;
   text-align: left;
   transition: transform 400ms var(--spring);
+}
+
+.act > div:last-child {
+  padding: 0 8px;
 }
 
 .act:hover {
@@ -209,12 +145,13 @@
 
 .act-art {
   position: relative;
-  height: 128px;
+  height: 140px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   gap: 2px;
-  border-radius: 24px;
+  margin-bottom: 16px;
+  border-radius: 22px;
   background: var(--lilac-soft);
   padding-bottom: 6px;
 }
@@ -243,8 +180,8 @@
 
 .bubble {
   position: absolute;
-  top: 8px;
-  right: 4px;
+  top: 14px;
+  left: calc(50% + 34px);
   padding: 4px 10px;
   border-radius: 16px;
   background: #fff;
@@ -307,17 +244,12 @@
 .closing {
   position: relative;
   margin-top: 110px;
-  padding: 72px 24px 80px;
+  padding: 64px 24px 60px;
   border-radius: 44px;
   background: radial-gradient(ellipse at 50% 0%, #3a2366, #1a1130 70%);
   color: var(--fg);
   text-align: center;
   overflow: hidden;
-}
-
-.closing > :not(.closing-decor) {
-  position: relative;
-  z-index: 1;
 }
 
 .closing-ghost {
@@ -326,46 +258,6 @@
   margin-bottom: 12px;
 }
 
-.closing-decor > span {
-  position: absolute;
-}
-
-.closing-web {
-  left: 0;
-  top: 0;
-}
-
-.closing-moon {
-  right: 7%;
-  top: 8%;
-}
-
-.closing-pumpkin.left {
-  left: 6%;
-  bottom: 6%;
-}
-
-.closing-pumpkin.right {
-  right: 9%;
-  bottom: 7%;
-}
-
-.closing-lantern {
-  right: 17%;
-  bottom: 9%;
-}
-
-.closing-candy.one {
-  left: 17%;
-  bottom: 9%;
-  rotate: -18deg;
-}
-
-.closing-candy.two {
-  right: 4%;
-  bottom: 4%;
-  rotate: 24deg;
-}
 
 .closing-line {
   font-family: var(--display);
@@ -387,12 +279,23 @@
 }
 
 @media (max-width: 600px) {
-  .hero-altar .hero-candle {
-    display: none;
+  .edge-peeker.top,
+  .edge-grip.top {
+    scale: 0.7;
   }
 
+  /* Scaled down, the face sinks; lift it back above the edge. */
   .edge-peeker.top {
-    scale: 0.7;
+    translate: 0 -16px;
+  }
+
+  /* Room for the friends peeking over the top, below the menu. */
+  .hero-stage {
+    margin-top: 56px;
+  }
+
+  .hero-jar {
+    zoom: 0.74;
   }
 }
 
@@ -406,13 +309,6 @@
     min-height: 0;
     padding-top: 70px;
     border-radius: 34px;
-  }
-
-  .edge-peeker.left,
-  .edge-peeker.right,
-  .edge-grip.left,
-  .edge-grip.right {
-    display: none;
   }
 
   .hero-altar {
@@ -893,15 +789,6 @@
   transition: transform 450ms var(--spring), box-shadow 450ms var(--soft), opacity 400ms;
 }
 
-.buddy-card-corners {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  fill: #c9a6ff;
-  pointer-events: none;
-}
-
 button.buddy-card {
   cursor: pointer;
 }
@@ -1285,19 +1172,11 @@ textarea.mono-input {
   overflow: visible;
 }
 
-.rug-glint {
-  stroke: #ffd25a;
-  stroke-dasharray: 26 974;
-  stroke-linecap: round;
-  opacity: calc(var(--lit, 0) * 0.85);
-  animation: glint calc(14s - var(--lit, 0) * 8s) linear infinite;
-  filter: drop-shadow(0 0 4px #ffb547);
-}
-
-@keyframes glint {
-  to {
-    stroke-dashoffset: -1000;
-  }
+.rug-ring {
+  stroke: #ffc457;
+  opacity: var(--lit, 0);
+  filter: drop-shadow(0 0 5px #ffb547);
+  transition: opacity 900ms var(--soft);
 }
 
 .altar-glow {
@@ -1356,6 +1235,8 @@ textarea.mono-input {
 .spot-name.shown {
   opacity: 1;
   transform: none;
+  background: var(--sun);
+  color: var(--ink);
 }
 
 .altar-jar {
@@ -1433,19 +1314,37 @@ textarea.mono-input {
 }
 
 .demo-card {
-  width: 118px;
-  height: 160px;
+  width: 106px;
+  height: 150px;
+  padding: 10px 6px 12px;
   transform: rotate(var(--rot));
 }
 
 .demo-card .ghost {
-  width: 66px !important;
+  width: 62px !important;
   height: auto !important;
+}
+
+.demo-card .buddy-card-name {
+  font-size: 0.98rem;
 }
 
 .demo-card:hover:not(:disabled) {
   transform: rotate(0) translateY(-10px) scale(1.06);
-  box-shadow: 0 22px 40px -16px rgba(0, 0, 0, 0.6), 0 0 0 4px var(--sun);
+  box-shadow:
+    inset 0 0 0 5px #fffdf7,
+    inset 0 0 0 6px #ecdcc0,
+    0 22px 40px -16px rgba(0, 0, 0, 0.6),
+    0 0 0 4px var(--sun);
+}
+
+.demo-card.picked:not(.used) {
+  transform: rotate(0) translateY(-10px) scale(1.06);
+  box-shadow:
+    inset 0 0 0 5px #fffdf7,
+    inset 0 0 0 6px #ecdcc0,
+    0 0 0 4px var(--sun),
+    0 0 30px 6px rgba(255, 196, 87, 0.7);
 }
 
 .demo-card.used {
@@ -1468,10 +1367,10 @@ textarea.mono-input {
   margin-top: 6px;
 }
 
-.reveal-ghost {
+.reveal-jar {
   position: relative;
   width: fit-content;
-  margin: 0 auto 6px;
+  margin: 70px auto 6px;
 }
 
 .reveal-body {
@@ -1673,12 +1572,26 @@ textarea.mono-input {
   perspective: 900px;
 }
 
-/* The buddy peeks over the top, from behind. */
+/* The buddy peeks over the top from behind, holding on with both hands. */
 .envelope-buddy {
   position: absolute;
-  top: -58px;
-  right: 14%;
+  top: -52px;
+  right: 12%;
   z-index: 0;
+}
+
+.envelope-hands {
+  position: absolute;
+  top: -8px;
+  right: calc(12% + 8px);
+  z-index: 5;
+  display: flex;
+  gap: 18px;
+  transition: opacity 300ms;
+}
+
+.opened .envelope-hands {
+  opacity: 0;
 }
 
 .envelope-back {
@@ -2178,6 +2091,11 @@ textarea.mono-input {
   max-width: 100%;
   background: #fff0f6;
   border-color: #ffc3d6;
+}
+
+.msg.to-friends.relief {
+  background: #eafbf3;
+  border-color: #a8e8cb;
 }
 
 /* ── Guides ───────────────────────────────────────────────── */

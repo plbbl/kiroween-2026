@@ -74,7 +74,8 @@ export function Seal() {
   const [step, setStep] = useState(0);
   const [reached, setReached] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
-  const [wax, setWax] = useState<WaxState>('whole');
+  const [wax, setWax] = useState<WaxState | 'none'>('none');
+  const [corked, setCorked] = useState(false);
   const [burst, setBurst] = useState(0);
   const [result, setResult] = useState<SealResult | null>(null);
   const [error, setError] = useState('');
@@ -114,15 +115,21 @@ export function Seal() {
       setError(problems[0]!);
       return;
     }
+    // The cork drops in, the wax is stamped, the ghost falls asleep.
+    setCorked(true);
+    const sealing = sealJar(input);
+    sealing.catch(() => undefined); // handled below, once the wax is down
+    await wait(380);
     setWax('pressing');
     sound.thud();
     setTimeout(() => setBurst((b) => b + 1), 420);
     try {
-      const [sealed] = await Promise.all([sealJar(input), wait(1500)]);
+      const [sealed] = await Promise.all([sealing, wait(1700)]);
       setResult(sealed);
       window.scrollTo({ top: 0 });
     } catch (e) {
-      setWax('whole');
+      setCorked(false);
+      setWax('none');
       setError(e instanceof Error ? e.message : 'The jar could not be sealed.');
     }
   };
@@ -184,21 +191,23 @@ export function Seal() {
                     [draft.content.documents.length, 'place'],
                     [Object.values(draft.content.wishes).filter((w) => w.trim()).length, 'wish', 'wishes'],
                     [draft.holders.filter((h) => h.writing && h.letter.trim()).length, 'private letter'],
-                  ].map(([n, one, many]) => (
-                    <li key={one as string}>
-                      <b>{n}</b> {plural(n as number, one as string, many as string | undefined)}
-                    </li>
-                  ))}
+                  ]
+                    .filter(([n]) => (n as number) > 0)
+                    .map(([n, one, many]) => (
+                      <li key={one as string}>
+                        <b>{n}</b> {plural(n as number, one as string, many as string | undefined)}
+                      </li>
+                    ))}
                   <li>
                     <b>{capitalised(numberWord(draft.threshold))}</b> of {numberWord(draft.holders.length)} to open
                   </li>
                 </ul>
                 <div className="seal-jar">
-                  <Jar initials={initialsOf(draft.owner)} wax={wax} state={wax === 'pressing' ? 'sealed' : 'stirring'} warmth={0.5} size={220} />
+                  <Jar initials={initialsOf(draft.owner)} wax={wax} corked={corked} state={wax === 'pressing' ? 'sealed' : 'stirring'} warmth={0.5} size={220} />
                   <Sparkles burst={burst} radius={130} count={16} />
                 </div>
-                <button type="button" className="btn primary big" onClick={seal} disabled={wax === 'pressing'}>
-                  {wax === 'pressing' ? 'Sealing…' : 'Seal the jar'}
+                <button type="button" className="btn primary big" onClick={seal} disabled={corked}>
+                  {corked ? 'Sealing…' : 'Seal the jar'}
                 </button>
                 {error && (
                   <p className="error" role="alert">

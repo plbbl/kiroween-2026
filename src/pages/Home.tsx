@@ -4,25 +4,14 @@ import { Candle } from '../ui/art/Candle.tsx';
 import { EmblemIcon } from '../ui/art/Emblem.tsx';
 import { Ghost, GhostHand, type Mood } from '../ui/art/Ghost.tsx';
 import { Jar } from '../ui/art/Jar.tsx';
-import { Candy, FlyingBats, Lantern, Moon, Pumpkin, Web } from '../ui/art/Spooky.tsx';
 import { href, useAtmosphere } from '../ui/shell.tsx';
 
 const d = (ms: number) => ({ '--d': `${ms}ms` }) as CSSProperties;
 
-const TWINKLES = [
-  { x: 30, y: 18, s: 14, d: 0 },
-  { x: 72, y: 14, s: 10, d: 1.2 },
-  { x: 64, y: 62, s: 12, d: 2.1 },
-  { x: 24, y: 58, s: 9, d: 0.7 },
-  { x: 80, y: 40, s: 8, d: 1.8 },
-  { x: 12, y: 32, s: 10, d: 2.6 },
-  { x: 44, y: 8, s: 7, d: 3.1 },
-];
-
 interface EdgePeeker {
   costume: Costume;
   mood?: Mood;
-  edge: 'top' | 'left' | 'right';
+  edge: 'top';
   /** Along the edge, in percent of the hero. */
   at: number;
   size: number;
@@ -31,10 +20,8 @@ interface EdgePeeker {
 
 // Friends peeking over the hero's edges, holding on with little hands.
 const PEEKERS: EdgePeeker[] = [
-  { costume: 'skeleton', edge: 'top', at: 24, size: 118, tilt: -6 },
-  { costume: 'pumpkin', edge: 'top', at: 79, size: 96, tilt: 7, mood: 'wink' },
-  { costume: 'franken', edge: 'left', at: 40, size: 132, tilt: -10 },
-  { costume: 'sheet', edge: 'right', at: 30, size: 138, tilt: 9 },
+  { costume: 'skeleton', edge: 'top', at: 22, size: 118, tilt: -6 },
+  { costume: 'pumpkin', edge: 'top', at: 80, size: 104, tilt: 7, mood: 'wink' },
 ];
 
 /** The ghosts sit behind the hero; their hands are drawn in front of its edge. */
@@ -71,21 +58,10 @@ export function Home() {
 
   return (
     <div className="page home">
-      <FlyingBats />
       <div className="hero-stage">
         <HeroPeekers layer="ghosts" />
         <section className="hero" aria-labelledby="hero-title">
-          <div className="hero-twinkles" aria-hidden="true">
-            {TWINKLES.map((t, i) => (
-              <svg key={i} viewBox="0 0 20 20" style={{ left: `${t.x}%`, top: `${t.y}%`, width: t.s, height: t.s, animationDelay: `${-t.d}s` }}>
-                <path d="M10 0 C11 7 13 9 20 10 C13 11 11 13 10 20 C9 13 7 11 0 10 C7 9 9 7 10 0 Z" fill="#fff" />
-              </svg>
-            ))}
-          </div>
           <div className="hero-copy">
-            <p className="tag hero-tag pop" style={d(100)}>
-              a tiny ghost keeps your last words
-            </p>
             <h1 id="hero-title" className="hero-title pop" style={d(200)}>
               Phylactery
             </h1>
@@ -102,14 +78,8 @@ export function Home() {
             </div>
           </div>
           <div className="hero-altar">
-            <div className="hero-candle left pop" style={d(800)}>
-              <Candle lit size={86} phase={0.2} />
-            </div>
             <div className="hero-jar pop" style={d(650)}>
               <Jar initials="JA" size={250} warmth={0.45} />
-            </div>
-            <div className="hero-candle right pop" style={d(900)}>
-              <Candle lit={false} size={80} phase={1.1} />
             </div>
           </div>
         </section>
@@ -184,31 +154,8 @@ export function Home() {
       </section>
 
       <section className="closing wrap" data-theme="night">
-        <div className="closing-decor" aria-hidden="true">
-          <span className="closing-web">
-            <Web size={150} />
-          </span>
-          <span className="closing-moon">
-            <Moon size={120} />
-          </span>
-          <span className="closing-pumpkin left">
-            <Pumpkin size={96} phase={0.4} />
-          </span>
-          <span className="closing-lantern">
-            <Lantern size={46} phase={1.1} />
-          </span>
-          <span className="closing-pumpkin right">
-            <Pumpkin size={74} wink phase={1.7} />
-          </span>
-          <span className="closing-candy one">
-            <Candy hue="pink" />
-          </span>
-          <span className="closing-candy two">
-            <Candy hue="mint" size={28} />
-          </span>
-        </div>
         <div className="closing-ghost">
-          <Ghost mood="happy" size={110} float rim={0.55} />
+          <Ghost mood="happy" size={110} float rim={0.5} />
         </div>
         <p className="closing-line">Death gives life its meaning.</p>
         <p className="closing-sub">Leave something kind behind.</p>

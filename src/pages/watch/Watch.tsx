@@ -50,7 +50,9 @@ export function Watch({ params }: { params: URLSearchParams }) {
   const run = useMemo(() => runWatch(config, actions, day), [config, actions, day]);
   const full = useMemo(() => runWatch(config, actions, horizon), [config, actions, horizon]);
   const paused = run.status === 'paused';
-  const face = MOOD[run.status];
+  // Back after friends were asked: they are told all is well.
+  const relieved = run.status === 'well' && run.events.some((e) => e.kind === 'notify' && e.at < run.lastSign);
+  const face = relieved ? { mood: 'happy' as Mood, say: 'Phew! I told your friends you’re okay.' } : MOOD[run.status];
 
   useEffect(() => {
     if (!playing) return;
@@ -108,7 +110,7 @@ export function Watch({ params }: { params: URLSearchParams }) {
       ) : (
         <section className="narrow center watch-head">
           <div className="watch-hero">
-            <div className="speech pop" key={run.status}>
+            <div className="speech pop" key={relieved ? 'relieved' : run.status}>
               {face.say}
             </div>
             <Ghost mood={face.mood} size={130} float shadow />
@@ -228,8 +230,8 @@ export function Watch({ params }: { params: URLSearchParams }) {
               </div>
             ) : (
               <ol className="inbox-list" ref={inbox} tabIndex={0} aria-label="Messages, oldest first">
-                {messages.map((e) => (
-                  <Message key={`${e.kind}-${e.at}-${e.n ?? 0}`} event={e} of={config.reminders} />
+                {messages.map((e, i) => (
+                  <Message key={`${e.kind}-${e.at}-${e.n ?? 0}`} event={e} of={config.reminders} afterNotify={e.kind === 'checkin' && messages[i - 1]?.kind === 'notify'} />
                 ))}
               </ol>
             )}
@@ -256,17 +258,30 @@ export function Watch({ params }: { params: URLSearchParams }) {
   );
 }
 
-function Message({ event, of }: { event: WatchEvent; of: number }) {
+const friendsLine = HOLDERS.map((h) => h.split(' ')[0]).join(', ');
+
+function Message({ event, of, afterNotify = false }: { event: WatchEvent; of: number; afterNotify?: boolean }) {
   const when = `day ${Math.floor(event.at)}`;
   if (event.kind === 'checkin' || event.kind === 'pause' || event.kind === 'resume') {
     const text = event.kind === 'checkin' ? 'I’m here!' : event.kind === 'pause' ? 'Away for a while.' : 'Back again!';
     return (
-      <li className="msg from-owner pop">
-        <span className="msg-meta">
-          {FIRST} · {when}
-        </span>
-        <p>{text}</p>
-      </li>
+      <>
+        <li className="msg from-owner pop">
+          <span className="msg-meta">
+            {FIRST} · {when}
+          </span>
+          <p>{text}</p>
+        </li>
+        {afterNotify && (
+          <li className="msg to-friends relief pop">
+            <span className="msg-meta">
+              to {friendsLine} · {when}
+            </span>
+            <p className="msg-title">{OWNER} is okay</p>
+            <p>{OWNER} has just let us know they are well. Thank you for caring. There is nothing more to do.</p>
+          </li>
+        )}
+      </>
     );
   }
   if (event.kind === 'reminder') {
@@ -283,7 +298,7 @@ function Message({ event, of }: { event: WatchEvent; of: number }) {
   return (
     <li className="msg to-friends pop">
       <span className="msg-meta">
-        to {HOLDERS.map((h) => h.split(' ')[0]).join(', ')} · {when}
+        to {friendsLine} · {when}
       </span>
       <p className="msg-title">{m.subject}</p>
       <p>{m.body.split('\n\n').slice(1, 3).join(' ')}</p>

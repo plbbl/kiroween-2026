@@ -276,12 +276,12 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
       {flight && <FlyingBuddy key={flight.id} flight={flight} onDone={endFlight} />}
 
       <section className="narrow center circle-head">
-        <p className="tag pop">séance</p>
+        <p className="tag pop">{sealedOn ? `sealed ${sealedOn}` : 'séance'}</p>
         <h1 className="pop" style={{ '--d': '80ms' } as CSSProperties}>
           {first}’s jar
         </h1>
         <p className="lede rise" style={{ '--d': '180ms' } as CSSProperties}>
-          {sealedOn && `Sealed by ${jar.owner} on ${sealedOn}. `}Any {numberWord(k)} of {numberWord(jar.total)} friends can open it.
+          Any {numberWord(k)} of {numberWord(jar.total)} friends can open it.
         </p>
       </section>
 
@@ -295,7 +295,8 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
           </defs>
           <ellipse cx="500" cy="150" rx="470" ry="138" fill="url(#rug-fill)" />
           <ellipse cx="500" cy="150" rx="440" ry="122" fill="none" stroke="#9b6dff" strokeOpacity="0.55" strokeWidth="3" strokeDasharray="1 12" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-          <ellipse className="rug-glint" cx="500" cy="150" rx="440" ry="122" fill="none" strokeWidth="3" pathLength={1000} vectorEffect="non-scaling-stroke" />
+          {/* The ring warms to amber as the circle gathers. */}
+          <ellipse className="rug-ring" cx="500" cy="150" rx="440" ry="122" fill="none" strokeWidth="4" strokeDasharray="1 12" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
         </svg>
         <div className="altar-glow" />
 
@@ -316,10 +317,10 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
             >
               {buddy && (
                 <div className={`spot-buddy${Math.cos(a) < -0.2 ? ' left' : ''}${Math.abs(Math.cos(a)) <= 0.2 ? ' front' : ''}`}>
-                  <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} mood={phase === 'open' ? 'happy' : 'open'} size={62} float phase={i * 0.7} />
+                  <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} mood={phase === 'open' ? 'happy' : 'open'} size={72} float phase={i * 0.7} rim={0.6} />
                 </div>
               )}
-              <Candle lit={!!o} justLit={justLit === i} phase={i * 0.83} size={58} label={o ? `${o.holder.name}'s candle, lit` : 'A sleeping candle'} />
+              <Candle lit={!!o} justLit={justLit === i} phase={i * 0.83} size={74} label={o ? `${o.holder.name}'s candle, lit` : 'A sleeping candle'} />
               <span className={`spot-name${o ? ' shown' : ''}`}>{o?.holder.name ?? ''}</span>
             </div>
           );
@@ -334,17 +335,19 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
       <section className="narrow offering">
         {phase === 'gathering' ? (
           <>
-            <ul className="roster" aria-label="Who is here">
-              {jar.holders.map((h) => {
-                const b = buddies.get(h.x)!;
-                return (
-                  <li key={h.x} className={here.has(h.x) ? 'here' : ''}>
-                    <Ghost costume={b.costume} emblem={b.emblem} mood={here.has(h.x) ? 'happy' : 'sleep'} size={30} />
-                    <span>{h.name}</span>
-                  </li>
-                );
-              })}
-            </ul>
+            {!demo && (
+              <ul className="roster" aria-label="Who is here">
+                {jar.holders.map((h) => {
+                  const b = buddies.get(h.x)!;
+                  return (
+                    <li key={h.x} className={here.has(h.x) ? 'here' : ''}>
+                      <Ghost costume={b.costume} emblem={b.emblem} mood={here.has(h.x) ? 'happy' : 'sleep'} size={30} />
+                      <span>{h.name}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
 
             <div className="card offer-card">
               <h2 className="center">{offered.length === 0 ? 'Who’s here first?' : `${capitalised(numberWord(remaining))} more to go`}</h2>
@@ -395,6 +398,7 @@ function DemoTable({
   onOffer: (text: string, from?: DOMRect) => string | null;
 }) {
   const [note, setNote] = useState('');
+  const [picked, setPicked] = useState<string | null>(null);
   const used = new Set(offered.map((o) => o.holder.name));
   return (
     <div className="demo-table">
@@ -409,10 +413,14 @@ function DemoTable({
               buddy={buddies.get(holder.x)!}
               index={i}
               total={DEMO_CARDS.length}
-              className={`demo-card${used.has(c.name) ? ' used' : ''}`}
+              className={`demo-card${used.has(c.name) ? ' used' : ''}${picked === c.name ? ' picked' : ''}`}
               disabled={used.has(c.name)}
               style={{ '--rot': `${[-4, 3, -2, 4, -3][i]}deg` } as CSSProperties}
-              onClick={(e) => setNote(onOffer(c.shard, e.currentTarget.getBoundingClientRect()) ?? '')}
+              onClick={(e) => {
+                const refused = onOffer(c.shard, e.currentTarget.getBoundingClientRect());
+                setNote(refused ?? '');
+                if (!refused) setPicked(c.name);
+              }}
             />
           );
         })}
