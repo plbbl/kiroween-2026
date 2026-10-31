@@ -62,13 +62,16 @@ export function CardInput({ kind, onCard, disabled = false }: CardInputProps) {
       <div className="tabs" role="tablist" aria-label="How to offer the card">
         {(
           [
-            ['words', 'Type the words'],
-            ['camera', 'Scan the code'],
-            ['photo', 'Use a photo'],
+            ['words', 'Type the words', 'Words'],
+            ['camera', 'Scan the code', 'Scan'],
+            ['photo', 'Use a photo', 'Photo'],
           ] as const
-        ).map(([m, label]) => (
+        ).map(([m, label, short]) => (
           <button key={m} role="tab" aria-selected={mode === m} className={`tab${mode === m ? ' on' : ''}`} onClick={() => setMode(m)}>
-            {label}
+            <span className="tab-long">{label}</span>
+            <span className="tab-short" aria-hidden="true">
+              {short}
+            </span>
           </button>
         ))}
       </div>

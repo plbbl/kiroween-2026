@@ -300,7 +300,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
         {angles.map((deg, i) => {
           const a = (deg * Math.PI) / 180;
           const x = 50 + Math.cos(a) * 40;
-          const y = 62 + Math.sin(a) * 19;
+          const y = 62 + Math.sin(a) * 20;
           const o = offered[i];
           const buddy = o ? buddies.get(o.holder.x) : undefined;
           return (

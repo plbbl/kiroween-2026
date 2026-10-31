@@ -247,7 +247,7 @@ a {
   margin: 0 auto;
 }
 
-.stack > * + * {
+.stack > :not(:first-child) {
   margin-top: var(--gap, 1rem);
 }
 

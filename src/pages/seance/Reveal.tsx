@@ -194,18 +194,18 @@ function Envelope({ jar, opened, holder, buddy }: { jar: JarFile; opened: Opened
   };
 
   return (
-    <div className={`envelope-wrap${letter ? ' opened' : ''}`}>
+    <div className={`envelope-wrap${letter ? ' opened' : ''}${letter || asking ? ' wide' : ''}`}>
       <div className="envelope" aria-hidden={!!letter}>
+        <span className="envelope-buddy">
+          <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} mood={asking ? 'happy' : 'open'} size={52} float phase={holder.x * 0.7} />
+        </span>
         <div className="envelope-back" />
         <div className="envelope-front">
-          <span className="envelope-buddy">
-            <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} mood={letter ? 'happy' : 'open'} size={58} float />
-          </span>
           <span className="envelope-to">for {holder.name}</span>
         </div>
         <div className="envelope-flap">
           <span className="envelope-seal">
-            <WaxSeal initials={initialsOf(jar.owner)} size={54} state={letter ? 'broken' : 'whole'} />
+            <WaxSeal initials={initialsOf(jar.owner)} size={46} state={letter ? 'broken' : 'whole'} />
           </span>
         </div>
       </div>

@@ -6,6 +6,16 @@ import { Ghost } from '../art/Ghost.tsx';
 import { numberWord } from '../text.ts';
 import { Qr } from './Qr.tsx';
 
+/** A tiny envelope: this card's seal opens a private letter. */
+export function EnvelopeMark() {
+  return (
+    <svg width="18" height="13" viewBox="0 0 18 13" aria-hidden="true">
+      <rect x="1" y="1" width="16" height="11" rx="2.5" fill="#fff" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M2 2.2 L9 7.6 L16 2.2" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 /** The card as it appears on screen: a little ghost and a name. */
 export function BuddyCard({
   name,
@@ -37,7 +47,12 @@ export function BuddyCard({
         <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} size={84} float phase={index * 0.6} />
       </span>
       <span className="buddy-card-name">{name}</span>
-      {note && <span className="buddy-card-note">{note}</span>}
+      {note && (
+        <span className="buddy-card-note" title={note}>
+          <EnvelopeMark />
+          <span className="visually-hidden">{note}</span>
+        </span>
+      )}
     </>
   );
   return onClick ? (

@@ -5,7 +5,7 @@ import { Sparkles } from '../../ui/art/Decor.tsx';
 import { EmblemIcon } from '../../ui/art/Emblem.tsx';
 import { Jar } from '../../ui/art/Jar.tsx';
 import { initialsOf } from '../../ui/art/WaxSeal.tsx';
-import { BuddyCard, PrintableCard } from '../../ui/components/Cards.tsx';
+import { BuddyCard, EnvelopeMark, PrintableCard } from '../../ui/components/Cards.tsx';
 import { capitalised, numberWord } from '../../ui/text.ts';
 import { canMakeGrimoire, download, makeGrimoire, safeFilename } from '../../ui/grimoire.ts';
 import { href } from '../../ui/shell.tsx';
@@ -63,13 +63,21 @@ export function Sealed({ result }: { result: SealResult }) {
               buddy={buddies.get(c.x)!}
               index={i}
               total={n}
-              note={c.hasLetter ? 'with a letter' : undefined}
+              note={c.hasLetter ? `${c.name} has a private letter` : undefined}
               className="fan-card pop"
               style={{ '--rot': `${(i - mid) * 4}deg`, '--lift': `${Math.abs(i - mid) * 6}px`, '--d': `${200 + i * 110}ms` } as CSSProperties}
             />
           );
         })}
       </section>
+      {cards.some((c) => c.hasLetter) && (
+        <p className="fan-legend faint">
+          <span className="buddy-card-note">
+            <EnvelopeMark />
+          </span>
+          a private letter, opened with that card’s seal
+        </p>
+      )}
 
       <section className="todo narrow">
         <article className="todo-item card">

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { DEFAULT_WATCH, holderMessage, ownerReminder, runWatch, type OwnerAction, type WatchConfig, type WatchEvent, type WatchStatus } from '../../core/watch.ts';
 import { DEMO_JAR } from '../../demo/demo.ts';
 import { Ghost, type Mood } from '../../ui/art/Ghost.tsx';
-import { numberWord } from '../../ui/text.ts';
+import { numberWord, plural } from '../../ui/text.ts';
 import { useAtmosphere } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
 import { watchAvailable } from '../../ui/watchApi.ts';
@@ -86,6 +86,12 @@ export function Watch({ params }: { params: URLSearchParams }) {
   };
 
   const messages = run.events.filter((e) => e.kind === 'reminder' || e.kind === 'notify' || e.kind === 'checkin' || e.kind === 'pause' || e.kind === 'resume');
+  // Like a chat: the newest message is always in view.
+  const inbox = useRef<HTMLOListElement>(null);
+  useEffect(() => {
+    const el = inbox.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages.length]);
   const pct = (at: number) => `${(Math.min(at, horizon) / horizon) * 100}%`;
   const remindersNow = run.events.filter((e) => e.kind === 'reminder' && e.at > run.lastSign).length;
 
@@ -142,63 +148,90 @@ export function Watch({ params }: { params: URLSearchParams }) {
           </p>
         </div>
 
-        <div className="card timeline">
-          <div className="spread">
-            <h2 className="card-title">
-              <span className="tag try-tag">try it</span> Day <span className="day-num">{Math.floor(day)}</span>
-            </h2>
-            <span className={`status-pill s-${run.status}`}>
-              {run.status === 'reminding' ? `reminder ${remindersNow} of ${config.reminders}` : run.status === 'notified' ? 'friends asked' : run.status}
-            </span>
-          </div>
-
-          <div className="track" aria-label={`Day ${Math.floor(day)} of ${horizon}`}>
-            <div className="track-line" />
-            <div className="track-past" style={{ width: pct(day) }} />
-            {Array.from({ length: horizon + 1 }, (_, d) => (
-              <span key={d} className={`day${d % 7 === 0 ? ' week' : ''}`} style={{ left: pct(d) }}>
-                {d % 7 === 0 && <i>{d}</i>}
+        <div className="watch-main">
+          <div className="card timeline">
+            <div className="spread">
+              <h2 className="card-title">
+                <span className="tag try-tag">try it</span> Day <span className="day-num">{Math.floor(day)}</span>
+              </h2>
+              <span className={`status-pill s-${run.status}`}>
+                {run.status === 'reminding' ? `reminder ${remindersNow} of ${config.reminders}` : run.status === 'notified' ? 'friends asked' : run.status}
               </span>
-            ))}
-            {full.events
-              .filter((e) => e.at <= horizon)
-              .map((e, i) => (
-                <span key={i} className={`mark m-${e.kind}${e.at <= day ? ' passed' : ''}`} style={{ left: pct(e.at) }} title={`${e.kind}, day ${e.at.toFixed(1)}`} />
+            </div>
+
+            <div className="track" aria-label={`Day ${Math.floor(day)} of ${horizon}`}>
+              <div className="track-line" />
+              <div className="track-past" style={{ width: pct(day) }} />
+              {Array.from({ length: horizon + 1 }, (_, d) => (
+                <span key={d} className={`day${d % 7 === 0 ? ' week' : ''}`} style={{ left: pct(d) }}>
+                  {d % 7 === 0 && <i>{d}</i>}
+                </span>
               ))}
-            <span className="walker" style={{ left: pct(day) } as CSSProperties} aria-hidden="true">
-              <Ghost mood={face.mood} size={40} float />
-            </span>
+              {full.events
+                .filter((e) => e.at <= horizon)
+                .map((e, i) => (
+                  <span key={i} className={`mark m-${e.kind}${e.at <= day ? ' passed' : ''}`} style={{ left: pct(e.at) }} title={`${e.kind}, day ${e.at.toFixed(1)}`} />
+                ))}
+              <span className="walker" style={{ left: pct(day) } as CSSProperties} aria-hidden="true">
+                <Ghost mood={face.mood} size={40} float />
+              </span>
+            </div>
+
+            <div className="legend">
+              <span>
+                <i className="m-checkin" /> you said hi
+              </span>
+              <span>
+                <i className="m-due" /> a hello is due
+              </span>
+              <span>
+                <i className="m-reminder" /> a reminder
+              </span>
+              <span>
+                <i className="m-notify" /> friends asked
+              </span>
+            </div>
+
+            <div className="row controls">
+              <button type="button" className="btn primary small" onClick={() => setPlaying(!playing)} disabled={day >= horizon}>
+                {playing ? 'Pause time' : day >= horizon ? 'That’s all' : 'Let time pass'}
+              </button>
+              <button type="button" className="btn small" onClick={() => act('checkin')} disabled={paused}>
+                {run.status === 'notified' ? 'Knock knock, I’m here!' : 'Say “I’m here”'}
+              </button>
+              <button type="button" className="btn small" onClick={() => act(paused ? 'resume' : 'pause')}>
+                {paused ? 'Back again' : 'Go away for a bit'}
+              </button>
+              <button type="button" className="text-btn quiet" onClick={reset}>
+                Start over
+              </button>
+            </div>
           </div>
 
-          <div className="legend">
-            <span>
-              <i className="m-checkin" /> you said hi
-            </span>
-            <span>
-              <i className="m-due" /> a hello is due
-            </span>
-            <span>
-              <i className="m-reminder" /> a reminder
-            </span>
-            <span>
-              <i className="m-notify" /> friends asked
-            </span>
-          </div>
-
-          <div className="row controls">
-            <button type="button" className="btn primary small" onClick={() => setPlaying(!playing)} disabled={day >= horizon}>
-              {playing ? 'Pause time' : day >= horizon ? 'That’s all' : 'Let time pass'}
-            </button>
-            <button type="button" className="btn small" onClick={() => act('checkin')} disabled={paused}>
-              {run.status === 'notified' ? 'Knock knock, I’m here!' : 'Say “I’m here”'}
-            </button>
-            <button type="button" className="btn small" onClick={() => act(paused ? 'resume' : 'pause')}>
-              {paused ? 'Back again' : 'Go away for a bit'}
-            </button>
-            <button type="button" className="text-btn quiet" onClick={reset}>
-              Start over
-            </button>
-          </div>
+          <section className="card inbox" aria-labelledby="inbox-title">
+            <div className="spread">
+              <h2 id="inbox-title" className="card-title">
+                What would be sent
+              </h2>
+              <span className="faint">{messages.length > 0 && `${messages.length} ${plural(messages.length, 'message')}`}</span>
+            </div>
+            {messages.length === 0 ? (
+              <div className="inbox-empty">
+                <Ghost mood="sleep" size={56} float />
+                <p className="faint">Quiet so far. Let time pass, and don’t answer.</p>
+              </div>
+            ) : (
+              <ol className="inbox-list" ref={inbox} tabIndex={0} aria-label="Messages, oldest first">
+                {messages.map((e) => (
+                  <Message key={`${e.kind}-${e.at}-${e.n ?? 0}`} event={e} of={config.reminders} />
+                ))}
+              </ol>
+            )}
+            <p className="inbox-foot faint">
+              A preview with June’s demo jar: nothing here is really sent. A real watch only ever knows names, email addresses and times, never what is
+              inside a jar.
+            </p>
+          </section>
         </div>
       </section>
 
@@ -213,21 +246,6 @@ export function Watch({ params }: { params: URLSearchParams }) {
           </p>
         )}
       </div>
-
-      <section className="narrow chat" aria-label="Messages">
-        <h2 className="center section-title">What the preview would send</h2>
-        {messages.length === 0 && <p className="center faint">Nothing yet. Let time pass, and stay quiet.</p>}
-        {messages.map((e) => (
-          <Message key={`${e.kind}-${e.at}-${e.n ?? 0}`} event={e} of={config.reminders} />
-        ))}
-        <p className="note">
-          <Ghost size={30} mood="wink" />
-          <span>
-            These are previews with June’s demo jar, so nothing here is really sent. A real watch only ever knows names, email addresses and times,
-            never what is inside a jar.
-          </span>
-        </p>
-      </section>
     </div>
   );
 }
@@ -237,32 +255,32 @@ function Message({ event, of }: { event: WatchEvent; of: number }) {
   if (event.kind === 'checkin' || event.kind === 'pause' || event.kind === 'resume') {
     const text = event.kind === 'checkin' ? 'I’m here!' : event.kind === 'pause' ? 'Away for a while.' : 'Back again!';
     return (
-      <div className="msg from-owner pop">
+      <li className="msg from-owner pop">
         <span className="msg-meta">
           {FIRST} · {when}
         </span>
         <p>{text}</p>
-      </div>
+      </li>
     );
   }
   if (event.kind === 'reminder') {
     const m = ownerReminder(FIRST, event.n ?? 1, of);
     return (
-      <div className="msg to-owner pop">
+      <li className="msg to-owner pop">
         <span className="msg-meta">to {FIRST} · {when}</span>
         <p className="msg-title">{m.subject}</p>
         <p>{m.body}</p>
-      </div>
+      </li>
     );
   }
   const m = holderMessage(OWNER, HOLDERS[0]!);
   return (
-    <div className="msg to-friends pop">
+    <li className="msg to-friends pop">
       <span className="msg-meta">
         to {HOLDERS.map((h) => h.split(' ')[0]).join(', ')} · {when}
       </span>
       <p className="msg-title">{m.subject}</p>
       <p>{m.body.split('\n\n').slice(1, 3).join(' ')}</p>
-    </div>
+    </li>
   );
 }

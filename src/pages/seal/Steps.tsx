@@ -92,39 +92,41 @@ export function StepLeave({ content, setContent }: { content: JarContent; setCon
           </button>
         ))}
       </div>
-      <ul className="rows" aria-label="Accounts">
-        {accounts.map((a, i) => (
-          <li key={i} className="row-card pop">
-            <div className="row-grid">
-              <label className="field">
-                <span>Service</span>
-                <input type="text" value={a.service} placeholder="Email, bank, photos…" onChange={(e) => updateAccount(i, { service: e.target.value })} />
-              </label>
-              <label className="field">
-                <span>How to get in</span>
-                <input type="text" value={a.login} placeholder="Login, and where the password is" onChange={(e) => updateAccount(i, { login: e.target.value })} />
-              </label>
-              <label className="field">
-                <span>What should happen</span>
-                <select value={a.wish} onChange={(e) => updateAccount(i, { wish: e.target.value as AccountWish })}>
-                  {WISHES.map((w) => (
-                    <option key={w.value} value={w.value}>
-                      {w.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                <span>A note</span>
-                <input type="text" value={a.note} placeholder="Anything they should know" onChange={(e) => updateAccount(i, { note: e.target.value })} />
-              </label>
-            </div>
-            <button type="button" className="text-btn quiet remove" onClick={() => setAccounts(accounts.filter((_, j) => j !== i))} aria-label={`Remove ${a.service || 'this account'}`}>
-              Remove
-            </button>
-          </li>
-        ))}
-      </ul>
+      {accounts.length > 0 && (
+        <ul className="rows" aria-label="Accounts">
+          {accounts.map((a, i) => (
+            <li key={i} className="row-card pop">
+              <div className="row-grid">
+                <label className="field">
+                  <span>Service</span>
+                  <input type="text" value={a.service} placeholder="Email, bank, photos…" onChange={(e) => updateAccount(i, { service: e.target.value })} />
+                </label>
+                <label className="field">
+                  <span>How to get in</span>
+                  <input type="text" value={a.login} placeholder="Login, and where the password is" onChange={(e) => updateAccount(i, { login: e.target.value })} />
+                </label>
+                <label className="field">
+                  <span>What should happen</span>
+                  <select value={a.wish} onChange={(e) => updateAccount(i, { wish: e.target.value as AccountWish })}>
+                    {WISHES.map((w) => (
+                      <option key={w.value} value={w.value}>
+                        {w.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="field">
+                  <span>A note</span>
+                  <input type="text" value={a.note} placeholder="Anything they should know" onChange={(e) => updateAccount(i, { note: e.target.value })} />
+                </label>
+              </div>
+              <button type="button" className="text-btn quiet remove" onClick={() => setAccounts(accounts.filter((_, j) => j !== i))} aria-label={`Remove ${a.service || 'this account'}`}>
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
       <button type="button" className="btn small" onClick={() => addAccount()}>
         + Add an account
       </button>
@@ -133,25 +135,27 @@ export function StepLeave({ content, setContent }: { content: JarContent; setCon
         <h3>Where things are</h3>
         <span className="faint">The will, the deed, the spare key.</span>
       </div>
-      <ul className="rows" aria-label="Places">
-        {documents.map((d, i) => (
-          <li key={i} className="row-card pop">
-            <div className="row-grid two">
-              <label className="field">
-                <span>What</span>
-                <input type="text" value={d.item} placeholder="Will, deed, insurance, spare key…" onChange={(e) => updateDoc(i, { item: e.target.value })} />
-              </label>
-              <label className="field">
-                <span>Where</span>
-                <input type="text" value={d.location} placeholder="Blue folder, top drawer of the desk" onChange={(e) => updateDoc(i, { location: e.target.value })} />
-              </label>
-            </div>
-            <button type="button" className="text-btn quiet remove" onClick={() => setDocuments(documents.filter((_, j) => j !== i))} aria-label={`Remove ${d.item || 'this place'}`}>
-              Remove
-            </button>
-          </li>
-        ))}
-      </ul>
+      {documents.length > 0 && (
+        <ul className="rows" aria-label="Places">
+          {documents.map((d, i) => (
+            <li key={i} className="row-card pop">
+              <div className="row-grid two">
+                <label className="field">
+                  <span>What</span>
+                  <input type="text" value={d.item} placeholder="Will, deed, insurance, spare key…" onChange={(e) => updateDoc(i, { item: e.target.value })} />
+                </label>
+                <label className="field">
+                  <span>Where</span>
+                  <input type="text" value={d.location} placeholder="Blue folder, top drawer of the desk" onChange={(e) => updateDoc(i, { location: e.target.value })} />
+                </label>
+              </div>
+              <button type="button" className="text-btn quiet remove" onClick={() => setDocuments(documents.filter((_, j) => j !== i))} aria-label={`Remove ${d.item || 'this place'}`}>
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
       <button type="button" className="btn small" onClick={() => setDocuments([...documents, { item: '', location: '' }])}>
         + Add a place
       </button>
