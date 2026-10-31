@@ -14,3 +14,11 @@ build/
 e2e/shots/
 e2e/screens/
 .data/
+
+# Compiler output if tsc is run without --noEmit
+*.tsbuildinfo
+src/**/*.js
+server/*.js
+scripts/*.js
+netlify/functions/*.mjs
+vite.config.js
