@@ -613,6 +613,15 @@ select {
   box-shadow: var(--shadow);
 }
 
+/* At night, cards and notes are dense enough that no star shines through the words. */
+[data-theme='night'] .card {
+  background: rgba(34, 24, 58, 0.9);
+}
+
+[data-theme='night'] .note {
+  background: rgba(28, 20, 48, 0.88);
+}
+
 .chip {
   display: inline-flex;
   align-items: center;

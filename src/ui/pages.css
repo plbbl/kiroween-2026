@@ -1184,6 +1184,10 @@ textarea.mono-input {
   margin-bottom: 10px;
 }
 
+.circle-note {
+  margin-top: 16px;
+}
+
 .demo-table {
   margin: 4px 0 18px;
   padding-bottom: 16px;

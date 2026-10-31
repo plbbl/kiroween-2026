@@ -188,6 +188,8 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
   const angles = useMemo(() => candleAngles(k), [k]);
   const buddies = useMemo(() => circleBuddies(jarIdBytes(jar), jar.holders.map((h) => h.x)), [jar]);
   const first = jar.owner.split(/\s+/)[0] ?? jar.owner;
+  const sealed = new Date(jar.sealedAt);
+  const sealedOn = Number.isNaN(sealed.getTime()) ? '' : sealed.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   useEffect(() => {
     shell.setCandlelight(phase === 'gathering' ? offered.length / k : 1);
@@ -279,7 +281,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
           {first}’s jar
         </h1>
         <p className="lede rise" style={{ '--d': '180ms' } as CSSProperties}>
-          Any {numberWord(k)} of {numberWord(jar.total)} friends can open it.
+          {sealedOn && `Sealed by ${jar.owner} on ${sealedOn}. `}Any {numberWord(k)} of {numberWord(jar.total)} friends can open it.
         </p>
       </section>
 
@@ -354,6 +356,15 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
                 </p>
               )}
             </div>
+            {!demo && (
+              <p className="note circle-note">
+                <Ghost size={30} mood="wink" />
+                <span>
+                  {first} gave each of you a card. The jar opens only when {numberWord(k)} of you offer yours here. What you type stays on this
+                  device, and this page works without the internet.
+                </span>
+              </p>
+            )}
             {onLeave && (
               <p className="center">
                 <button type="button" className="text-btn quiet" onClick={onLeave}>
