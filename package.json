@@ -14,8 +14,10 @@
     "typecheck": "tsc --noEmit",
     "demo:jar": "node --experimental-strip-types scripts/make-demo-jar.ts",
     "e2e": "node e2e/run.mjs",
+    "screens": "node e2e/screens.mjs",
+    "check:offline": "node scripts/check-offline.mjs",
     "lint": "eslint .",
-    "check": "npm run typecheck && npm run lint && npm test && npm run build && npm run e2e",
+    "check": "npm run typecheck && npm run lint && npm run check:offline && npm test && npm run build && npm run e2e",
     "serve": "node --experimental-strip-types server/dev.ts"
   },
   "dependencies": {

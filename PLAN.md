@@ -1,6 +1,6 @@
 # Kiroween 2026 计划
 
-> 开发开始前用 Claude Code 起草。初版应用也由 Claude Code 完成（README 的 How it was built 一节有说明）；之后的开发在 Kiro 里继续，`.kiro/` 下的内容在 Kiro 里生成。
+> 开发开始前用 Claude Code 起草。初版应用也由 Claude Code 完成（README 的 How it was built 一节有说明）；之后的开发在 Kiro 里继续。`.kiro/` 已按 Kiro 当前格式搭好交接：steering、已完成功能的 specs（根据代码补写）、hooks、两个自定义 agent、MCP；之后的新 specs 在 Kiro 里生成。
 > 所有时间为太平洋时间（PT）。截止：**2026-12-04（周五）14:00 PT**，不延期，截止后不能修改。
 
 - 产品暂名：**Phylactery**（待定，见 §8）

@@ -1,0 +1,26 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "printed-cards-stay-valid",
+      "description": "Card and jar formats are printed on paper. Any edit to them is checked against the compatibility rules.",
+      "trigger": "PostFileSave",
+      "matcher": "src/core/(cards|jar|words|bytes)\\.ts$",
+      "action": {
+        "type": "agent",
+        "prompt": "You just changed {{filePath}}, which defines how cards and jars are encoded or decrypted. Re-read the 'Never break printed cards' section of the security steering. Confirm in one or two sentences that every card and jar made by an earlier version still parses and opens (including June's demo jar in src/demo/demo.json). If a rule changed, add or update a property test in src/core/core.test.ts that states it."
+      },
+      "enabled": true
+    },
+    {
+      "name": "look-at-the-screens",
+      "description": "After a spec task that touched the interface, take screenshots and review them against the design steering.",
+      "trigger": "PostTaskExec",
+      "action": {
+        "type": "agent",
+        "prompt": "If the task you just finished changed anything in src/ui, src/pages, src/App.tsx, index.html or a .css file: run `npm run build`, then `npm run screens -- desk <part>` and `npm run screens -- phone <part>` for the parts you touched (seal, seance, watch, guides, home, real). Open the screenshots in e2e/screens/ and check them against the design steering: alignment, overlap, wrapping at 390px, night contrast, reduced-motion end state. Fix what is off. If the task touched no interface code, do nothing."
+      },
+      "enabled": true
+    }
+  ]
+}

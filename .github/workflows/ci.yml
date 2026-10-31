@@ -22,6 +22,7 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
+      - run: npm run check:offline
       - run: npm test
       - run: npm run build
       - name: Install Playwright (only for the e2e walk-through)

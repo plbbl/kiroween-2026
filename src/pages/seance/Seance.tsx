@@ -12,7 +12,7 @@ import { BuddyCard } from '../../ui/components/Cards.tsx';
 import { capitalised, numberWord } from '../../ui/text.ts';
 import { CardInput } from '../../ui/components/CardInput.tsx';
 import { jarFromText } from '../../ui/grimoire.ts';
-import { useAtmosphere, useShell, wait } from '../../ui/shell.tsx';
+import { href, useAtmosphere, useShell, wait } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
 import { watchApi } from '../../ui/watchApi.ts';
 import { Reveal } from './Reveal.tsx';
@@ -393,6 +393,11 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
                   {first} gave each of you a card. The jar opens only when {numberWord(k)} of you offer yours here. What you type stays on this
                   device, and this page works without the internet.
                 </span>
+              </p>
+            )}
+            {!demo && (
+              <p className="center faint owner-link">
+                Is this your jar, {first}? <a href={`${href('seal')}?update`}>Change what’s inside</a> with your key.
               </p>
             )}
             {onLeave && (

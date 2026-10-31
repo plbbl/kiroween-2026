@@ -135,13 +135,14 @@ src/ui/              components, styles, sound, the jar file (grimoire), shell
 src/demo/            June's jar and its cards (from scripts/make-demo-jar.ts)
 server/dev.ts        local server: the app plus the watch service
 netlify/functions/   the watch service on Netlify
-e2e/                 Playwright walk-through
-.kiro/               Kiro specs, hooks and steering
+e2e/                 Playwright walk-through (run.mjs) and screenshots of every state (screens.mjs)
+.kiro/               Kiro steering, specs, hooks, custom agents, MCP settings (see .kiro/README.md)
+scripts/             the demo jar generator; the offline guard
 ```
 
 ## How it was built
 
-Created from scratch during the Submission Period (October 30 – December 4, 2026). No pre-existing code. Planning and the first implementation were done with Claude Code; development continues in Kiro, and the specs, hooks and steering used there live in [`/.kiro`](.kiro). A full write-up of how Kiro was used will be added before submission.
+Created from scratch during the Submission Period (October 30 – December 4, 2026). No pre-existing code. Planning and the first implementation were done with Claude Code; development continues in Kiro, and the steering, specs, hooks, custom agents and MCP settings used there live in [`/.kiro`](.kiro) (its README says which specs were written from existing code). A full write-up of how Kiro was used will be added before submission.
 
 ## License
 

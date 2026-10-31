@@ -1,0 +1,40 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "core-property-tests",
+      "description": "After the agent edits cryptography, cards or the watch schedule, run their property tests.",
+      "trigger": "PostFileSave",
+      "matcher": "src/core/.*\\.ts$",
+      "action": { "type": "command", "command": "npx vitest run src/core" },
+      "timeout": 180,
+      "enabled": true
+    },
+    {
+      "name": "watch-service-tests",
+      "description": "After the agent edits the watch service, run its tests with the fake clock.",
+      "trigger": "PostFileSave",
+      "matcher": "src/watch-service/.*\\.ts$",
+      "action": { "type": "command", "command": "npx vitest run src/watch-service" },
+      "timeout": 120,
+      "enabled": true
+    },
+    {
+      "name": "offline-guard",
+      "description": "Keep the promise that nothing but the watch client and the mail adapter can reach a network.",
+      "trigger": "PostFileSave",
+      "matcher": "src/.*\\.(ts|tsx)$",
+      "action": { "type": "command", "command": "node scripts/check-offline.mjs" },
+      "timeout": 30,
+      "enabled": true
+    },
+    {
+      "name": "fast-checks-before-done",
+      "description": "Before the agent says it is done: types, lint, the offline guard and all unit tests.",
+      "trigger": "Stop",
+      "action": { "type": "command", "command": "npm run typecheck && npm run lint && npm run check:offline && npm test" },
+      "timeout": 300,
+      "enabled": true
+    }
+  ]
+}

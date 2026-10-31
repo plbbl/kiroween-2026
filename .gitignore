@@ -12,4 +12,5 @@ build/
 
 # Playwright output
 e2e/shots/
+e2e/screens/
 .data/
