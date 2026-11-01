@@ -167,7 +167,13 @@ export function Watch({ params }: { params: URLSearchParams }) {
 
       {realFirst && (
         <div className="narrow real-first">
-          <StartWatch config={config} />
+          <StartWatch
+            config={config}
+            onChangeRhythm={() => {
+              setTuning(true);
+              requestAnimationFrame(() => document.getElementById('rhythm')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+            }}
+          />
           <ResendManage />
           <h2 className="center how-title">See how it works</h2>
         </div>

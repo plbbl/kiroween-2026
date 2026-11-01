@@ -274,7 +274,7 @@ export function ResendManage({ open = false }: { open?: boolean }) {
 }
 
 /** Start a real watch. Shown only where the service is running. */
-export function StartWatch({ config }: { config: WatchConfig }) {
+export function StartWatch({ config, onChangeRhythm }: { config: WatchConfig; onChangeRhythm?: () => void }) {
   // Coming from a jar just sealed: its names are already known; only the emails are new.
   const handed = jarHandoff.peek();
   const [owner, setOwner] = useState<PersonDraft>({ name: handed?.owner ?? '', email: '' });
@@ -423,6 +423,16 @@ export function StartWatch({ config }: { config: WatchConfig }) {
           {missing.length > 1 ? 'them' : firstName(missing[0]!)}.
         </p>
       )}
+      {/* The rhythm this watch will keep, with a way to change it. */}
+      <p className="rhythm-line">
+        <span className="label">Rhythm</span> “Still here?” every {config.cadenceDays === 1 ? 'day' : `${config.cadenceDays} days`}; friends asked after{' '}
+        {config.cadenceDays + config.graceDays} quiet days and {config.reminders} {plural(config.reminders, 'reminder')}.{' '}
+        {onChangeRhythm && (
+          <button type="button" className="text-btn" onClick={onChangeRhythm}>
+            Change
+          </button>
+        )}
+      </p>
       <div className="keep-jar">
         <p className="label">Your jar, for your friends</p>
         {jar ? (

@@ -13,7 +13,7 @@ import nunito800 from '@fontsource/nunito/files/nunito-latin-800-normal.woff2';
 // The Halloween wordmark: letters that drip like warm candle wax.
 import wetPaint from '@fontsource/rubik-wet-paint/files/rubik-wet-paint-latin-400-normal.woff2';
 
-const faces: [family: string, weight: number, style: 'normal' | 'italic', url: string][] = [
+const faces: [family: string, weight: number, style: 'normal' | 'italic', url: string, range?: string][] = [
   ['Fredoka', 500, 'normal', fredoka500],
   ['Fredoka', 600, 'normal', fredoka600],
   ['Fredoka', 700, 'normal', fredoka700],
@@ -22,14 +22,15 @@ const faces: [family: string, weight: number, style: 'normal' | 'italic', url: s
   ['Nunito', 700, 'normal', nunito700],
   ['Nunito', 800, 'normal', nunito800],
   ['Fragment Mono', 400, 'normal', mono400],
-  ['Rubik Wet Paint', 400, 'normal', wetPaint],
+  // Not the ellipsis: dripping dots read like commas, so "…" falls back to Fredoka.
+  ['Rubik Wet Paint', 400, 'normal', wetPaint, 'U+0000-2025, U+2027-FFFF'],
 ];
 
 export function installFonts(): void {
   const css = faces
     .map(
-      ([family, weight, style, url]) =>
-        `@font-face{font-family:'${family}';font-weight:${weight};font-style:${style};font-display:swap;src:url(${url}) format('woff2');}`,
+      ([family, weight, style, url, range]) =>
+        `@font-face{font-family:'${family}';font-weight:${weight};font-style:${style};font-display:swap;src:url(${url}) format('woff2');${range ? `unicode-range:${range};` : ''}}`,
     )
     .join('\n');
   const el = document.createElement('style');

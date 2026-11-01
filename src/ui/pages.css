@@ -332,8 +332,7 @@
   }
 
   .hero-bat.b1 {
-    top: 84px;
-    left: 8%;
+    display: none;
   }
 
   .hero-pumpkin.left {
@@ -996,6 +995,14 @@ input[aria-invalid='true'] {
     opacity 500ms var(--soft),
     max-height 700ms var(--soft),
     margin 700ms var(--soft);
+}
+
+/* The sealing is a big moment: its words drip like the wax being pressed. */
+.step-card.sealing .step-title {
+  font-family: var(--spooky);
+  font-weight: 400;
+  padding-bottom: 0.1em;
+  text-shadow: 0 0 30px rgba(196, 150, 255, 0.45);
 }
 
 .step-card.sealing .summary,
@@ -3848,6 +3855,21 @@ body:has(.seance-room) .scenery-moon {
 
 .how-title {
   margin: 56px 0 0;
+}
+
+/* The rhythm the new watch will keep. */
+.rhythm-line {
+  margin: 4px 0 14px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: var(--lilac);
+  color: var(--fg-soft);
+  font-size: 0.98rem;
+}
+
+.rhythm-line .label {
+  display: inline;
+  margin-right: 6px;
 }
 
 /* Where a real watch can start, its form comes first. */
