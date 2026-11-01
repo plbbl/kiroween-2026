@@ -36,7 +36,8 @@ function decodeCanvas(canvas: HTMLCanvasElement): string | null {
 function wrongHalf(kind: CardInputProps['kind'], count: number): string | null {
   if (kind === 'shard' && count === SEAL_WORDS) return 'That looks like your private seal, the smaller half. Use the 30 words on the card itself.';
   if (kind === 'seal' && count === SHARD_WORDS) return 'That looks like the card itself. Use the 17 words on your private seal, the smaller half.';
-  if (kind !== 'key' && count === KEY_WORDS) return 'That looks like the owner’s key. Use your own card.';
+  if (kind === 'shard' && count === KEY_WORDS) return 'That looks like the owner’s own key, not a card. The key opens the jar on its own: choose Seal, then “Change what’s inside”.';
+  if (kind === 'seal' && count === KEY_WORDS) return 'That looks like the owner’s own key. A letter needs its reader’s private seal.';
   return null;
 }
 
@@ -46,8 +47,8 @@ export function CardInput({ kind, onCard, disabled = false }: CardInputProps) {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const expected = kind === 'shard' ? SHARD_WORDS : kind === 'seal' ? SEAL_WORDS : KEY_WORDS;
-  const where = kind === 'shard' ? 'on the outside of the card' : kind === 'seal' ? 'on the inside, your seal' : 'on your key';
-  const action = kind === 'shard' ? 'Offer this card' : kind === 'seal' ? 'Break this seal' : 'Use my key';
+  const where = kind === 'shard' ? 'on your card' : kind === 'seal' ? 'on your private seal' : 'on your key';
+  const action = kind === 'shard' ? 'Use this card' : kind === 'seal' ? 'Open my letter' : 'Use my key';
 
   const submit = async (value: string) => {
     if (busy) return false;

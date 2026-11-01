@@ -11,6 +11,7 @@ export function capturePristinePage(): void {
   const clone = document.documentElement.cloneNode(true) as HTMLElement;
   clone.querySelector('#phylactery-jar')?.remove();
   clone.querySelector('meta[http-equiv="Content-Security-Policy"]')?.remove();
+  clone.querySelector('meta[name="phylactery-home"]')?.remove();
   const root = clone.querySelector('#root');
   if (root) root.innerHTML = '';
   pristine = '<!doctype html>\n' + clone.outerHTML;
@@ -31,19 +32,29 @@ function escapeHtml(s: string): string {
 
 /**
  * Where this copy of Phylactery lives, for a card or a file found years
- * later. Empty when running from a file, which has no address to give.
+ * later: the website itself, or for a jar file, the website it was made on.
+ * Empty when neither is known.
  */
+export function homeUrl(): string {
+  if (typeof location === 'undefined') return '';
+  if (/^https?:$/.test(location.protocol)) return (location.origin + location.pathname).replace(/\/index\.html$/, '/').replace(/\/$/, '');
+  const meta = document.querySelector<HTMLMetaElement>('meta[name="phylactery-home"]')?.content ?? '';
+  return /^https?:\/\/[^\s"<>]+$/.test(meta) ? meta : '';
+}
+
+/** The same, as people would type it: without "https://". */
 export function homeAddress(): string {
-  if (typeof location === 'undefined' || !/^https?:$/.test(location.protocol)) return '';
-  return (location.host + location.pathname).replace(/\/index\.html$/, '/').replace(/\/$/, '');
+  return homeUrl().replace(/^https?:\/\//, '');
 }
 
 export function makeGrimoire(jar: JarFile): string {
   if (!pristine) throw new Error('The page was not captured.');
   const home = homeAddress();
   const json = JSON.stringify(jar).replace(/</g, '\\u003c');
+  const url = homeUrl();
   const head =
     `<meta http-equiv="Content-Security-Policy" content="${CSP}">\n` +
+    (url ? `<meta name="phylactery-home" content="${escapeHtml(url)}">\n` : '') +
     `<script id="phylactery-jar" type="application/json">${json}</script>\n`;
   return pristine
     .replace('use the Phylactery website instead', home ? `go to ${escapeHtml(home)} instead` : 'use the Phylactery website instead')

@@ -19,7 +19,7 @@ function combos(n: number, k: number): number {
   return Math.round(r);
 }
 
-export function Sealed({ result, onStartOver }: { result: SealResult; onStartOver: () => void }) {
+export function Sealed({ result, onStartOver, replaces }: { result: SealResult; onStartOver: () => void; replaces?: string }) {
   const { jar, cards } = result;
   const buddies = useMemo(() => circleBuddies(cards[0]!.shard.jarId, cards.map((c) => c.x)), [cards]);
   const [check, setCheck] = useState<CircleCheck | null>(null);
@@ -33,11 +33,17 @@ export function Sealed({ result, onStartOver }: { result: SealResult; onStartOve
   const [saved, setSaved] = useState(false);
   // The key is printed on its own, so it is never handed out with the cards.
   const [printing, setPrinting] = useState<'cards' | 'key'>('cards');
+  // A cancelled print dialog looks the same as a finished one, so ask.
+  const [checking, setChecking] = useState<'cards' | 'key' | null>(null);
   const print = (what: 'cards' | 'key') => {
     flushSync(() => setPrinting(what));
     window.print();
-    if (what === 'cards') setPrinted(true);
-    else setKeyPrinted(true);
+    setChecking(what);
+  };
+  const confirmPrinted = () => {
+    if (checking === 'cards') setPrinted(true);
+    if (checking === 'key') setKeyPrinted(true);
+    setChecking(null);
   };
   const missing = [...(printed ? [] : ['print the cards']), ...(keyPrinted ? [] : ['print your key']), ...(saved ? [] : ['download the jar file'])];
   const list = (xs: string[]) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} or ${xs[xs.length - 1]}` : xs[0]);
@@ -72,6 +78,15 @@ export function Sealed({ result, onStartOver }: { result: SealResult; onStartOve
             `Checked: all ${check.opened} groups of ${numberWord(k)} open it${k > 2 ? `, and none of the ${check.refused} groups of ${numberWord(k - 1)} can` : ', and no one can alone'}.`}
           {check && !check.ok && 'Something is wrong with these cards. Please seal the jar again.'}
         </p>
+        <p className="still-to-do" role="status">
+          {missing.length ? `Before you close this page: ${list(missing)}.` : 'All done. You can close this page.'}
+        </p>
+        {replaces && (
+          <p className="faint replaces">
+            This jar replaces your earlier one. Its cards still open the old jar file: ask for them back, and change any password in it that
+            someone shouldn’t have.
+          </p>
+        )}
       </section>
 
       <section className="fan wrap" aria-label="The cards">
@@ -117,7 +132,19 @@ export function Sealed({ result, onStartOver }: { result: SealResult; onStartOve
                 {keyPrinted ? 'Print your key again' : 'Print your key'}
               </button>
             </div>
-            {(printed || keyPrinted) && <p className="faint">Check that every page came out. You can print again until you leave this page.</p>}
+            {checking && (
+              <div className="print-check" role="group" aria-label="Did it print?">
+                <p>{checking === 'cards' ? `Did all ${numberWord(n)} pages come out?` : 'Did your key come out?'}</p>
+                <div className="row centered">
+                  <button type="button" className="btn small primary" onClick={confirmPrinted}>
+                    Yes
+                  </button>
+                  <button type="button" className="btn small" onClick={() => print(checking)}>
+                    Print again
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </article>
         <article className="todo-item card">
@@ -125,8 +152,8 @@ export function Sealed({ result, onStartOver }: { result: SealResult; onStartOve
           <div>
             <h3>Give everyone their card and the jar file</h3>
             <p className="muted">
-              Tell each friend what the card is. Email them all the jar file: this app with your locked jar inside. It opens offline, and is safe
-              to send.
+              Tell each friend what the card is. Email them all the jar file: one file that holds your locked jar and opens in any browser, even
+              offline. It is safe to send.
             </p>
             <button
               type="button"
@@ -182,8 +209,10 @@ export function Sealed({ result, onStartOver }: { result: SealResult; onStartOve
 /** After the owner changed what is inside: the same cards, a new jar file. */
 export function Updated({ jar }: { jar: JarFile }) {
   const grimoireOk = canMakeGrimoire();
-  // The version in the name, so the newest file is easy to tell apart.
-  const base = safeFilename(`${jar.owner}'s jar, version ${jar.revision ?? 2}`);
+  // The version and the day in the name, so the newest file is easy to tell apart.
+  const base = safeFilename(`${jar.owner}'s jar, version ${jar.revision ?? 2} (${jar.sealedAt.slice(0, 10)})`);
+  const [saved, setSaved] = useState(false);
+  useLeaveWarning(saved ? null : 'You haven’t downloaded the new jar file yet. Leaving forgets it, and you would need to make the change again. Leave anyway?');
   const first = jar.owner.split(/\s+/)[0];
   const [service, setService] = useState<boolean | null>(null);
   useEffect(() => {
@@ -208,7 +237,15 @@ export function Updated({ jar }: { jar: JarFile }) {
           <div>
             <h3>Send the new jar file</h3>
             <p className="muted">Email it to the same friends, and ask them to delete the old one: it still opens with the cards, but shows the old words.</p>
-            <button type="button" className="btn primary" disabled={!grimoireOk} onClick={() => download(`${base}.html`, makeGrimoire(jar), 'text/html')}>
+            <button
+              type="button"
+              className="btn primary"
+              disabled={!grimoireOk}
+              onClick={() => {
+                download(`${base}.html`, makeGrimoire(jar), 'text/html');
+                setSaved(true);
+              }}
+            >
               Download the jar
             </button>
             {!grimoireOk && <p className="faint">The jar file can only be made from the built app.</p>}

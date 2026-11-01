@@ -25,7 +25,7 @@ const REFUSALS: Record<string, string> = {
 };
 
 export function Seance({ embedded, params }: { embedded: JarFile | null; params: URLSearchParams }) {
-  useAtmosphere('night');
+  useAtmosphere('night', null);
   const shell = useShell();
   const [jar, setJar] = useState<JarFile | null>(embedded);
   // A friend's link from the watch's email: the jar the owner left with it.
@@ -262,7 +262,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
       } catch (e) {
         return e instanceof CardError ? e.message : 'That card could not be read.';
       }
-      if (card.kind === 'seal') return 'That’s a private seal, from the inside of a card. Keep it for the letters.';
+      if (card.kind === 'seal') return 'That’s a private seal, the smaller half cut from a card. Keep it for the letters.';
       if (card.kind === 'key') return `That’s ${first}’s own key. It opens the jar without the cards: choose Seal, then “Change what’s inside”.`;
       const current = offeredRef.current;
       if (current.length >= k) return 'Every candle is already lit.';
@@ -400,8 +400,8 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
               <p className="note circle-note">
                 <Ghost size={30} mood="wink" />
                 <span>
-                  {first} gave each of you a card. The jar opens only when {numberWord(k)} of you offer yours here. What you type stays on this
-                  device, and this page works without the internet.
+                  {first} gave each of you a card. The jar opens only when {numberWord(k)} of you offer yours here, so if a card is lost, any{' '}
+                  {numberWord(k)} of the {numberWord(jar.total)} still do. What you type stays on this device, and this page works without the internet.
                 </span>
               </p>
             )}
@@ -450,7 +450,10 @@ function DemoTable({
   const used = new Set(offered.map((o) => o.holder.name));
   return (
     <div className="demo-table">
-      <p className="faint center">The cards are on the table. Tap any {numberWord(jar.threshold)}.</p>
+      <p className="faint center">
+        The cards are on the table.{' '}
+        {offered.length === 0 ? `Tap any ${numberWord(jar.threshold)}.` : `Tap ${numberWord(jar.threshold - offered.length)} more.`}
+      </p>
       <div className="demo-cards">
         {DEMO_CARDS.map((c, i) => {
           const holder = jar.holders.find((h) => h.name === c.name)!;

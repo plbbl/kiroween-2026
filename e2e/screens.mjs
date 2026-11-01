@@ -80,7 +80,7 @@ for (const which of sizes) {
     await shot('s5-error');
     await p.getByPlaceholder('Friend 2').fill('Mary');
     await p.getByPlaceholder('Friend 3').fill('Augustus');
-    await p.getByRole('button', { name: '+ Letter' }).first().click();
+    await p.getByRole('button', { name: /^Write a letter for/ }).first().click();
     await p.getByPlaceholder('Dear Charles,').fill('Dear Charles,\n\nThe engine was always yours.');
     await p.getByRole('radio', { name: '2 cards' }).click();
     await wait(700);
@@ -167,7 +167,7 @@ for (const which of sizes) {
     await to('.offer-card', -80);
     await shot('c3-table');
     await p.getByPlaceholder('first second third …').fill('apple banana cherry');
-    await p.getByRole('button', { name: 'Offer this card' }).click().catch(() => {});
+    await p.getByRole('button', { name: 'Use this card' }).click().catch(() => {});
     await wait(500);
     await to('.card-input', -60);
     await shot('c4-typing-error');

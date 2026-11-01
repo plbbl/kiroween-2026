@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { circleBuddies, circleCostumes } from '../../core/buddy.ts';
-import { randomBytes } from '../../core/bytes.ts';
+import { fromBase32, randomBytes, toBase32 } from '../../core/bytes.ts';
 import { JAR_ID_LENGTH, type KeyCard } from '../../core/cards.ts';
 import { emptyContent, jarIdBytes, resealJar, sealJar, validateSealInput, type JarContent, type JarFile, type OwnedJar, type SealResult } from '../../core/jar.ts';
 import { Candle } from '../../ui/art/Candle.tsx';
@@ -9,11 +9,13 @@ import { Ghost } from '../../ui/art/Ghost.tsx';
 import { Jar } from '../../ui/art/Jar.tsx';
 import { initialsOf, type WaxState } from '../../ui/art/WaxSeal.tsx';
 import { capitalised, numberWord, plural } from '../../ui/text.ts';
-import { useAtmosphere, useLeaveWarning, useShell, wait } from '../../ui/shell.tsx';
+import { useAtmosphere, useLeaveWarning, wait } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
 import { Sealed, Updated } from './Sealed.tsx';
 import { OpenForUpdate } from './Update.tsx';
 import { StepCircle, StepLeave, StepMessage, StepName, StepWishes, type Draft } from './Steps.tsx';
+
+const listNames = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : (names[0] ?? ''));
 
 const STEPS: { label: string; title: (d: Draft) => string; sub: string; art: ReactNode }[] = [
   {
@@ -99,8 +101,10 @@ function initialDraft(): Draft {
 
 /**
  * A new jar's draft and result outlive a visit to another page (to look at
- * the watch, say), but only in this page's memory: nothing is stored, and
- * closing the tab still forgets everything.
+ * the watch, say). The draft (never the cards or the key) also outlives a
+ * reload, in this tab's session storage: a phone that drops a tab while you
+ * look up a login must not lose an hour of writing. Closing the tab, or
+ * starting over, forgets it.
  */
 interface Kept {
   /** Chosen at the start, so each friend's ghost on the circle step is the one on their card. */
@@ -109,23 +113,98 @@ interface Kept {
   step: number;
   reached: number;
   result: SealResult | null;
+  /** Started from an older jar, to change who holds the cards: whose it was. */
+  replaces?: string;
 }
 let kept: Kept | null = null;
+
+const DRAFT_KEY = 'phylactery:draft';
+
+interface StoredDraft {
+  jarId: string;
+  draft: Draft;
+  step: number;
+  reached: number;
+  /** A jar was sealed from this draft: sealing it again must make a different jar. */
+  sealed: boolean;
+}
+
+function storeDraft(k: Kept): void {
+  try {
+    const stored: StoredDraft = { jarId: toBase32(k.jarId), draft: k.draft, step: k.step, reached: k.reached, sealed: !!k.result };
+    sessionStorage.setItem(DRAFT_KEY, JSON.stringify(stored));
+  } catch {
+    /* no storage here: the draft lives in memory only */
+  }
+}
+
+function forgetDraft(): void {
+  try {
+    sessionStorage.removeItem(DRAFT_KEY);
+  } catch {
+    /* nothing to forget */
+  }
+}
+
+function restoredDraft(): Kept | null {
+  try {
+    const raw = sessionStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw) as StoredDraft;
+    if (!s.draft?.content || !Array.isArray(s.draft.holders)) return null;
+    // The cards of a jar already sealed are gone with the reload; a new seal is a new jar.
+    const jarId = s.sealed ? randomBytes(JAR_ID_LENGTH) : fromBase32(s.jarId);
+    return { jarId, draft: s.draft, step: s.sealed ? 5 : s.step, reached: s.reached, result: null };
+  } catch {
+    return null;
+  }
+}
+
+/** Rows left empty are not sealed: the family would only see "An account" with nothing in it. */
+function withoutEmptyRows(content: JarContent): JarContent {
+  return {
+    ...content,
+    accounts: content.accounts.filter((a) => a.service.trim() || a.login.trim() || a.note.trim()),
+    documents: content.documents.filter((d) => d.item.trim() || d.location.trim()),
+  };
+}
 
 export function Seal({ params, embedded }: { params: URLSearchParams; embedded: JarFile | null }) {
   const [existing, setExisting] = useState<Existing | null>(null);
   const [fresh, setFresh] = useState(0);
-  if (params.has('update') && !existing) return <OpenForUpdate jar={embedded} onOpen={setExisting} />;
+  // Left an update for a new jar made from it: the address still says "update".
+  const [leftUpdate, setLeftUpdate] = useState(false);
+  if (params.has('update') && !existing && !leftUpdate) return <OpenForUpdate jar={embedded} onOpen={setExisting} />;
   const startOver = () => {
     kept = null;
+    forgetDraft();
     setFresh((n) => n + 1);
   };
-  return <Wizard existing={existing} key={existing?.jar.jarId ?? `new-${fresh}`} onStartOver={startOver} />;
+  // Everything written comes along; the circle can change, and the cards will be new.
+  const newJarFrom = (draft: Draft, from: JarFile) => {
+    kept = { jarId: randomBytes(JAR_ID_LENGTH), draft, step: 4, reached: 5, result: null, replaces: from.owner };
+    history.replaceState(null, '', `#/seal`);
+    setLeftUpdate(true);
+    setExisting(null);
+    setFresh((n) => n + 1);
+    window.scrollTo({ top: 0 });
+  };
+  return <Wizard existing={existing} key={existing?.jar.jarId ?? `new-${fresh}`} onStartOver={startOver} onNewJar={newJarFrom} />;
 }
 
-function Wizard({ existing, onStartOver }: { existing: Existing | null; onStartOver: () => void }) {
+function Wizard({
+  existing,
+  onStartOver,
+  onNewJar,
+}: {
+  existing: Existing | null;
+  onStartOver: () => void;
+  onNewJar: (draft: Draft, from: JarFile) => void;
+}) {
   const updating = existing !== null;
-  const memory = updating ? null : kept;
+  // What this wizard starts from, read once: a draft kept in memory or in this tab.
+  const [memory] = useState(() => (updating ? null : (kept ?? restoredDraft())));
+  const replaces = memory?.replaces;
   const [jarId] = useState(() => (existing ? jarIdBytes(existing.jar) : (memory?.jarId ?? randomBytes(JAR_ID_LENGTH))));
   const costumes = useMemo(() => {
     if (!existing) return circleCostumes(jarId);
@@ -146,20 +225,18 @@ function Wizard({ existing, onStartOver }: { existing: Existing | null; onStartO
   // You write by day. Sealing happens by candlelight, and the sealed jar sleeps under the night sky.
   const [dusk, setDusk] = useState(false);
   const [candleLit, setCandleLit] = useState(false);
-  useAtmosphere(dusk || result || updated ? 'night' : 'day');
-  const shell = useShell();
+  useAtmosphere(dusk || result || updated ? 'night' : 'day', candleLit ? 0.9 : result || updated ? 0.5 : 0);
   useEffect(() => {
-    shell.setCandlelight(candleLit ? 0.9 : result || updated ? 0.5 : 0);
-  }, [shell, candleLit, result, updated]);
-  useEffect(() => {
-    if (!updating) kept = { jarId, draft, step, reached, result };
-  }, [updating, jarId, draft, step, reached, result]);
+    if (updating) return;
+    kept = { jarId, draft, step, reached, result, ...(replaces ? { replaces } : {}) };
+    if (draft.owner.trim() || draft.content.message.trim() || draft.holders.some((h) => h.name.trim())) storeDraft(kept);
+  }, [updating, jarId, draft, step, reached, result, replaces]);
   const [error, setError] = useState('');
 
   const input = useMemo(
     () => ({
       owner: draft.owner,
-      content: draft.content,
+      content: withoutEmptyRows(draft.content),
       threshold: draft.threshold,
       holders: draft.holders.map((h) => ({ name: h.name, letter: h.writing ? h.letter : '' })),
       jarId,
@@ -167,17 +244,19 @@ function Wizard({ existing, onStartOver }: { existing: Existing | null; onStartO
     [draft, jarId],
   );
   const problems = validateSealInput(input);
+  const letterNames = draft.holders.filter((h) => h.writing && h.letter.trim()).map((h) => h.name.trim().split(/\s+/)[0] || 'someone');
 
-  // Nothing is stored anywhere, so ask before the tab is closed. Moving to
-  // another page is safe: a new jar's draft is kept in memory (an update's
-  // is not, so leaving an update asks too).
+  // A new jar's draft survives a reload or a visit to another page, but not
+  // closing the tab, so ask then. An update's draft is not kept at all (it
+  // came from the key), so leaving an update asks too.
   const [original] = useState(() => JSON.stringify(draft));
   const unsaved = updating ? JSON.stringify(draft) !== original : !!(draft.owner || draft.content.message);
-  useLeaveWarning(!result && !updated && unsaved ? 'What you wrote is not sealed yet, and is not saved anywhere. Leave anyway?' : null, {
+  useLeaveWarning(!result && !updated && unsaved ? 'What you wrote is not sealed yet. Closing this tab forgets it. Leave anyway?' : null, {
     inApp: updating,
   });
 
   const goTo = (n: number) => {
+    if (corked) return;
     setDirection(n >= step ? 1 : -1);
     setStep(n);
     setReached((r) => Math.max(r, n));
@@ -239,7 +318,7 @@ function Wizard({ existing, onStartOver }: { existing: Existing | null; onStartO
     }
   };
 
-  if (result) return <Sealed result={result} onStartOver={onStartOver} />;
+  if (result) return <Sealed result={result} onStartOver={onStartOver} replaces={replaces} />;
   if (updated) return <Updated jar={updated} />;
 
   const current = updating ? (UPDATE_STEPS[step] ?? STEPS[step]!) : STEPS[step]!;
@@ -261,7 +340,7 @@ function Wizard({ existing, onStartOver }: { existing: Existing | null; onStartO
                 <button
                   type="button"
                   className={`trail-dot${i <= step ? ' done' : ''}${i === step ? ' current' : ''}`}
-                  disabled={i > reached || (updating && i === 0)}
+                  disabled={corked || i > reached || (updating && i === 0)}
                   onClick={() => goTo(i)}
                   aria-current={i === step ? 'step' : undefined}
                   aria-label={`Step ${i + 1}: ${s.label}`}
@@ -287,16 +366,17 @@ function Wizard({ existing, onStartOver }: { existing: Existing | null; onStartO
             {step === 1 && <StepMessage content={draft.content} setContent={setContent} />}
             {step === 2 && <StepLeave content={draft.content} setContent={setContent} />}
             {step === 3 && <StepWishes content={draft.content} setContent={setContent} />}
-            {step === 4 && <StepCircle draft={draft} setDraft={setDraft} locked={updating} costumes={costumes} />}
+            {step === 4 && (
+              <StepCircle draft={draft} setDraft={setDraft} locked={updating} costumes={costumes} onNewJar={existing ? () => onNewJar(draft, existing.jar) : undefined} />
+            )}
             {step === 5 && (
               <div className="seal-stage">
                 <ul className="summary" aria-label="What goes in the jar">
                   {[
                     [draft.content.message.trim() ? draft.content.message.trim().split(/\s+/).length : 0, 'word in your note', 'words in your note'],
-                    [draft.content.accounts.length, 'account'],
-                    [draft.content.documents.length, 'place'],
+                    [input.content.accounts.length, 'account'],
+                    [input.content.documents.length, 'place'],
                     [Object.values(draft.content.wishes).filter((w) => w.trim()).length, 'wish', 'wishes'],
-                    [draft.holders.filter((h) => h.writing && h.letter.trim()).length, 'private letter'],
                   ]
                     .filter(([n]) => (n as number) > 0)
                     .map(([n, one, many]) => (
@@ -304,6 +384,11 @@ function Wizard({ existing, onStartOver }: { existing: Existing | null; onStartO
                         <b>{n}</b> {plural(n as number, one as string, many as string | undefined)}
                       </li>
                     ))}
+                  {letterNames.length > 0 && (
+                    <li>
+                      {letterNames.length > 1 ? 'Letters' : 'A letter'} for <b>{listNames(letterNames)}</b>
+                    </li>
+                  )}
                   <li>
                     <b>{capitalised(numberWord(draft.threshold))}</b> of {numberWord(draft.holders.length)} to open
                   </li>
@@ -350,7 +435,7 @@ function Wizard({ existing, onStartOver }: { existing: Existing | null; onStartO
               </button>
             </div>
           )}
-          {step === 5 && (
+          {step === 5 && !corked && (
             <div className="step-nav">
               <button type="button" className="text-btn quiet" onClick={() => goTo(4)}>
                 ← Back

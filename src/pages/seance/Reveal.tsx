@@ -332,7 +332,7 @@ function SealEntry({ jar, opened, holder, onOpen }: { jar: JarFile; opened: Open
     } catch (e) {
       return e instanceof CardError ? e.message : 'That seal could not be read.';
     }
-    if (card.kind !== 'seal') return 'That’s the outside of a card. This needs the private seal from the inside.';
+    if (card.kind !== 'seal') return 'That’s a card, not a private seal. A letter opens with the smaller half cut from its reader’s card.';
     if (card.x !== holder.x) return `That seal belongs to someone else. This letter is for ${firstName}.`;
     try {
       const l = await openLetter(jar, opened, card);

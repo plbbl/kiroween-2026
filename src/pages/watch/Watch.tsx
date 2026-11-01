@@ -3,6 +3,7 @@ import { DEFAULT_WATCH, holderMessage, ownerReminder, runWatch, type OwnerAction
 import { DEMO_JAR } from '../../demo/demo.ts';
 import { Ghost, type Mood } from '../../ui/art/Ghost.tsx';
 import { numberWord, plural } from '../../ui/text.ts';
+import { homeAddress, homeUrl } from '../../ui/grimoire.ts';
 import { useAtmosphere } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
 import { watchAvailable } from '../../ui/watchApi.ts';
@@ -104,6 +105,8 @@ export function Watch({ params }: { params: URLSearchParams }) {
   const linked = !!linkActionOf(params);
   // Where the watch service runs, starting a real watch comes first, beside the rhythm it will use.
   const realFirst = service === true && !linked;
+  // A jar file knows the website it was made on, where a real watch can start.
+  const home = location.protocol === 'file:' ? homeUrl() : '';
 
   return (
     <div className="page watch-page">
@@ -128,6 +131,27 @@ export function Watch({ params }: { params: URLSearchParams }) {
             One gentle question now and then. Go quiet, and your friends are asked to look in on you.
           </p>
         </section>
+      )}
+
+      {service === false && !linked && (
+        <div className="narrow service">
+          <p className="note">
+            <Ghost size={30} mood="sleep" />
+            <span>
+              {home ? (
+                <>
+                  This copy of Phylactery can’t send email (a jar file never can), so here you can only try the rhythm. To start a real watch, go to{' '}
+                  <a href={`${home}/#/watch`} target="_blank" rel="noopener">
+                    {homeAddress()}
+                  </a>
+                  .
+                </>
+              ) : (
+                'This copy of Phylactery has no watch service (a jar file never has), so here you can only try the rhythm. Everything else works.'
+              )}
+            </span>
+          </p>
+        </div>
       )}
 
       <section className="wrap watch-grid">
@@ -257,16 +281,6 @@ export function Watch({ params }: { params: URLSearchParams }) {
         </div>
       </section>
 
-      <div className="narrow service">
-        {service === false && (
-          <p className="note">
-            <Ghost size={30} mood="sleep" />
-            <span>
-              This copy of Phylactery has no watch service (the offline jar file never does), so here you can only try the rhythm. Everything else works.
-            </span>
-          </p>
-        )}
-      </div>
     </div>
   );
 }

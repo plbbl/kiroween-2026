@@ -1039,6 +1039,43 @@ button.buddy-card {
   margin-top: 6px;
 }
 
+.print-check {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--surface-2);
+  border: 2px solid var(--line-strong);
+}
+
+.print-check p {
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+.still-to-do {
+  margin: 10px 0 0;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.replaces {
+  max-width: 560px;
+  margin: 8px auto 0;
+}
+
+.newest-hint {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+}
+
+.new-jar-note {
+  margin-top: 6px;
+}
+
+.new-jar-note p {
+  margin: 0 0 10px;
+}
+
 .print-buttons {
   display: flex;
   flex-wrap: wrap;

@@ -4,7 +4,7 @@ import { cardToQrText, cardToWords, SHARD_SHARED_WORDS } from '../../core/cards.
 import type { KeyCard } from '../../core/cards.ts';
 import type { HolderCards } from '../../core/jar.ts';
 import { Ghost } from '../art/Ghost.tsx';
-import { homeAddress } from '../grimoire.ts';
+import { homeAddress, safeFilename } from '../grimoire.ts';
 import { numberWord } from '../text.ts';
 import { Qr } from './Qr.tsx';
 
@@ -118,7 +118,8 @@ function ShardFace({ owner, circle, card, buddy, index, total, threshold }: Prin
       </div>
       <WordGrid words={cardToWords(card.shard)} columns={5} />
       <footer className="card-foot">
-        You also need {first}’s jar file, which {first} emails to each of you (keep that email). When the time comes, gather, open it
+        You also need {first}’s jar file, “{safeFilename(`${owner}'s jar`)}.html”, which {first} emails to each of you (keep that email). When the
+        time comes, gather, open it
         {homeAddress() ? ` (or ${homeAddress()}, then Séance)` : ''}, and each offer your card. Keep this card safe, like a house key. Never post a photo
         of it. Words {SHARD_SHARED_WORDS.from} to {SHARD_SHARED_WORDS.to} are the same on every card of this jar.
       </footer>
@@ -131,7 +132,7 @@ function SealFace({ owner, card, buddy }: PrintProps) {
   return (
     <section className="card-face seal-face" aria-label={`Private seal for ${card.name}`}>
       <header className="card-head">
-        <span>your private seal</span>
+        <span>{owner}’s jar · your private seal</span>
         <span>for {card.name} only</span>
       </header>
       <div className="card-body">

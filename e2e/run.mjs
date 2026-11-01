@@ -73,6 +73,13 @@ await next();
 await settle(500);
 await page.getByLabel('Your note to everyone').fill('If you are reading this, thank you for coming.\n\nBe gentle with each other.');
 await shot('03-seal-message', false);
+// A phone that drops the tab while you look something up must not lose the draft.
+await page.reload();
+await settle(900);
+check(
+  (await page.getByLabel('Your note to everyone').inputValue()).endsWith('Be gentle with each other.'),
+  'a reload keeps the draft, in this tab only',
+);
 await next();
 await settle(500);
 await page.getByRole('button', { name: '+ Password manager' }).click();
@@ -90,7 +97,7 @@ await next();
 await settle(500);
 const names = ['Charles', 'Mary', 'Augustus'];
 for (let i = 0; i < names.length; i++) await page.getByPlaceholder(`Friend ${i + 1}`).fill(names[i]);
-await page.getByRole('button', { name: '+ Letter' }).first().click();
+await page.getByRole('button', { name: /^Write a letter for/ }).first().click();
 await page.getByPlaceholder('Dear Charles,').fill('Dear Charles,\n\nThe engine was always yours.');
 await page.getByRole('radio', { name: '2 cards' }).click();
 await settle(1200);
@@ -154,16 +161,18 @@ g.on('pageerror', (e) => errors.push(`jar file: ${e}`));
 await g.goto(pathToFileURL(jarPath).href);
 await g.waitForTimeout(1500);
 check(await g.getByRole('heading', { name: 'Ada’s jar' }).isVisible(), 'the jar file opens straight into its séance');
+await g.getByLabel(/The 30 words/).fill(wordsOf(keyWords));
+check(await g.getByText(/owner’s own key, not a card/).isVisible(), 'the owner’s key typed at the séance is recognised, with where it does open the jar');
 for (const words of cardWords.slice(0, 2)) {
   await g.getByLabel(/The 30 words/).fill(wordsOf(words));
-  await g.getByRole('button', { name: 'Offer this card' }).click();
+  await g.getByRole('button', { name: 'Use this card' }).click();
   await g.waitForTimeout(500);
 }
 await g.getByText(/opened by/).waitFor({ timeout: 15000 });
 check(await g.getByText('Be gentle with each other.').isVisible(), 'two typed cards open the jar file');
 await g.getByRole('button', { name: 'Open with Charles’s seal' }).click();
 await g.getByLabel(/The 17 words/).fill(wordsOf(sealWords));
-await g.getByRole('button', { name: 'Break this seal' }).click();
+await g.getByRole('button', { name: 'Open my letter' }).click();
 await g.getByText('The engine was always yours.').waitFor({ timeout: 6000 });
 check(true, 'the private seal opens its letter');
 
@@ -188,12 +197,31 @@ try {
   await h.waitForTimeout(1200);
   for (const words of cardWords.slice(1, 3)) {
     await h.getByLabel(/The 30 words/).fill(wordsOf(words));
-    await h.getByRole('button', { name: 'Offer this card' }).click();
+    await h.getByRole('button', { name: 'Use this card' }).click();
     await h.waitForTimeout(500);
   }
   await h.getByText(/opened by/).waitFor({ timeout: 15000 });
   check(await h.getByText('Version two: the spare key moved to the blue bowl.').isVisible(), 'after an update, the same printed cards open the new words');
   await h.close();
+
+  // To change who holds the cards, the owner starts a new jar from the old one.
+  await g.goto(`${pathToFileURL(jar2Path).href}#/seal?update`);
+  await g.reload();
+  await g.getByLabel(/The 28 words/).fill(wordsOf(keyWords));
+  await g.getByRole('button', { name: 'Use my key' }).click();
+  await g.getByRole('heading', { name: 'A note for everyone' }).waitFor({ timeout: 6000 });
+  for (let i = 0; i < 3; i++) await g.getByRole('button', { name: /^Next/ }).click();
+  await g.getByRole('button', { name: 'Start a new jar from this one' }).click();
+  await g.getByRole('heading', { name: 'Who keeps the cards?' }).waitFor({ timeout: 6000 });
+  await g.getByRole('button', { name: 'Remove Augustus' }).click();
+  await g.getByRole('button', { name: /^Almost done/ }).click();
+  check(await g.getByText(/A letter for/).isVisible(), 'a new jar from an old one keeps what was written, letters included');
+  await g.getByRole('button', { name: 'Seal the jar' }).click();
+  await g.getByRole('heading', { name: /Sealed!/ }).waitFor({ timeout: 10000 });
+  check(
+    (await g.getByText('Two cards were made. Any two of them open the jar.').isVisible()) && (await g.getByText(/replaces your earlier one/).isVisible()),
+    'the new jar has the new circle, and says what to do about the old cards',
+  );
 } catch (e) {
   check(false, `updating with the key: ${e.message}`);
 }
@@ -212,7 +240,7 @@ await table.nth(0).click();
 await settle(1600);
 await shot('12-seance-one', false);
 await page.getByLabel(/The 30 words/).fill(demo.cards[2].sealWords);
-check(await page.getByRole('button', { name: 'Offer this card' }).isDisabled(), 'a seal cannot be offered as a card (word count)');
+check(await page.getByRole('button', { name: 'Use this card' }).isDisabled(), 'a seal cannot be offered as a card (word count)');
 await table.nth(1).click();
 await settle(1300);
 await table.nth(3).click();

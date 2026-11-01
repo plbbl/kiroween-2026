@@ -104,12 +104,17 @@ export function useShell(): Shell {
   return s;
 }
 
-/** Set the page atmosphere while a page is shown. */
-export function useAtmosphere(theme: 'day' | 'night') {
+/**
+ * Set the page atmosphere while a page is shown: day or night, and how much
+ * candlelight warms the night (none, unless the page says so; null leaves it
+ * to the page, which sets it itself).
+ */
+export function useAtmosphere(theme: 'day' | 'night', candlelight: number | null = 0) {
   const shell = useShell();
   useEffect(() => {
     shell.setTheme(theme);
-  }, [shell, theme]);
+    if (candlelight !== null) shell.setCandlelight(candlelight);
+  }, [shell, theme, candlelight]);
 }
 
 export function prefersReducedMotion(): boolean {

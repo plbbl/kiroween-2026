@@ -34,8 +34,8 @@ export function StepName({ draft, setOwner }: { draft: Draft; setOwner: (s: stri
       <p className="note">
         <Ghost size={30} mood="wink" />
         <span>
-          Nothing is saved until you seal the jar: if you leave this page, or switch apps on a phone, your words may vanish. That is on purpose. Have
-          your logins at hand before you start.
+          What you write stays in this tab, on this device, until you seal it: a reload won’t lose it, but closing the tab will. Nothing is sent
+          anywhere. Have your logins at hand before you start.
         </span>
       </p>
       <p className="faint update-link">
@@ -208,7 +208,20 @@ export function StepWishes({ content, setContent }: { content: JarContent; setCo
  * every printed card, so only the letters can change; `costumes` are then
  * the real buddies on those cards.
  */
-export function StepCircle({ draft, setDraft, locked = false, costumes }: { draft: Draft; setDraft: (d: Draft) => void; locked?: boolean; costumes: Costume[] }) {
+export function StepCircle({
+  draft,
+  setDraft,
+  locked = false,
+  costumes,
+  onNewJar,
+}: {
+  draft: Draft;
+  setDraft: (d: Draft) => void;
+  locked?: boolean;
+  costumes: Costume[];
+  /** When updating: start a new jar, with new cards, from what is written here. */
+  onNewJar?: () => void;
+}) {
   const n = draft.holders.length;
   const key = (name: string) => name.trim().toLowerCase();
   const twice = (name: string) => !!key(name) && draft.holders.filter((h) => key(h.name) === key(name)).length > 1;
@@ -239,8 +252,15 @@ export function StepCircle({ draft, setDraft, locked = false, costumes }: { draf
                   />
                 </label>
               )}
-              <button type="button" className={`chip${h.writing ? ' on' : ''}`} onClick={() => update(i, { writing: !h.writing })} aria-expanded={h.writing}>
-                {h.writing ? '✓ Letter' : '+ Letter'}
+              {/* Removing keeps the words in the draft, so adding the letter back brings them back. */}
+              <button
+                type="button"
+                className="chip"
+                onClick={() => update(i, { writing: !h.writing })}
+                aria-expanded={h.writing}
+                aria-label={h.writing ? `Remove the letter for ${h.name || `friend ${i + 1}`}` : `Write a letter for ${h.name || `friend ${i + 1}`}`}
+              >
+                {h.writing ? 'Remove letter' : '+ Letter'}
               </button>
               {n > 2 && !locked && (
                 <button type="button" className="icon-btn small" onClick={() => setHolders(draft.holders.filter((_, j) => j !== i))} aria-label={`Remove ${h.name || `friend ${i + 1}`}`}>
@@ -266,6 +286,20 @@ export function StepCircle({ draft, setDraft, locked = false, costumes }: { draf
         <button type="button" className="btn small" onClick={() => setHolders([...draft.holders, { name: '', letter: '', writing: false }])}>
           + Add a friend
         </button>
+      )}
+      {locked && onNewJar && (
+        <div className="note new-jar-note">
+          <Ghost size={30} mood="open" />
+          <div>
+            <p>
+              To add or remove someone, start a new jar from this one. Everything you wrote comes along, and everyone gets a new card. The old cards
+              still open the old jar file, so change any password in it that someone shouldn’t have.
+            </p>
+            <button type="button" className="btn small" onClick={onNewJar}>
+              Start a new jar from this one
+            </button>
+          </div>
+        </div>
       )}
 
       <div className="threshold" data-theme="night">

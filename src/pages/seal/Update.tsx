@@ -60,7 +60,8 @@ export function OpenForUpdate({ jar: given, onOpen }: { jar: JarFile | null; onO
           {first ? `${first}’s jar` : 'Change what’s inside'}
         </h1>
         <p className="lede rise" style={{ '--d': '160ms' } as CSSProperties}>
-          With your key, write new words into the same jar. Your friends keep their cards.
+          With your key, change the words inside. Your friends keep their cards, and anyone holding one can open the new words too. To change who
+          holds them, open it here and start a new jar from it.
         </p>
       </section>
 
@@ -76,6 +77,7 @@ export function OpenForUpdate({ jar: given, onOpen }: { jar: JarFile | null; onO
                   Sealed {new Date(jar.sealedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                   {jar.revision && jar.revision > 1 ? ` · version ${jar.revision}` : ''} · {jar.holders.map((h) => h.name.split(/\s+/)[0]).join(', ')}
                 </p>
+                <p className="faint newest-hint">Make sure this is your newest jar file, the one you sent last.</p>
                 {!given && (
                   <button type="button" className="text-btn" onClick={() => setJar(null)}>
                     Choose another file

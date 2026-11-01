@@ -62,11 +62,6 @@ export function App() {
     document.documentElement.style.setProperty('--candlelight', String(candlelight));
   }, [candlelight]);
 
-  // Each page starts with no candle burning; a page that lights one says so in its own (later) effect.
-  useLayoutEffect(() => {
-    setCandlelight(0);
-  }, [route]);
-
   const shell = useMemo(() => ({ setTheme, setCandlelight }), []);
 
   // The purple pill under the current page slides from link to link.

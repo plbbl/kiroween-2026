@@ -125,7 +125,7 @@ export function ownerReminder(owner: string, n: number, of: number): { subject: 
     body:
       `One tap below lets us know you are well. ` +
       (n === of
-        ? `If we don't hear from you, the people holding your cards will be asked to check on you.`
+        ? `If we don't hear from you, the friends on your watch will be asked to check on you.`
         : `This is reminder ${n} of ${of}.`),
   };
 }
