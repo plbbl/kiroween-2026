@@ -268,14 +268,6 @@ export function Scenery() {
         <div className="scenery-spider">
           <Spider size={26} />
         </div>
-        <div className="scenery-bats">
-          <Bat size={30} color="rgba(106, 46, 224, 0.45)" className="flyer f1" />
-          <Bat size={22} color="rgba(106, 46, 224, 0.35)" className="flyer f2" />
-        </div>
-        {/* Now and then a shy ghost peeks up from the corner, looks at you, and hides. */}
-        <div className="corner-peeker">
-          <Ghost mood="curious" size={84} look={{ x: -0.8, y: -0.6 }} />
-        </div>
       </div>
       <div className="scenery-set night-set nightfall">
         <Moon size={190} className="scenery-moon" />

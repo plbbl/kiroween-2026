@@ -129,13 +129,8 @@ export function Home() {
         <HeroPeekers layer="ghosts" ducked={ducked} />
         <section className="hero" aria-labelledby="hero-title">
           <div className="hero-copy">
-            <h1 id="hero-title" className="hero-title pop" style={d(200)} aria-label="Phylactery">
-              {/* Each letter floats a little, out of step with the others, like a ghost. */}
-              {'Phylactery'.split('').map((ch, i) => (
-                <span key={i} className="float-letter" style={{ '--i': i } as CSSProperties} aria-hidden="true">
-                  {ch}
-                </span>
-              ))}
+            <h1 id="hero-title" className="hero-title pop" style={d(200)}>
+              Phylactery
             </h1>
             <p className="hero-sub rise" style={d(380)}>
               Leave your passwords, papers and last words in a jar that only your friends, together, can open.
@@ -155,9 +150,9 @@ export function Home() {
           {/* A Halloween night inside the hero: the moon, bats, a hill with lit pumpkins. */}
           <div className="hero-night" aria-hidden="true">
             <Moon size={150} cloud className="hero-moon" />
-            <Bat size={70} color="#3b1680" className="hero-bat b1" />
-            <Bat size={48} color="#4a1fa0" className="hero-bat b2" />
-            <Bat size={40} color="#4a1fa0" className="hero-bat b3" />
+            <Bat size={70} color="#3b1680" flap={false} className="hero-bat b1" />
+            <Bat size={48} color="#4a1fa0" flap={false} className="hero-bat b2" />
+            <Bat size={40} color="#4a1fa0" flap={false} className="hero-bat b3" />
             <svg className="hero-hill" viewBox="0 0 1000 120" preserveAspectRatio="xMidYMax slice">
               <path d="M0 70 C140 40 260 46 380 64 C470 78 540 50 620 44 C760 34 860 70 1000 52 L1000 120 L0 120 Z" fill="#3a1f78" />
               {/* A small old house on the far hill, its windows lit. */}
@@ -208,21 +203,21 @@ export function Home() {
               <EmblemIcon name="key" size={26} />
             </span>
             <h3>No one opens it alone</h3>
-            <p className="muted">Not one friend, not a company, not us. Fewer cards than you choose reveal nothing at all.</p>
+            <p className="muted">Not one friend, not a company, not this website. Too few cards reveal nothing.</p>
           </div>
           <div className="promise">
             <span className="promise-icon" style={{ background: '#ffe7f1', color: '#e0457a' }}>
               <EmblemIcon name="heart" size={26} />
             </span>
             <h3>Nothing leaves unlocked</h3>
-            <p className="muted">Free, no account, no tracking. Your words are locked in your browser before anything is saved or sent.</p>
+            <p className="muted">Locked in your browser before anything is saved or sent. No account, no tracking.</p>
           </div>
           <div className="promise">
             <span className="promise-icon" style={{ background: '#fff3d6', color: '#e39a14' }}>
               <EmblemIcon name="star" size={26} />
             </span>
-            <h3>It outlives us</h3>
-            <p className="muted">Keep your jar as one small file that opens offline, years from now, even if this website is gone.</p>
+            <h3>It outlives this website</h3>
+            <p className="muted">Your jar is one small file. It opens offline, years from now.</p>
           </div>
         </div>
       </section>
@@ -235,7 +230,7 @@ export function Home() {
         </div>
         <p className="closing-line">One day your friends will gather.</p>
         <p className="closing-sub">Leave them something to open together.</p>
-        <a className="btn primary drip" href={href('seal')}>
+        <a className="btn primary" href={href('seal')}>
           Seal a jar
         </a>
       </section>

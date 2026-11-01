@@ -101,20 +101,20 @@ export function LinkAction({ params }: { params: URLSearchParams }) {
   } else if (left !== null) {
     mood = 'happy';
     title = `You’ve left ${left}’s watch`;
-    body = 'You won’t get emails about them again. If we sent you a link to their jar, it still works. Thank you.';
+    body = 'No more emails about them. Any link to their jar you were sent still works. Thank you.';
   } else if (view) {
     if (action === 'confirm') {
       mood = 'happy';
       title = 'You’re all set!';
-      body = `We’ll ask “still here?” about every ${view.config.cadenceDays === 1 ? 'day' : `${view.config.cadenceDays} days`}. The first time will be ${day(view.nextAsk)}. Keep the email we sent: its manage link is your way back here.`;
+      body = `“Still here?” comes about every ${view.config.cadenceDays === 1 ? 'day' : `${view.config.cadenceDays} days`}, first on ${day(view.nextAsk)}. Keep the email: its manage link brings you back here.`;
     } else if (action === 'here') {
       mood = 'happy';
       title = `Thank you, ${firstName(view.owner)}!`;
-      body = `Glad you’re here. We’ll ask again ${view.nextAsk ? `on ${day(view.nextAsk)}` : 'soon'}.`;
+      body = `Glad you’re here. Next “still here?” ${view.nextAsk ? `on ${day(view.nextAsk)}` : 'soon'}.`;
     } else {
       mood = view.status === 'paused' ? 'sleep' : view.status === 'well' ? 'happy' : 'worried';
       title = `${firstName(view.owner)}’s watch`;
-      body = view.status === 'paused' ? 'Paused. Nothing will be sent until you resume.' : view.nextAsk ? `Next “still here?” on ${day(view.nextAsk)}.` : 'We are waiting for a sign from you.';
+      body = view.status === 'paused' ? 'Paused. Nothing will be sent until you resume.' : view.nextAsk ? `Next “still here?” on ${day(view.nextAsk)}.` : 'Waiting for a sign from you.';
     }
   }
 
@@ -127,7 +127,7 @@ export function LinkAction({ params }: { params: URLSearchParams }) {
       <h1>{title}</h1>
       {body && <p className="muted">{body}</p>}
       {error && action !== 'optout' && (
-        <p className="faint">Each new email replaces the links in the one before. Try the newest email from us.</p>
+        <p className="faint">Each new email replaces the links in the one before. Try the newest one.</p>
       )}
       {error && action === 'manage' && <ResendManage open />}
       {action === 'manage' && view && !deleted && (
@@ -250,7 +250,7 @@ export function ResendManage({ open = false }: { open?: boolean }) {
       </p>
     ) : (
       <form className="resend-form" onSubmit={send} noValidate>
-        <p className="muted">Give the address your watch belongs to, and we send a new manage link there.</p>
+        <p className="muted">A new manage link goes to the address your watch belongs to.</p>
         <div className="resend-row">
           <input type="email" aria-label="The email your watch belongs to" placeholder="you@email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
           <button type="submit" className="btn small" disabled={state === 'busy'}>
@@ -339,7 +339,7 @@ export function StartWatch({ config }: { config: WatchConfig }) {
         </div>
         <h2>Check your inbox</h2>
         <p className="muted">
-          We sent a link to <b>{owner.email}</b>. Nothing happens until you tap it. If it isn’t there in a few minutes, look in spam.
+          A link is on its way to <b>{owner.email}</b>. Nothing happens until you tap it. Not there in a few minutes? Check spam.
         </p>
       </section>
     );
@@ -347,11 +347,9 @@ export function StartWatch({ config }: { config: WatchConfig }) {
 
   return (
     <form className="card start-watch" onSubmit={submit} aria-labelledby="start-title" noValidate>
-      <p className="tag">for real</p>
       <h2 id="start-title">Start your watch</h2>
       <p className="muted">
-        It uses your rhythm<span className="rhythm-where"> (beside this)</span>. We keep names, emails and times, and a locked copy of your jar only if you choose. Pause
-        or delete it any time from the link we send.
+        Uses your rhythm<span className="rhythm-where"> (beside this)</span>. Only names, emails and times are stored. Pause or delete it any time.
       </p>
       <div className="person-grid">
         <label className="field">
@@ -431,14 +429,13 @@ export function StartWatch({ config }: { config: WatchConfig }) {
           <label className="keep-jar-check">
             <input type="checkbox" checked={keep} onChange={(e) => setKeep(e.target.checked)} />
             <span>
-              Keep a locked copy of {jar.owner}’s jar{versionOf(jar) > 1 ? ` (version ${versionOf(jar)})` : ''}. If your friends are ever asked, each
-              gets a link to it, so no one has to keep the file for years. Without their cards (or your key) it can’t be read, by us or anyone.
+              Keep a locked copy of {jar.owner}’s jar{versionOf(jar) > 1 ? ` (version ${versionOf(jar)})` : ''}, so each friend gets a link to it. Without
+              their cards, no one can read it.
             </span>
           </label>
         ) : (
           <p className="muted keep-jar-none">
-            Optional: <JarFileButton label="choose your jar file" onJar={setJar} className="text-btn" /> and we keep a locked copy, so no one has to
-            keep the file for years.
+            Optional: <JarFileButton label="choose your jar file" onJar={setJar} className="text-btn" /> to keep a locked copy for your friends.
           </p>
         )}
       </div>
@@ -450,7 +447,7 @@ export function StartWatch({ config }: { config: WatchConfig }) {
         ) : (
           <span />
         )}
-        <button type="submit" className="btn primary drip" disabled={state === 'sending'}>
+        <button type="submit" className="btn primary" disabled={state === 'sending'}>
           {state === 'sending' ? 'Sending…' : 'Start the watch'}
         </button>
       </div>

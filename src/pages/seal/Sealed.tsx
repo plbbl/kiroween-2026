@@ -131,7 +131,7 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
               One page per friend: cut on the line and give both halves. Your key prints on its own: it opens everything, so keep it apart.
             </p>
             <div className="print-buttons">
-              <button type="button" className={`btn${printed ? '' : ' primary drip'}`} onClick={() => print('cards')}>
+              <button type="button" className={`btn${printed ? '' : ' primary'}`} onClick={() => print('cards')}>
                 {printed ? 'Print the cards again' : 'Print the cards'}
               </button>
               <button type="button" className={`btn${printed && !keyPrinted ? ' primary' : ''}`} onClick={() => print('key')}>
@@ -178,7 +178,7 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
           <span className="todo-num">3</span>
           <div>
             <h3>Turn on the watch</h3>
-            <p className="muted">We ask now and then if you’re still here. Go quiet, and your friends are asked to look in on you.</p>
+            <p className="muted">Now and then you’re asked if you’re still here. Go quiet, and your friends are asked to look in on you.</p>
             <a className="btn" href={href('watch')} onClick={() => jarHandoff.give(jar)}>
               Set the watch
             </a>
@@ -299,7 +299,7 @@ function WatchCopy({ jar }: { jar: JarFile }) {
         {state === 'done' && <p className="muted">Done. Your friends’ links now open this version.</p>}
         {state !== 'done' && (
           <form className="watch-copy" onSubmit={give}>
-            <p className="muted">Does a watch keep a copy of your jar? Paste its manage link, from our email, to give it this version.</p>
+            <p className="muted">Does a watch keep a copy of your jar? Paste its manage link to give it this version.</p>
             <input type="url" aria-label="Your watch’s manage link" placeholder="https://…#/watch?manage=…" value={link} onChange={(e) => setLink(e.target.value)} />
             <button type="submit" className="btn small" disabled={state === 'busy' || !link.trim()}>
               {state === 'busy' ? 'Giving…' : 'Give it this jar'}

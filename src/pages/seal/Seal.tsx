@@ -372,7 +372,7 @@ function Wizard({
         </div>
 
         <section
-          className={`step-card card webbed ${direction > 0 ? 'enter-right' : 'enter-left'}${corked ? ' sealing' : ''}`}
+          className={`step-card card ${direction > 0 ? 'enter-right' : 'enter-left'}${corked ? ' sealing' : ''}`}
           key={step}
           aria-labelledby="step-title"
         >

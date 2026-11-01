@@ -17,9 +17,9 @@ interface Scene {
 
 const SCENES: Scene[] = [
   { title: 'Write', line: 'Write what your people will need: logins, where things are, a letter or two.', ms: 3600 },
-  { title: 'Seal', line: 'Seal it in a jar. It’s locked in your browser: no one can read it, not even us.', ms: 3800 },
+  { title: 'Seal', line: 'Seal it in a jar. It’s locked in your browser: no one can read it, not even this website.', ms: 3800 },
   { title: 'Share', line: 'Print a card for each friend. Any two of them, together, can open it.', ms: 3800 },
-  { title: 'Watch', line: 'Now and then we ask if you’re still here. Go quiet, and your friends are asked to look in on you.', ms: 4200 },
+  { title: 'Watch', line: 'Now and then you’re asked if you’re still here. Go quiet, and your friends are asked to look in on you.', ms: 4200 },
   { title: 'Gather', line: 'When the time comes, they gather, light their candles, and the ghost hands over your words.', ms: 5200 },
 ];
 

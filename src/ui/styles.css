@@ -139,8 +139,6 @@ h1[tabindex='-1']:focus {
   background:
     radial-gradient(circle at 12% 8%, rgba(205, 184, 255, 0.45), transparent 34%),
     radial-gradient(circle at 92% 30%, rgba(255, 143, 184, 0.16), transparent 30%),
-    /* A faint Halloween wallpaper: a few bats and crescent moons. */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'%3E%3Cg fill='%238e47ff' fill-opacity='0.05'%3E%3Cpath d='M68 52 C65 47 59 46 52 49 C55 50 55 53 54 56 C57 55 59 56 59 59 C62 57 64 58 65 60 C65 57 66 54 68 52 C70 54 71 57 71 60 C72 58 74 57 77 59 C77 56 79 55 82 56 C81 53 81 50 84 49 C77 46 71 47 68 52 Z'/%3E%3Cpath d='M232 92 A14 14 0 1 0 248 108 A11 11 0 1 1 232 92 Z'/%3E%3Cpath d='M196 236 C193 231 187 230 180 233 C183 234 183 237 182 240 C185 239 187 240 187 243 C190 241 192 242 193 244 C193 241 194 238 196 236 C198 238 199 241 199 244 C200 242 202 241 205 243 C205 240 207 239 210 240 C209 237 209 234 212 233 C205 230 199 231 196 236 Z' transform='rotate%28-14 196 237%29'/%3E%3Cpath d='M70 222 A10 10 0 1 0 82 234 A8 8 0 1 1 70 222 Z'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 320px 320px,
     var(--lilac-soft);
 }
 
@@ -231,7 +229,7 @@ h1[tabindex='-1']:focus {
   right: 0;
 }
 
-/* A spider lets itself down from the corner web, and climbs back a little. */
+/* A spider hangs from the corner web, still. */
 .scenery-spider {
   position: absolute;
   top: 0;
@@ -239,7 +237,6 @@ h1[tabindex='-1']:focus {
   display: flex;
   flex-direction: column;
   align-items: center;
-  animation: spider-drop 7s var(--soft) infinite alternate;
 }
 
 .scenery-spider::before {
@@ -247,15 +244,6 @@ h1[tabindex='-1']:focus {
   width: 1px;
   height: 130px;
   background: rgba(42, 24, 70, 0.35);
-}
-
-@keyframes spider-drop {
-  from {
-    transform: translateY(-40px);
-  }
-  to {
-    transform: translateY(10px);
-  }
 }
 
 .scenery-moon {
@@ -294,20 +282,20 @@ h1[tabindex='-1']:focus {
 
 .flyer.f1 {
   top: 9vh;
-  animation-duration: 19s;
-  animation-delay: 3s;
+  animation-duration: 40s;
+  animation-delay: 4s;
 }
 
 .flyer.f2 {
   top: 13vh;
-  animation-duration: 27s;
-  animation-delay: 11s;
+  animation-duration: 56s;
+  animation-delay: 21s;
 }
 
 .flyer.f3 {
   top: 6vh;
-  animation-duration: 33s;
-  animation-delay: 19s;
+  animation-duration: 74s;
+  animation-delay: 38s;
 }
 
 @keyframes bat-cross {
@@ -399,7 +387,7 @@ h1[tabindex='-1']:focus {
 
 /* Each page arrives with a small lift. */
 .route {
-  animation: route-in 520ms var(--soft) both;
+  animation: route-in 360ms var(--soft) both;
 }
 
 @keyframes route-in {
@@ -704,59 +692,48 @@ article {
 
 /* ── Buttons: soft, chunky, pressable ─────────────────────── */
 
+/* Buttons: flat capsules. The prominent one is filled; the others are a
+   tint of it. Pressing one makes it give a little, at once. */
 .btn {
-  --b-bg: var(--surface);
-  --b-fg: var(--purple);
-  --b-edge: var(--line-strong);
+  --b-bg: rgba(142, 71, 255, 0.12);
+  --b-fg: var(--purple-text);
+  --b-shadow: none;
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  min-height: 54px;
-  padding: 0 28px;
+  min-height: 50px;
+  padding: 0 26px;
   border-radius: 999px;
-  border: 2px solid var(--b-edge);
+  border: none;
   background: var(--b-bg);
   color: var(--b-fg);
   font-family: var(--display);
   font-weight: 600;
-  font-size: 1.08rem;
+  font-size: 1.05rem;
   text-decoration: none;
   cursor: pointer;
-  box-shadow: 0 5px 0 var(--b-edge);
-  transform: translateY(0);
+  box-shadow: var(--b-shadow);
   transition:
-    transform 260ms var(--spring),
-    box-shadow 260ms var(--spring),
-    background-color 300ms var(--soft),
-    opacity 300ms var(--soft);
+    transform 160ms var(--spring),
+    background-color 200ms var(--soft),
+    filter 200ms var(--soft),
+    opacity 200ms var(--soft);
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Solid, so candlelight behind a button never muddies it. */
 [data-theme='night'] .btn {
-  --b-bg: #2a1c4b;
+  --b-bg: rgba(205, 184, 255, 0.16);
   --b-fg: #f5f0ff;
-  --b-edge: #4f3a86;
-}
-
-/* A taller hit area that moves with the button, so lifting it on hover
-   never slips it out from under the pointer (no flicker at the edge). */
-.btn::before {
-  content: '';
-  position: absolute;
-  inset: -4px -2px -9px;
 }
 
 .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 7px 0 var(--b-edge);
+  filter: brightness(1.06) saturate(1.05);
 }
 
 .btn:active {
-  transform: translateY(4px);
-  box-shadow: 0 1px 0 var(--b-edge);
+  transform: scale(0.97);
   transition-duration: 80ms;
 }
 
@@ -764,26 +741,25 @@ article {
 [data-theme='night'] .btn.primary {
   --b-bg: var(--purple);
   --b-fg: #fff;
-  --b-edge: var(--purple-press);
+  --b-shadow: 0 10px 22px -12px rgba(90, 34, 196, 0.9);
 }
 
 .btn.small {
   min-height: 42px;
   padding: 0 18px;
-  font-size: 0.98rem;
+  font-size: 0.97rem;
 }
 
 .btn.danger {
   --b-bg: #c8324a;
   --b-fg: #fff;
-  --b-edge: #962238;
 }
 
 .btn:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 5px 0 var(--b-edge);
+  filter: none;
 }
 
 .btn svg {
@@ -1080,7 +1056,7 @@ select {
     transform: translateY(0);
   }
   to {
-    transform: translateY(-8px);
+    transform: translateY(-5px);
   }
 }
 
@@ -1648,26 +1624,13 @@ select {
   color: var(--ink);
 }
 
-/* Every little label hangs from a crescent moon. */
-.tag::before {
-  content: '';
-  display: inline-block;
-  width: 0.95em;
-  height: 0.95em;
-  margin-right: 0.4em;
-  vertical-align: -0.1em;
-  background: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M8 1.5 A8.5 8.5 0 1 0 18.5 12 A7 7 0 1 1 8 1.5 Z'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M8 1.5 A8.5 8.5 0 1 0 18.5 12 A7 7 0 1 1 8 1.5 Z'/%3E%3C/svg%3E") center / contain no-repeat;
-}
-
 /* Primary buttons drip, like candle wax or a witch's brew. */
 .btn.primary.drip::after {
   content: '';
   position: absolute;
   left: 18%;
   width: 64%;
-  top: calc(100% + 2px);
+  top: calc(100% - 3px);
   height: 11px;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'%3E%3Cpath d='M0 0 H100 V2 C96 2 95 4 95 7 C95 10 92 11 90 9 C89 7 89 4 86 3 C80 2 78 4 77 9 C76 13 72 13 71 9 C70 5 68 3 62 3 C55 3 53 5 52 7 C51 9 48 9 47 7 C46 4 43 2 36 3 C30 4 29 7 28 11 C27 14 22 14 22 10 C21 5 18 3 12 3 C6 3 5 5 4 7 C3 9 0 8 0 6 Z' fill='%235a22c4'/%3E%3C/svg%3E") center top / 100% 100% no-repeat;
   pointer-events: none;
@@ -1686,37 +1649,10 @@ select {
 }
 
 .btn.primary.drip:active::after {
-  top: calc(100% + 0px);
-}
-
-/* A cobweb in the corner of each page's main card (top left, clear of corner
-   ghosts), above the card's paper but under its words. */
-.card.webbed {
-  isolation: isolate;
-}
-
-.card.webbed::after {
-  z-index: -1;
-  content: '';
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 46px;
-  height: 46px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M100 0 L0.0 0.0 M100 0 L4.9 30.9 M100 0 L19.1 58.8 M100 0 L41.2 80.9 M100 0 L69.1 95.1 M100 0 L100.0 100.0 M74.0 0.0 Q78.9 3.3 75.3 8.0 Q81.0 9.7 79.0 15.3 Q84.9 15.1 84.7 21.0 Q90.3 19.0 92.0 24.7 Q96.7 21.1 100.0 26.0 M54.0 0.0 Q62.7 5.9 56.3 14.2 Q66.4 17.1 62.8 27.0 Q73.3 26.7 73.0 37.2 Q82.9 33.6 85.8 43.7 Q94.1 37.3 100.0 46.0 M34.0 0.0 Q46.5 8.5 37.2 20.4 Q51.8 24.6 46.6 38.8 Q61.7 38.3 61.2 53.4 Q75.4 48.2 79.6 62.8 Q91.5 53.5 100.0 66.0 M14.0 0.0 Q30.3 11.0 18.2 26.6 Q37.2 32.0 30.4 50.5 Q50.1 49.9 49.5 69.6 Q68.0 62.8 73.4 81.8 Q89.0 69.7 100.0 86.0' fill='none' stroke='%237a40d6' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") right top / contain no-repeat;
-  opacity: 0.42;
-  pointer-events: none;
-  transform: scaleX(-1);
-}
-
-[data-theme='night'] .card.webbed::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M100 0 L0.0 0.0 M100 0 L4.9 30.9 M100 0 L19.1 58.8 M100 0 L41.2 80.9 M100 0 L69.1 95.1 M100 0 L100.0 100.0 M74.0 0.0 Q78.9 3.3 75.3 8.0 Q81.0 9.7 79.0 15.3 Q84.9 15.1 84.7 21.0 Q90.3 19.0 92.0 24.7 Q96.7 21.1 100.0 26.0 M54.0 0.0 Q62.7 5.9 56.3 14.2 Q66.4 17.1 62.8 27.0 Q73.3 26.7 73.0 37.2 Q82.9 33.6 85.8 43.7 Q94.1 37.3 100.0 46.0 M34.0 0.0 Q46.5 8.5 37.2 20.4 Q51.8 24.6 46.6 38.8 Q61.7 38.3 61.2 53.4 Q75.4 48.2 79.6 62.8 Q91.5 53.5 100.0 66.0 M14.0 0.0 Q30.3 11.0 18.2 26.6 Q37.2 32.0 30.4 50.5 Q50.1 49.9 49.5 69.6 Q68.0 62.8 73.4 81.8 Q89.0 69.7 100.0 86.0' fill='none' stroke='%23cdb8ff' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
-  opacity: 0.22;
+  top: calc(100% - 3px);
 }
 
 @media print {
-  .card.webbed::after,
-  .tag::before,
   .btn.primary.drip::after {
     display: none;
   }
@@ -1727,14 +1663,6 @@ select {
   display: none;
 }
 
-@media (max-width: 640px) {
-  .card.webbed::after {
-    top: 6px;
-    left: 6px;
-    width: 34px;
-    height: 34px;
-  }
-}
 
 /* At night the corners of the screen sink into shadow. */
 .night-set::after {
@@ -1752,7 +1680,7 @@ select {
   display: flex;
   align-items: flex-end;
   opacity: 0;
-  animation: drift 52s linear infinite;
+  animation: drift 90s linear infinite;
   animation-delay: 6s;
 }
 
@@ -1782,36 +1710,6 @@ select {
   }
 }
 
-/* By day, on wide screens, a shy ghost peeks up from the bottom corner now and then. */
-.corner-peeker {
-  position: absolute;
-  right: 3vw;
-  bottom: -110px;
-  animation: corner-peek 26s var(--soft) infinite;
-  animation-delay: 9s;
-}
-
-@keyframes corner-peek {
-  0%,
-  80%,
-  100% {
-    transform: translateY(0);
-  }
-  84%,
-  94% {
-    transform: translateY(-62px) rotate(-6deg);
-  }
-  97% {
-    transform: translateY(-20px);
-  }
-}
-
-@media (max-width: 1100px) {
-  .corner-peeker {
-    display: none;
-  }
-}
-
 @media (max-width: 640px) {
   .drifter {
     top: 26vh;
@@ -1819,8 +1717,7 @@ select {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .drifter,
-  .corner-peeker {
+  .drifter {
     display: none;
   }
 }

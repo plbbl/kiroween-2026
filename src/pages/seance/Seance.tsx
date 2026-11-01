@@ -85,7 +85,6 @@ function Choose({ onChoose, notice = '' }: { onChoose: (jar: JarFile) => void; n
   return (
     <div className="page seance-page">
       <section className="narrow center">
-        <p className="tag pop">séance</p>
         <h1 className="pop" style={{ '--d': '100ms' } as CSSProperties}>
           Gather around
         </h1>
@@ -101,7 +100,7 @@ function Choose({ onChoose, notice = '' }: { onChoose: (jar: JarFile) => void; n
           </span>
           <span className="tag">try it</span>
           <span className="choose-title">June’s jar</span>
-          <span className="muted">June sealed hers with five cards. They’re on the table. Any three open it.</span>
+          <span className="muted">Five cards on the table. Any three open it.</span>
         </button>
 
         <label
@@ -133,7 +132,7 @@ function Choose({ onChoose, notice = '' }: { onChoose: (jar: JarFile) => void; n
           </span>
           <span className="tag">your circle</span>
           <span className="choose-title">A jar you were given</span>
-          <span className="muted">Drop the jar file here, or tap to choose it. It is read on this device and nowhere else.</span>
+          <span className="muted">Drop the jar file here, or tap to choose it. It stays on this device.</span>
         </label>
       </section>
       {error && (
@@ -206,6 +205,8 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
   const [flight, setFlight] = useState<Flight | null>(null);
   // The opening gag: the jar rattles, lightning, the ghost jumps out with a "BOO!", then laughs.
   const [gag, setGag] = useState<'boo' | 'laugh' | null>(null);
+  // Nobody has to wait for the show: skipping goes straight to the words.
+  const [skipped, setSkipped] = useState(false);
   const [flash, setFlash] = useState(0);
   const candleRefs = useRef<(HTMLDivElement | null)[]>([]);
   // The latest circle, readable from callbacks without re-creating them.
@@ -306,7 +307,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
 
   const endFlight = useCallback(() => setFlight(null), []);
 
-  if (phase === 'revealed' && opened) {
+  if ((phase === 'revealed' || skipped) && opened) {
     return <Reveal jar={jar} opened={opened} circle={offered.map((o) => o.holder)} buddies={buddies} />;
   }
 
@@ -422,7 +423,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
               </ul>
             )}
 
-            <div className="card offer-card webbed">
+            <div className="card offer-card">
               <h2 className="center">{offered.length === 0 ? 'Who’s here first?' : `${capitalised(numberWord(remaining))} more to go`}</h2>
               {demo && <DemoTable jar={jar} offered={offered} buddies={buddies} onOffer={offer} />}
               <CardInput kind="shard" onCard={(t) => offer(t)} />
@@ -437,8 +438,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
               <p className="note circle-note">
                 <Ghost size={30} mood="wink" />
                 <span>
-                  {first} gave each of you a card. The jar opens only when {numberWord(k)} of you offer yours here, so if a card is lost, any{' '}
-                  {numberWord(k)} of the {numberWord(jar.total)} still do. What you type stays on this device, and this page works without the internet.
+                  Any {numberWord(k)} of the {numberWord(jar.total)} cards open it, so a lost card is fine. What you type stays on this device.
                 </span>
               </p>
             )}
@@ -462,9 +462,16 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
             )}
           </>
         ) : (
-          <p className="center waking-text pop" key={phase}>
-            {phase === 'waking' ? 'Wake up, little ghost…' : 'It’s open!'}
-          </p>
+          <>
+            <p className="center waking-text pop" key={phase}>
+              {phase === 'waking' ? 'Wake up, little ghost…' : 'It’s open!'}
+            </p>
+            <p className="center">
+              <button type="button" className="text-btn quiet" onClick={() => setSkipped(true)}>
+                Skip to the words
+              </button>
+            </p>
+          </>
         )}
       </section>
     </div>

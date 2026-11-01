@@ -111,16 +111,17 @@
   opacity: 0.85;
 }
 
-.btn.on-purple {
+.btn.on-purple,
+[data-theme='night'] .btn.on-purple {
   --b-bg: #fff;
-  --b-fg: var(--purple);
-  --b-edge: var(--purple-press);
+  --b-fg: var(--purple-text);
+  --b-shadow: 0 10px 22px -12px rgba(0, 0, 0, 0.6);
 }
 
-.btn.ghosty {
-  --b-bg: transparent;
+.btn.ghosty,
+[data-theme='night'] .btn.ghosty {
+  --b-bg: rgba(255, 255, 255, 0.14);
   --b-fg: #fff;
-  --b-edge: rgba(255, 255, 255, 0.55);
 }
 
 /* The hero's own Halloween night. */
@@ -141,7 +142,6 @@
 
 .hero-bat {
   position: absolute;
-  animation: hero-bat-bob 3.2s ease-in-out infinite alternate;
 }
 
 .hero-bat.b1 {
@@ -159,12 +159,6 @@
   top: 150px;
   right: 22%;
   animation-delay: -2s;
-}
-
-@keyframes hero-bat-bob {
-  to {
-    transform: translate(10px, -12px) rotate(-6deg);
-  }
 }
 
 .hero-hill {
@@ -281,7 +275,6 @@
   position: absolute;
   top: 0;
   right: 22%;
-  animation: spider-drop 5s var(--soft) infinite alternate;
 }
 
 
@@ -458,17 +451,17 @@
 }
 
 .step-card.enter-right {
-  animation: enter-right 520ms var(--soft) both;
+  animation: enter-right 340ms var(--soft) both;
 }
 
 .step-card.enter-left {
-  animation: enter-left 520ms var(--soft) both;
+  animation: enter-left 340ms var(--soft) both;
 }
 
 @keyframes enter-right {
   from {
     opacity: 0;
-    transform: translateX(40px) rotate(1deg);
+    transform: translateX(24px);
   }
   to {
     opacity: 1;
@@ -479,7 +472,7 @@
 @keyframes enter-left {
   from {
     opacity: 0;
-    transform: translateX(-40px) rotate(-1deg);
+    transform: translateX(-24px);
   }
   to {
     opacity: 1;
@@ -1553,10 +1546,10 @@ textarea.mono-input {
 
 @keyframes lantern-sway {
   from {
-    transform: rotate(5deg);
+    transform: rotate(3deg);
   }
   to {
-    transform: rotate(-5deg);
+    transform: rotate(-3deg);
   }
 }
 
@@ -3361,22 +3354,6 @@ html {
 }
 
 /* ── Soft, funny haunting ─────────────────────────────────── */
-
-/* The title floats, letter by letter, out of step. */
-.float-letter {
-  display: inline-block;
-  animation: letter-float 3.2s ease-in-out infinite alternate;
-  animation-delay: calc(var(--i) * -0.29s);
-}
-
-@keyframes letter-float {
-  from {
-    transform: translateY(2px) rotate(1deg);
-  }
-  to {
-    transform: translateY(-5px) rotate(-1.5deg);
-  }
-}
 
 /* Shy friends duck behind the hero's edge when the pointer comes near. */
 .edge-peeker {

@@ -221,7 +221,7 @@ for (const which of sizes) {
     await to('.watch-grid', -110);
     await shot('w2-grid');
     await p.getByRole('button', { name: 'Let time pass' }).click();
-    await p.getByText('Hello? Just tap to say you’re okay.').waitFor({ timeout: 30000 });
+    await p.getByText('Hello? Tap to say you’re okay.').waitFor({ timeout: 30000 });
     await p.getByRole('button', { name: 'Pause time' }).click();
     await wait(700);
     await shot('w3-reminding');

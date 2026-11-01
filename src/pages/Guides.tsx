@@ -121,7 +121,7 @@ function Checklist({ items, id }: { items: Item[]; id: string }) {
 
 function GuideCard({ id, tag, title, sub, costume, mood, items }: { id: string; tag: string; title: string; sub: string; costume: Costume; mood: Mood; items: Item[] }) {
   return (
-    <section className={`card guide${id === 'before' ? ' webbed' : ''}`} id={id} aria-labelledby={`${id}-title`}>
+    <section className="card guide" id={id} aria-labelledby={`${id}-title`}>
       <div className="guide-ghost">
         <WatchingGhost costume={costume} mood={mood} size={84} float />
       </div>
@@ -143,12 +143,11 @@ export function Guides({ anchor }: { anchor: string }) {
   return (
     <div className="page guides-page">
       <section className="narrow center">
-        <p className="tag pop">guides</p>
         <h1 className="pop" style={{ '--d': '100ms' } as CSSProperties}>
           Before, and after
         </h1>
         <p className="lede rise" style={{ '--d': '200ms' } as CSSProperties}>
-          The doors the world already has, and what to do when the time comes. Ticks stay on this page only.
+          Doors the world already has, and what to do when the time comes.
         </p>
       </section>
       <div className="narrow guides">

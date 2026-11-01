@@ -49,7 +49,7 @@ export function BuddyCard({
         {index + 1}/{total}
       </span>
       <span className="buddy-card-art">
-        <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} size={96} float phase={index * 0.6} />
+        <Ghost costume={buddy.costume} emblem={buddy.emblem} tilt={buddy.tilt} size={96} />
       </span>
       <span className="buddy-card-name">{name}</span>
       {note && (

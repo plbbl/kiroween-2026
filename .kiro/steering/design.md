@@ -9,11 +9,14 @@ The costume is cute, soft and simple: Kiroween purple and a cast of chibi ghosts
 
 ## Rules
 
-1. One character, one headline, one main action per screen. A headline, then one sentence.
-2. Halloween is on every surface, in the same soft style as the cast: the cast (eight costumes, one per friend), the candles, the jar and the wax seal; behind every page the scenery (`<Scenery/>`: cobwebs, a spider, the hill with the old house, passing bats; at night the moon, fog and lit windows); and the details (a bat on every `.tag`, dripping primary buttons, a cobweb on every `.card`, jack-o'-lanterns for progress). Decoration stays behind or beside the words, never on them, and is `aria-hidden`.
-3. Every spooky element does a job: candles = progress; the wax seal = locked/opened; the ghost in the jar = the jar's state; a card's buddy = that card's fingerprint; the watch ghost's face = the watch state; day/night = writing vs gathering.
-4. Motion marks a change of state. Only the ghost in focus (float, blink), lit flames and the scenery (a passing bat, the spider, the fog) move on their own. Everything respects `prefers-reduced-motion` (state kept, movement dropped).
-5. Color: purple, ink, lilac and night are the base. Amber means light (candles, progress). Mint, yellow and pink only mean status. Text meets WCAG AA (the e2e axe audit enforces it).
+Taken from Apple's Human Interface Guidelines (Motion, Writing, Buttons, Layout) and applied here.
+
+1. **Content first.** One headline, at most one short sentence, one main action per screen. The most important thing goes first. Content surfaces (cards, letters, fields) stay clean: no webs, patterns or props on them.
+2. **Halloween lives in the cast and at the edges of the world.** The cast (eight costumes), candles, the jar and the wax seal carry the story; the scenery (`<Scenery/>`, `<HillScene/>`) sits behind and below the content; jack-o'-lanterns stand for progress. Decoration never sits on words, and is `aria-hidden`.
+3. **Every word earns its place.** Fewer words. Plain language, no jargon. No "we" (it is unclear who that is): say what happens. Buttons are verbs ("Seal the jar", "Use this card"). Errors sit next to the field and say how to fix it. Humour is for the ritual moments (BOO!), never for labels.
+4. **Buttons.** Flat capsules. One or two prominent (filled) buttons per view; the rest are a tint. Same size; style, not size, says which matters. Press feedback is immediate (scale 0.97, 80 ms).
+5. **Motion has a purpose.** Feedback (brief, ≤ 200 ms), continuity (page 360 ms, step 340 ms, night falls 1 s) and the three ritual moments (sealing, the séance, the jar opening). No motion for its own sake: no floating letters, no wiggling buttons, little at the edges of the screen (a bat now and then). Nobody waits for a show twice: the opening can be skipped. Everything respects `prefers-reduced-motion`.
+6. **Color.** Purple, ink, lilac and night are the base. Amber means light (candles, progress). Mint, yellow and pink only mean status. Text meets WCAG AA (the e2e axe audit enforces it).
 
 ## Tokens and parts
 

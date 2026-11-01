@@ -55,13 +55,11 @@ export function OpenForUpdate({ jar: given, onOpen }: { jar: JarFile | null; onO
   return (
     <div className="page update-page">
       <section className="narrow center">
-        <p className="tag pop">update</p>
         <h1 className="pop" style={{ '--d': '80ms' } as CSSProperties}>
           {first ? `${first}’s jar` : 'Change what’s inside'}
         </h1>
         <p className="lede rise" style={{ '--d': '160ms' } as CSSProperties}>
-          With your key, change the words inside. Your friends keep their cards, and anyone holding one can open the new words too. To change who
-          holds them, open it here and start a new jar from it.
+          Change the words inside with your key. The same cards open the new words.
         </p>
       </section>
 

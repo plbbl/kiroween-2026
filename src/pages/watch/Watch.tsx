@@ -19,7 +19,7 @@ const MOOD: Record<WatchStatus, { mood: Mood; say: string }> = {
   well: { mood: 'happy', say: 'All good! See you soon.' },
   paused: { mood: 'sleep', say: 'Resting while you’re away.' },
   due: { mood: 'curious', say: 'Still here?' },
-  reminding: { mood: 'worried', say: 'Hello? Just tap to say you’re okay.' },
+  reminding: { mood: 'worried', say: 'Hello? Tap to say you’re okay.' },
   notified: { mood: 'sad', say: 'I’ve asked your friends to check on you.' },
 };
 
@@ -129,7 +129,6 @@ export function Watch({ params }: { params: URLSearchParams }) {
               <Lantern size={46} className="watch-lantern" />
             </span>
           </div>
-          <p className="tag">watch</p>
           <h1>Still here?</h1>
           <p className="lede">
             One gentle question now and then. Go quiet, and your friends are asked to look in on you.
@@ -144,14 +143,14 @@ export function Watch({ params }: { params: URLSearchParams }) {
             <span>
               {home ? (
                 <>
-                  This copy of Phylactery can’t send email (a jar file never can), so here you can only try the rhythm. To start a real watch, go to{' '}
+                  A jar file can’t send email, so here you can only try the rhythm. To start a real watch, go to{' '}
                   <a href={`${home}/#/watch`} target="_blank" rel="noopener">
                     {homeAddress()}
                   </a>
                   .
                 </>
               ) : (
-                'This copy of Phylactery has no watch service (a jar file never has), so here you can only try the rhythm. Everything else works.'
+                'This copy can’t send email, so here you can only try the rhythm.'
               )}
             </span>
           </p>
@@ -159,7 +158,7 @@ export function Watch({ params }: { params: URLSearchParams }) {
       )}
 
       <section className="wrap watch-grid">
-        <div className="card rhythm webbed">
+        <div className="card rhythm">
           <h2 className="card-title">Your rhythm</h2>
           <Segmented
             label="Ask me every"
@@ -281,8 +280,7 @@ export function Watch({ params }: { params: URLSearchParams }) {
               </ol>
             )}
             <p className="inbox-foot faint">
-              A preview with June’s demo jar: nothing here is really sent. A real watch knows names, email addresses and times, never what your jar
-              says.
+              A preview. Nothing is sent, and a real watch never sees what your jar says.
             </p>
           </section>
         </div>
