@@ -10,6 +10,8 @@ import nunito400 from '@fontsource/nunito/files/nunito-latin-400-normal.woff2';
 import nunito400i from '@fontsource/nunito/files/nunito-latin-400-italic.woff2';
 import nunito700 from '@fontsource/nunito/files/nunito-latin-700-normal.woff2';
 import nunito800 from '@fontsource/nunito/files/nunito-latin-800-normal.woff2';
+// The Halloween wordmark: letters that drip like warm candle wax.
+import wetPaint from '@fontsource/rubik-wet-paint/files/rubik-wet-paint-latin-400-normal.woff2';
 
 const faces: [family: string, weight: number, style: 'normal' | 'italic', url: string][] = [
   ['Fredoka', 500, 'normal', fredoka500],
@@ -20,6 +22,7 @@ const faces: [family: string, weight: number, style: 'normal' | 'italic', url: s
   ['Nunito', 700, 'normal', nunito700],
   ['Nunito', 800, 'normal', nunito800],
   ['Fragment Mono', 400, 'normal', mono400],
+  ['Rubik Wet Paint', 400, 'normal', wetPaint],
 ];
 
 export function installFonts(): void {

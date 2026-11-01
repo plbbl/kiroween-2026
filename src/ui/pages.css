@@ -1,86 +1,242 @@
 /* ── Home ─────────────────────────────────────────────────── */
 
+/* The page opens on a night that runs edge to edge, under the menu. */
 .home {
-  padding-top: 88px;
+  padding-top: 0;
 }
 
-.hero-stage {
-  position: relative;
-  max-width: 1360px;
-  margin: 0 auto;
-}
-
-/* The first screen is one Halloween night: the name, one line, two buttons, the jar. */
 .hero {
+  --px: 0;
+  --py: 0;
+  --lx: -999px;
+  --ly: -999px;
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
-  min-height: min(920px, calc(100svh - 112px));
-  padding: clamp(64px, 9vh, 110px) 24px 0;
-  border-radius: 48px;
-  /* A Halloween sky: deep at the top, glowing purple at the horizon. */
-  background: linear-gradient(180deg, #1b1036 0%, #3a1f78 48%, #7a3bea 100%);
-  border: 2px solid rgba(205, 184, 255, 0.24);
+  min-height: max(660px, 100svh);
+  margin: 0 -24px;
+  padding: clamp(118px, 15vh, 160px) 24px 0;
+  overflow: hidden;
+  isolation: isolate;
   color: #fff;
-  box-shadow:
-    0 30px 60px -30px rgba(90, 34, 196, 0.8),
-    0 0 80px -20px rgba(142, 71, 255, 0.45);
+  /* Clear at the top, where the stars show through; a purple glow on the horizon. */
+  background:
+    radial-gradient(ellipse 70% 46% at 50% 94%, rgba(142, 71, 255, 0.6), transparent 72%),
+    linear-gradient(180deg, rgba(14, 8, 30, 0) 0%, rgba(36, 17, 84, 0.62) 52%, #4b22ad 100%);
 }
 
-/* Friends behind the hero, peeking over its edges; their hands in front. */
-.edge-ghosts,
-.edge-hands {
+/* The corners of the night sink into shadow. */
+.hero::after {
+  content: '';
   position: absolute;
   inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(ellipse 85% 75% at 50% 42%, transparent 58%, rgba(6, 3, 14, 0.62) 100%);
+}
+
+.hero-night {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   pointer-events: none;
 }
 
-.edge-hands {
-  z-index: 2;
-}
-
-.edge-peeker,
-.edge-grip {
+/* Each layer of the night shifts against the pointer by its depth. */
+.hero-night .layer {
   position: absolute;
-  animation-duration: 900ms;
-  animation-timing-function: var(--spring);
-  animation-fill-mode: both;
-  animation-delay: var(--delay);
+  inset: 0;
+  transform: translate3d(calc(var(--px) * var(--depth, 0) * -1px), calc(var(--py) * var(--depth, 0) * -0.6px), 0);
+  transition: transform 900ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.edge-peeker.top {
-  left: var(--at);
-  top: 0;
-  /* Eyes and cheeks above the edge, the rest hidden behind it. */
-  transform: translate(-50%, -77%) rotate(var(--tilt));
-  animation-name: peek-top;
+.hero-moon {
+  position: absolute;
+  top: 84px;
+  right: 3.5%;
 }
 
-.edge-grip {
-  display: flex;
-  animation-name: grip;
-  animation-duration: 500ms;
-  animation-delay: calc(var(--delay) + 450ms);
+.hero-bat {
+  position: absolute;
 }
 
-.edge-grip.top {
-  left: var(--at);
-  top: 0;
-  gap: calc(var(--size) * 0.26);
-  transform: translate(-50%, -48%);
+.hero-bat.b1 {
+  top: 150px;
+  left: 9%;
 }
 
-@keyframes peek-top {
-  from {
-    translate: 0 50px;
-    opacity: 0;
+.hero-bat.b2 {
+  top: 220px;
+  left: 18%;
+}
+
+.hero-bat.b3 {
+  top: 250px;
+  right: 22%;
+}
+
+.hero-night .hero-hill {
+  inset: auto -4% 0;
+  width: 108%;
+}
+
+.hero-hill.far {
+  height: clamp(160px, 26vh, 250px);
+}
+
+.hero-hill.near {
+  bottom: -2px;
+  height: clamp(110px, 17vh, 170px);
+}
+
+.house-lights {
+  animation: window-glow 4.5s ease-in-out infinite alternate;
+}
+
+@keyframes window-glow {
+  50% {
+    opacity: 0.55;
   }
 }
 
-@keyframes grip {
+/* Fog lies over the hills and drifts very slowly. */
+.hero-fog {
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  height: 170px;
+  background:
+    radial-gradient(ellipse 34% 55% at 26% 55%, rgba(214, 196, 255, 0.2), transparent 72%),
+    radial-gradient(ellipse 30% 50% at 70% 50%, rgba(214, 196, 255, 0.16), transparent 72%),
+    radial-gradient(ellipse 22% 40% at 50% 60%, rgba(214, 196, 255, 0.12), transparent 72%);
+  filter: blur(4px);
+}
+
+.hero-night .hero-fog.f1 {
+  inset: auto -20% 13%;
+  animation: fog-drift 40s ease-in-out infinite alternate;
+}
+
+.hero-fog.f2 {
+  bottom: -40px;
+  opacity: 0.85;
+  animation: fog-drift 56s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes fog-drift {
   from {
-    scale: 0.3;
+    translate: -6% 0;
+  }
+  to {
+    translate: 6% 0;
+  }
+}
+
+/* Friends hiding in the dark. */
+.hider {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  transform: translate(-50%, -50%) rotate(var(--tilt));
+}
+
+/* Found ones stay, faintly. */
+.found-layer .hider {
+  opacity: 0;
+  transition: opacity 700ms var(--soft);
+}
+
+.found-layer .hider.found {
+  opacity: 0.45;
+}
+
+/* The lantern shows everyone in its light. */
+.lantern-layer {
+  -webkit-mask-image: radial-gradient(circle 160px at var(--lx) var(--ly), #000 30%, transparent 100%);
+  mask-image: radial-gradient(circle 160px at var(--lx) var(--ly), #000 30%, transparent 100%);
+}
+
+.lantern-light {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 380px;
+  height: 380px;
+  margin: -190px 0 0 -190px;
+  transform: translate(var(--lx), var(--ly));
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 214, 140, 0.32), rgba(255, 180, 90, 0.12) 42%, transparent 70%);
+  mix-blend-mode: screen;
+}
+
+/* Fireflies over the hills. */
+.fireflies i {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff4b8;
+  box-shadow: 0 0 10px 3px rgba(255, 214, 110, 0.65);
+  animation:
+    firefly-drift 12s ease-in-out infinite alternate,
+    firefly-glow 3.4s ease-in-out infinite;
+}
+
+@keyframes firefly-drift {
+  0% {
+    translate: 0 0;
+  }
+  33% {
+    translate: 24px -20px;
+  }
+  66% {
+    translate: -16px -38px;
+  }
+  100% {
+    translate: 20px -10px;
+  }
+}
+
+@keyframes firefly-glow {
+  0%,
+  100% {
+    opacity: 0.12;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* A fine grain over the night, like an old photograph. */
+.grain {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.1;
+  mix-blend-mode: overlay;
+}
+
+/* Click the sky and a bat flaps off. */
+.click-bat {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  translate: -50% -50%;
+  animation: bat-off 1.4s cubic-bezier(0.3, 0.6, 0.4, 1) forwards;
+}
+
+@keyframes bat-off {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  14% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(var(--dx, 1) * 160px), -280px) scale(0.45);
     opacity: 0;
   }
 }
@@ -89,16 +245,26 @@
   position: relative;
   z-index: 2;
   text-align: center;
-  max-width: 980px;
+  max-width: 1040px;
   margin: 0 auto;
+  pointer-events: none;
 }
 
+.hero-copy a {
+  pointer-events: auto;
+}
+
+/* The wordmark drips like warm wax, and glows. */
 .hero-title {
-  font-size: clamp(4rem, 14vw, 11rem);
-  line-height: 0.92;
-  letter-spacing: -0.03em;
-  margin: 0 0 22px;
-  text-shadow: 0 8px 0 rgba(74, 24, 170, 0.55);
+  font-family: var(--spooky);
+  font-weight: 400;
+  font-size: clamp(3.2rem, 12.5vw, 10.5rem);
+  line-height: 0.95;
+  letter-spacing: 0.005em;
+  margin: 0 0 26px;
+  text-shadow:
+    0 0 42px rgba(196, 150, 255, 0.55),
+    0 8px 0 rgba(74, 24, 170, 0.6);
 }
 
 .hero-sub {
@@ -123,51 +289,6 @@
   --b-fg: #fff;
 }
 
-/* The hero's own Halloween night. */
-.hero-night {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.hero-moon {
-  position: absolute;
-  top: 26px;
-  right: 6%;
-}
-
-.hero-bat {
-  position: absolute;
-}
-
-.hero-bat.b1 {
-  top: 70px;
-  left: 9%;
-}
-
-.hero-bat.b2 {
-  top: 130px;
-  left: 17%;
-  animation-delay: -1.2s;
-}
-
-.hero-bat.b3 {
-  top: 150px;
-  right: 22%;
-  animation-delay: -2s;
-}
-
-.hero-hill {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 130px;
-}
-
 .hero-pumpkin {
   align-self: flex-end;
   margin-bottom: 4px;
@@ -181,11 +302,27 @@
   margin-left: -2px;
 }
 
+.hero-altar {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  margin-top: auto;
+  padding: 8px 0 clamp(18px, 4vh, 40px);
+}
+
+/* While the opening plays, the hero waits to make its entrance. */
+.hero.waiting .pop,
+.hero.waiting .rise {
+  animation-play-state: paused;
+}
+
 @media (max-width: 640px) {
   .hero-moon {
-    width: 60px;
-    height: 60px;
-    top: 16px;
+    width: 64px;
+    height: 64px;
+    top: 78px;
     right: 18px;
   }
 
@@ -195,8 +332,8 @@
   }
 
   .hero-bat.b1 {
-    top: 28px;
-    left: 30%;
+    top: 84px;
+    left: 8%;
   }
 
   .hero-pumpkin.left {
@@ -208,16 +345,109 @@
     width: 40px;
     height: 38px;
   }
+
+  .hero-title {
+    font-size: 14.6vw;
+  }
+
+  .hero .btn.big {
+    min-height: 54px;
+    padding: 0 24px;
+    font-size: 1.1rem;
+  }
+
+  /* On a phone the friends peek in from the sides. */
+  .hider {
+    left: var(--xp);
+    top: var(--yp);
+    scale: 0.8;
+  }
+
+  .hider.desk-only {
+    display: none;
+  }
 }
 
-.hero-altar {
-  position: relative;
-  z-index: 3;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  margin-top: auto;
-  padding: 8px 0 30px;
+/* Without motion: no fog drifting, no fireflies wandering, no bats flapping off. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-fog,
+  .fireflies i,
+  .house-lights {
+    animation: none;
+  }
+
+  .fireflies i {
+    opacity: 0.6;
+  }
+
+  .hero-night .layer {
+    transition: none;
+  }
+}
+
+/* ── The opening: a candle in the dark, then the night ─────── */
+
+@property --hole {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  background: #06030c;
+  cursor: pointer;
+  /* The dark opens from the candle outwards. */
+  -webkit-mask-image: radial-gradient(circle at 50% 46%, transparent calc(var(--hole) - 90px), #000 var(--hole));
+  mask-image: radial-gradient(circle at 50% 46%, transparent calc(var(--hole) - 90px), #000 var(--hole));
+  animation: intro-open 1100ms cubic-bezier(0.7, 0, 0.3, 1) 2000ms forwards;
+}
+
+@keyframes intro-open {
+  to {
+    --hole: 150vmax;
+  }
+}
+
+.intro-candle {
+  animation: rise 600ms var(--soft) 100ms both;
+  filter: drop-shadow(0 0 40px rgba(255, 190, 90, 0.55));
+}
+
+.intro-line {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.5rem;
+  color: rgba(255, 236, 205, 0.92);
+  animation: rise 700ms var(--soft) 550ms both;
+}
+
+.intro-skip {
+  position: absolute;
+  right: 28px;
+  bottom: 24px;
+  font-family: var(--display);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* The big Halloween words drip like warm wax: page titles, the big moments, the facts. */
+.page h1:not(.step-title),
+.fact-big,
+.closing-line {
+  font-family: var(--spooky);
+  font-weight: 400;
+  letter-spacing: 0.005em;
+}
+
+/* Room for the drips. */
+.page h1:not(.step-title) {
+  padding-bottom: 0.12em;
 }
 
 /* Section headings on the home page are statements. */
@@ -249,11 +479,9 @@
 }
 
 .fact-big {
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: clamp(4rem, 7vw, 6.4rem);
-  line-height: 0.9;
-  letter-spacing: -0.03em;
+  font-size: clamp(3.4rem, 5.6vw, 5.6rem);
+  line-height: 0.95;
+  white-space: nowrap;
 }
 
 .fact p {
@@ -323,8 +551,6 @@
 
 
 .closing-line {
-  font-family: var(--display);
-  font-weight: 700;
   font-size: clamp(2.3rem, 5vw, 3.8rem);
   line-height: 1.15;
   text-wrap: balance;
@@ -336,21 +562,6 @@
 }
 
 @media (max-width: 600px) {
-  .edge-peeker.top,
-  .edge-grip.top {
-    scale: 0.7;
-  }
-
-  /* Scaled down, the face sinks; lift it back above the edge. */
-  .edge-peeker.top {
-    translate: 0 -16px;
-  }
-
-  /* Room for the friends peeking over the top, below the menu. */
-  .hero-stage {
-    margin-top: 56px;
-  }
-
   .hero-jar {
     zoom: 0.74;
   }
@@ -370,13 +581,8 @@
   }
 
   .hero {
-    min-height: 0;
-    padding-top: 92px;
-    border-radius: 34px;
-  }
-
-  .hero-altar {
-    padding-bottom: 24px;
+    min-height: max(600px, 100svh);
+    padding-top: 112px;
   }
 
   .facts,
@@ -1690,9 +1896,9 @@ textarea.mono-input {
 }
 
 .waking-text {
-  font-family: var(--display);
-  font-weight: 600;
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-family: var(--spooky);
+  font-weight: 400;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
   margin-top: 36px;
   color: var(--sun);
 }
@@ -3360,26 +3566,6 @@ html {
 }
 
 /* ── Soft, funny haunting ─────────────────────────────────── */
-
-/* Shy friends duck behind the hero's edge when the pointer comes near. */
-.edge-peeker {
-  transition: transform 420ms var(--spring);
-}
-
-.edge-peeker.top.ducked {
-  transform: translate(-50%, -18%) rotate(var(--tilt));
-}
-
-.edge-grip {
-  transition:
-    opacity 200ms var(--soft),
-    transform 300ms var(--spring);
-}
-
-.edge-grip.ducked {
-  opacity: 0;
-  transform: translate(-50%, -48%) scale(0.4);
-}
 
 /* The hero jar is a button: poke it. */
 button.hero-jar {

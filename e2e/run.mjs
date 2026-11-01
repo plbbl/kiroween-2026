@@ -56,12 +56,29 @@ async function audit(pg, name) {
   audits.push(...violations.map((v) => `${name}: ${v}`));
 }
 
-// Home
+// Home: the opening plays once a visit, and a click skips it.
 await page.goto(app);
+await settle(700);
+check(await page.locator('.intro').isVisible(), 'the home page opens in the dark, with a candle');
+await page.locator('.intro').click();
+await settle(300);
+check((await page.locator('.intro').count()) === 0, 'a click skips the opening');
+await page.reload();
+await settle(700);
+check((await page.locator('.intro').count()) === 0, 'the opening plays only once a visit');
 await settle(2600);
 await shot('01-home');
 await audit(page, 'home');
 check(await page.getByRole('heading', { name: 'Phylactery' }).isVisible(), 'home shows the title');
+// The pointer is a lantern: a friend hiding in the dark shows in its light, and stays once found.
+{
+  const hider = page.locator('.lantern-layer .hider').first();
+  const b = await hider.boundingBox();
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 6 });
+  await settle(800);
+  check((await page.locator('.found-layer .hider.found').count()) === 1, 'the lantern finds a friend hiding in the dark');
+  await page.mouse.move(700, 880);
+}
 
 // Seal a jar
 await page.goto(`${app}#/seal`);

@@ -22,7 +22,7 @@ Phylactery joins the pieces, and makes a heavy subject gentle: death as a reunio
 
 | | |
 |---|---|
-| ![Home](docs/screenshots/home.jpg) | ![Sealed: a fan of cards and a self-check](docs/screenshots/sealed.jpg) |
+| ![Home: a night to play in; the lantern has found the pumpkin hiding by the house](docs/screenshots/home.jpg) | ![Sealed: a fan of cards and a self-check](docs/screenshots/sealed.jpg) |
 | ![The séance, the first candle lit](docs/screenshots/seance.jpg) | ![What June left](docs/screenshots/reveal.jpg) |
 | ![Letters, each with its reader's buddy peeking over the top](docs/screenshots/letters.jpg) | ![A letter, opened with Clara's seal](docs/screenshots/letter.jpg) |
 
@@ -32,7 +32,7 @@ Phylactery joins the pieces, and makes a heavy subject gentle: death as a reunio
 
 ## The costume
 
-Kiroween purple and a cast of little ghosts drawn as SVG, shaded like soft vinyl toys: a sheet ghost with its curl, Frankenstein, a hooded skeleton, a pumpkin, a witch, a bat, a vampire and a mummy, one per friend. Around them is a Halloween world, drawn in the same soft style: by day a lilac afternoon with cobwebs in the corners and a spider on its thread, and at the bottom of every page a hill with an old house; at night the moon, still fog, lit windows and a bat now and then. The seal steps are a row of jack-o'-lanterns that light as you go, and checklists light pumpkins. Content stays clean, in the spirit of Apple's Human Interface Guidelines: one big headline, one short line and one main action per screen, facts said with a number (2 of 3, 0, 1 file), details only when asked for, flat buttons, and motion only where it means something. Every spooky element that sits on the content does a job:
+Kiroween purple and a cast of little ghosts drawn as SVG, shaded like soft vinyl toys: a sheet ghost with its curl, Frankenstein, a hooded skeleton, a pumpkin, a witch, a bat, a vampire and a mummy, one per friend. Around them is a Halloween world, drawn in the same soft style: by day a lilac afternoon with cobwebs in the corners and a spider on its thread, and at the bottom of every page a hill with an old house; at night the moon, fog, fireflies, lit windows and a bat now and then, under a fine film grain. The big words (the wordmark, page titles, "Sealed!", "It's open!") are set in Rubik Wet Paint, letters that drip like warm candle wax. The seal steps are a row of jack-o'-lanterns that light as you go, and checklists light pumpkins. Content stays clean, in the spirit of Apple's Human Interface Guidelines: one big headline, one short line and one main action per screen, facts said with a number (2 of 3, 0, 1 file), details only when asked for, flat buttons, and motion only where it means something. Every spooky element that sits on the content does a job:
 
 ![The cast](docs/screenshots/cast.jpg)
 
@@ -58,7 +58,8 @@ Motion marks a change of state, and is springy and small: night falls and a cand
 ## Try it
 
 - **June's jar.** On the home page press *Try a séance*, then *Pick three for me*: the candles light, the jar rattles, and the ghost jumps out. Or click any three cards on the table yourself, or type a card's 30 words. Then open a letter with that person's seal.
-- **The story in twenty seconds.** The home page plays it with the cast: write, seal, share the cards, keep watch, gather. Poke the jar in the hero, too.
+- **The night on the home page.** Once a visit it opens in the dark: a candle catches, someone whispers "Shh… it's sleeping.", and the light spreads into the night (a click or any key skips it). The pointer is a lantern: six friends hide in the dark, show in its light, and stay once found; find them all and the jar ghost cheers. The hills shift a little as it moves. Click the sky and a bat flaps off; poke the jar and the ghost jumps up with a "BOO!". On a phone, tap the dark to light it.
+- **The story in twenty seconds.** Below the night, the cast plays it: write, seal, share the cards, keep watch, gather.
 - **Seal your own.** Open *Seal*, write, choose your circle, seal, and print the cards (one page per friend; cut off the seal half) and then, on its own, your key.
 - **Change it later.** Open *Seal*, choose *Change what's inside*, give it your jar file and your key, edit, and seal again. The same cards open the new words.
 - **The watch.** Open *Watch* and press *Let time pass* to see the rhythm. Where the watch service runs, start a real watch below it.

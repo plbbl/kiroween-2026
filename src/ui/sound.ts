@@ -208,6 +208,44 @@ export const sound = {
     });
   },
 
+  /** A bat's squeak as it flaps off: two tiny chirps, high and quick. */
+  squeak() {
+    const a = audio();
+    if (!a) return;
+    const t = a.ctx.currentTime;
+    [0, 0.09].forEach((at) => {
+      const o = a.ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(2600, t + at);
+      o.frequency.exponentialRampToValueAtTime(1700, t + at + 0.05);
+      const g = a.ctx.createGain();
+      g.gain.setValueAtTime(0, t + at);
+      g.gain.linearRampToValueAtTime(0.08, t + at + 0.006);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + at + 0.06);
+      o.connect(g).connect(a.out);
+      o.start(t + at);
+      o.stop(t + at + 0.07);
+    });
+  },
+
+  /** Found you! A soft rising "ooh" when the lantern catches a hiding ghost. */
+  found() {
+    const a = audio();
+    if (!a) return;
+    const t = a.ctx.currentTime;
+    const o = a.ctx.createOscillator();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(330, t);
+    o.frequency.exponentialRampToValueAtTime(560, t + 0.28);
+    const g = a.ctx.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.14, t + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
+    o.connect(g).connect(a.out);
+    o.start(t);
+    o.stop(t + 0.45);
+  },
+
   /** Thunder far away: a low rumble, soft enough to make someone smile. */
   thunder() {
     const a = audio();

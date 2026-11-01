@@ -258,6 +258,15 @@ export function Skyline({ night, className = '' }: { night: boolean; className?:
  * fog over the hill, lit windows. Bats cross now and then. The night set
  * falls in from the top with the night itself.
  */
+const EDGE_FIREFLIES = [
+  [3, 62, 0],
+  [7, 80, -4.2],
+  [11, 70, -7.5],
+  [89, 66, -2.6],
+  [93, 84, -6.1],
+  [97, 58, -9.3],
+] as const;
+
 export function Scenery() {
   return (
     <div className="scenery no-print" aria-hidden="true">
@@ -276,6 +285,12 @@ export function Scenery() {
           <Bat size={64} color="#0b0714" className="flyer f1" />
           <Bat size={46} color="#0b0714" className="flyer f2" />
           <Bat size={54} color="#0b0714" className="flyer f3" />
+        </div>
+        {/* A few fireflies at the edges of the night, never over the words. */}
+        <div className="fireflies">
+          {EDGE_FIREFLIES.map(([x, y, delay], i) => (
+            <i key={i} style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${delay}s, ${delay / 2}s` }} />
+          ))}
         </div>
       </div>
     </div>

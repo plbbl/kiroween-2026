@@ -32,6 +32,12 @@ for (const which of sizes) {
   const phone = which === 'phone';
   const viewport = phone ? { width: 390, height: 844 } : { width: 1440, height: 900 };
   const ctx = await b.newContext({ viewport, deviceScaleFactor: phone ? 2 : 1, acceptDownloads: true });
+  // The opening plays once a visit; the screenshots start after it (it has its own, below).
+  await ctx.addInitScript(() => {
+    try {
+      if (!location.hash.includes('intro')) sessionStorage.setItem('phylactery:intro', '1');
+    } catch {}
+  });
   // Pages that hold what cannot be made again ask before leaving; screenshots always mean to leave.
   ctx.on('page', (np) => np.on('dialog', (d) => void d.accept()));
   const p = await ctx.newPage();
@@ -270,6 +276,27 @@ for (const which of sizes) {
       await wait(700);
       await shot(`h${i}`);
     }
+    // The lantern finds a friend hiding in the dark; a click lets a bat go.
+    await p.evaluate(() => window.scrollTo(0, 0));
+    await wait(500);
+    if (!phone) {
+      const hb = await p.locator('.lantern-layer .hider').nth(4).boundingBox();
+      await p.mouse.move(hb.x + hb.width / 2, hb.y + hb.height / 2, { steps: 8 });
+      await wait(600);
+      await shot('h5-lantern');
+      await p.mouse.click(420, 420);
+      await wait(300);
+      await shot('h6-bat');
+    }
+    // The opening, once a visit.
+    const ic = await b.newContext({ viewport, deviceScaleFactor: phone ? 2 : 1 });
+    const iq = await ic.newPage();
+    await iq.goto(app);
+    await iq.waitForTimeout(1200);
+    await iq.screenshot({ path: `${out}/${pre}-h0-opening.png` });
+    await iq.waitForTimeout(1300);
+    await iq.screenshot({ path: `${out}/${pre}-h0-opening-light.png` });
+    await ic.close();
     const rm = await b.newContext({ viewport, deviceScaleFactor: phone ? 2 : 1, reducedMotion: 'reduce' });
     const q = await rm.newPage();
     await q.goto(app + '#/seance');
