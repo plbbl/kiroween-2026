@@ -3183,16 +3183,11 @@ body:has(.seance-room) .scenery-moon {
 }
 
 /* Every email the watch sends is postmarked. */
-.msg.to-owner,
-.msg.to-friends {
-  position: relative;
-  padding-right: 78px;
-}
-
+/* The stamp sits in the top corner and the words flow around it. */
 .postmark {
-  position: absolute;
-  top: 10px;
-  right: 12px;
+  float: right;
+  margin: -4px -6px 4px 10px;
+  shape-outside: circle(50%);
   display: grid;
   place-content: center;
   width: 56px;
