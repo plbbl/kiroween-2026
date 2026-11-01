@@ -4,7 +4,7 @@ import { CardError, parseCard, type Shard } from '../../core/cards.ts';
 import { checkShard, JarError, jarIdBytes, openJar, type JarFile, type JarHolder, type OpenedJar } from '../../core/jar.ts';
 import { DEMO_CARDS, DEMO_JAR, isDemo } from '../../demo/demo.ts';
 import { Candle } from '../../ui/art/Candle.tsx';
-import { Pumpkin } from '../../ui/art/Spooky.tsx';
+import { Bat, Pumpkin } from '../../ui/art/Spooky.tsx';
 import { Sparkles } from '../../ui/art/Decor.tsx';
 import { Ghost } from '../../ui/art/Ghost.tsx';
 import { Jar, type JarState } from '../../ui/art/Jar.tsx';
@@ -369,6 +369,14 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
         <div className="altar-jar" style={{ zIndex: 600 }}>
           <Jar initials={initialsOf(jar.owner)} state={jarState} wax={wax} warmth={phase === 'gathering' ? offered.length / k : 1} size={210} />
           <Sparkles burst={burst} radius={200} count={22} />
+          {/* When the cork pops, a few bats that were sleeping in the jar fly out. */}
+          {phase === 'open' && (
+            <span className="jar-bats" aria-hidden="true">
+              <Bat size={46} color="#1d0f38" className="jar-bat b1" />
+              <Bat size={34} color="#24133f" className="jar-bat b2" />
+              <Bat size={28} color="#1d0f38" className="jar-bat b3" />
+            </span>
+          )}
         </div>
       </div>
 

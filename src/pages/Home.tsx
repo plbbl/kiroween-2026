@@ -5,7 +5,7 @@ import { EmblemIcon } from '../ui/art/Emblem.tsx';
 import { Ghost, GhostHand, type Mood } from '../ui/art/Ghost.tsx';
 import { Jar } from '../ui/art/Jar.tsx';
 import { href, useAtmosphere } from '../ui/shell.tsx';
-import { Bat, Moon, Pumpkin } from '../ui/art/Spooky.tsx';
+import { Bat, Lantern, Moon, Pumpkin } from '../ui/art/Spooky.tsx';
 
 const d = (ms: number) => ({ '--d': `${ms}ms` }) as CSSProperties;
 
@@ -109,6 +109,7 @@ export function Home() {
             <div className="act-jar">
               <Jar initials="ME" size={112} />
             </div>
+            <Pumpkin size={40} className="act-pumpkin" />
           </div>
           <div>
             <p className="tag">01 · seal</p>
@@ -120,6 +121,7 @@ export function Home() {
           <div className="act-art">
             <div className="bubble">still here?</div>
             <Ghost mood="curious" size={84} float phase={0.6} />
+            <Lantern size={30} className="act-lantern" />
           </div>
           <div>
             <p className="tag">02 · watch</p>
@@ -172,7 +174,9 @@ export function Home() {
 
       <section className="closing wrap" data-theme="night">
         <div className="closing-ghost">
+          <Pumpkin size={64} lit className="closing-pumpkin" />
           <Ghost mood="happy" size={110} float rim={0.5} />
+          <Pumpkin size={52} lit className="closing-pumpkin" />
         </div>
         <p className="closing-line">One day your friends will gather.</p>
         <p className="closing-sub">Leave them something to open together.</p>

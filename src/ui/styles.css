@@ -336,10 +336,12 @@ h1[tabindex='-1']:focus {
 }
 
 @media (max-width: 640px) {
+  /* Small and half out of the corner, so it never crowds a heading. */
   .scenery-moon {
-    width: 120px;
-    height: 120px;
-    top: 64px;
+    width: 92px;
+    height: 92px;
+    top: 66px;
+    right: -26px;
   }
 
   .scenery-web {

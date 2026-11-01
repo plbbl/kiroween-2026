@@ -3,7 +3,7 @@ import { DEFAULT_WATCH, holderMessage, ownerReminder, runWatch, type OwnerAction
 import { DEMO_JAR } from '../../demo/demo.ts';
 import { Ghost, type Mood } from '../../ui/art/Ghost.tsx';
 import { numberWord, plural } from '../../ui/text.ts';
-import { Lantern } from '../../ui/art/Spooky.tsx';
+import { Lantern, Spider } from '../../ui/art/Spooky.tsx';
 import { homeAddress, homeUrl } from '../../ui/grimoire.ts';
 import { useAtmosphere } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
@@ -268,6 +268,7 @@ export function Watch({ params }: { params: URLSearchParams }) {
             </div>
             {messages.length === 0 ? (
               <div className="inbox-empty">
+                <Spider size={26} className="inbox-spider" />
                 <Ghost mood="sleep" size={56} float />
                 <p className="faint">Quiet so far. Let time pass, and don’t answer.</p>
               </div>
