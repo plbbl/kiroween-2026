@@ -121,6 +121,7 @@ export function App() {
     if (next) {
       sound.chime();
       if (route === 'seance') sound.startDrone();
+      if (route === 'home') sound.startNight();
     }
   };
 

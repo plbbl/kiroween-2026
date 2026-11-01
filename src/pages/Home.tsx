@@ -245,6 +245,11 @@ function hiderStyle(h: Hider): CSSProperties {
 
 export function Home() {
   useAtmosphere('night');
+  // With sound on, the night outside: a soft wind and crickets.
+  useEffect(() => {
+    sound.startNight();
+    return () => sound.stopNight();
+  }, []);
   const intro = useIntro();
   const { hero, jar: jarButton, hiders, look, found, lit, gag, bats, boo, onPointerDown } = useNightHero(!intro.on);
 

@@ -6,6 +6,7 @@ let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let enabled = false;
 let drone: { stop: () => void } | null = null;
+let night: { stop: () => void } | null = null;
 
 function audio(): { ctx: AudioContext; out: GainNode } | null {
   if (!enabled) return null;
@@ -58,6 +59,8 @@ export const sound = {
     if (!on) {
       drone?.stop();
       drone = null;
+      night?.stop();
+      night = null;
     } else {
       audio();
     }
@@ -306,5 +309,69 @@ export const sound = {
   stopDrone() {
     drone?.stop();
     drone = null;
+  },
+
+  /** The night outside, for the home page: a soft wind, and crickets now and then. */
+  startNight() {
+    const a = audio();
+    if (!a || night) return;
+    const t = a.ctx.currentTime;
+    const g = a.ctx.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.05, t + 3);
+    const lfo = a.ctx.createOscillator();
+    lfo.frequency.value = 0.09;
+    const lfoGain = a.ctx.createGain();
+    lfoGain.gain.value = 0.025;
+    lfo.connect(lfoGain).connect(g.gain);
+    const wind = a.ctx.createBufferSource();
+    wind.buffer = noise(a.ctx, 4);
+    wind.loop = true;
+    const bp = a.ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 480;
+    bp.Q.value = 0.7;
+    wind.connect(bp).connect(g).connect(a.out);
+    wind.start(t);
+    lfo.start(t);
+    let timer = 0;
+    const chirp = () => {
+      const c = audio();
+      if (c) {
+        const at = c.ctx.currentTime;
+        const pitch = 4300 + Math.random() * 600;
+        for (let i = 0; i < 3; i++) {
+          const o = c.ctx.createOscillator();
+          o.type = 'sine';
+          o.frequency.value = pitch;
+          const cg = c.ctx.createGain();
+          const s0 = at + i * 0.07;
+          cg.gain.setValueAtTime(0, s0);
+          cg.gain.linearRampToValueAtTime(0.025, s0 + 0.008);
+          cg.gain.exponentialRampToValueAtTime(0.0001, s0 + 0.035);
+          o.connect(cg).connect(c.out);
+          o.start(s0);
+          o.stop(s0 + 0.04);
+        }
+      }
+      timer = window.setTimeout(chirp, 900 + Math.random() * 1800);
+    };
+    timer = window.setTimeout(chirp, 1200);
+    night = {
+      stop: () => {
+        clearTimeout(timer);
+        const now = a.ctx.currentTime;
+        g.gain.cancelScheduledValues(now);
+        g.gain.setValueAtTime(g.gain.value, now);
+        g.gain.linearRampToValueAtTime(0, now + 1.2);
+        wind.stop(now + 1.3);
+        lfo.stop(now + 1.3);
+      },
+    };
+  },
+
+  stopNight() {
+    night?.stop();
+    night = null;
   },
 };
