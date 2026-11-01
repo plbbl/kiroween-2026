@@ -89,7 +89,7 @@ function Choose({ onChoose, notice = '' }: { onChoose: (jar: JarFile) => void; n
           Gather around
         </h1>
         <p className="lede rise" style={{ '--d': '200ms' } as CSSProperties}>
-          Each friend’s card lights a candle. Enough candles, and the little ghost wakes up.
+          Each card lights a candle. Enough candles wake the ghost.
         </p>
       </section>
 
@@ -98,8 +98,7 @@ function Choose({ onChoose, notice = '' }: { onChoose: (jar: JarFile) => void; n
           <span className="choose-art">
             <Jar initials="JA" size={130} warmth={0.4} />
           </span>
-          <span className="tag">try it</span>
-          <span className="choose-title">June’s jar</span>
+          <span className="choose-title">Try June’s jar</span>
           <span className="muted">Five cards on the table. Any three open it.</span>
         </button>
 
@@ -130,9 +129,8 @@ function Choose({ onChoose, notice = '' }: { onChoose: (jar: JarFile) => void; n
           <span className="choose-art">
             <Ghost costume="witch" mood="wow" size={92} float />
           </span>
-          <span className="tag">your circle</span>
-          <span className="choose-title">A jar you were given</span>
-          <span className="muted">Drop the jar file here, or tap to choose it. It stays on this device.</span>
+          <span className="choose-title">Open a jar you were given</span>
+          <span className="muted">Drop the jar file here, or tap to choose it.</span>
         </label>
       </section>
       {error && (
@@ -336,7 +334,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
         </p>
       </section>
 
-      <div className="altar" style={{ '--lit': offered.length / k } as CSSProperties}>
+      <div className={`altar${phase === 'gathering' ? '' : ' risen'}`} style={{ '--lit': offered.length / k } as CSSProperties}>
         <svg className="rug" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true">
           <defs>
             <radialGradient id="rug-fill" cx="50%" cy="50%" r="50%">
@@ -391,7 +389,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
           />
           {gag && (
             <span className={`boo-bubble ${gag}`} key={gag} aria-hidden="true">
-              {gag === 'boo' ? 'BOO!' : 'Ha! Just kidding. Hello, friends.'}
+              {gag === 'boo' ? 'BOO!' : 'Ha! Hello, friends.'}
             </span>
           )}
           <Sparkles burst={burst} radius={200} count={22} />
@@ -511,13 +509,6 @@ function DemoTable({
         The cards are on the table.{' '}
         {offered.length === 0 ? `Tap any ${numberWord(jar.threshold)}.` : `Tap ${numberWord(jar.threshold - offered.length)} more.`}
       </p>
-      {!gathering && (
-        <p className="center gather-for-me">
-          <button type="button" className="btn small" onClick={() => void gatherForMe()}>
-            Gather {offered.length === 0 ? numberWord(jar.threshold) : 'the rest of the'} friends for me
-          </button>
-        </p>
-      )}
       <div className="demo-cards" ref={table}>
         {DEMO_CARDS.map((c, i) => {
           const holder = jar.holders.find((h) => h.name === c.name)!;
@@ -542,7 +533,13 @@ function DemoTable({
         })}
       </div>
       {note && <p className="error center">{note}</p>}
-      <p className="faint center">or offer a real card below</p>
+      {!gathering && (
+        <p className="center gather-for-me">
+          <button type="button" className="text-btn" onClick={() => void gatherForMe()}>
+            Pick {numberWord(jar.threshold - offered.length)} for me
+          </button>
+        </p>
+      )}
     </div>
   );
 }

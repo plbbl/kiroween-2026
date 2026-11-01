@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { circleBuddies, circleCostumes } from '../../core/buddy.ts';
 import { fromBase32, randomBytes, toBase32 } from '../../core/bytes.ts';
 import { JAR_ID_LENGTH, type KeyCard } from '../../core/cards.ts';
@@ -6,7 +6,6 @@ import { emptyContent, jarIdBytes, resealJar, sealJar, validateSealInput, type J
 import { Candle } from '../../ui/art/Candle.tsx';
 import { Pumpkin } from '../../ui/art/Spooky.tsx';
 import { Sparkles } from '../../ui/art/Decor.tsx';
-import { Ghost } from '../../ui/art/Ghost.tsx';
 import { WatchingGhost } from '../../ui/art/WatchingGhost.tsx';
 import { Jar } from '../../ui/art/Jar.tsx';
 import { initialsOf, type WaxState } from '../../ui/art/WaxSeal.tsx';
@@ -19,42 +18,36 @@ import { StepCircle, StepLeave, StepMessage, StepName, StepWishes, type Draft } 
 
 const listNames = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : (names[0] ?? ''));
 
-const STEPS: { label: string; title: (d: Draft) => string; sub: string; art: ReactNode }[] = [
+const STEPS: { label: string; title: (d: Draft) => string; sub: string }[] = [
   {
     label: 'You',
-    title: () => 'Hi! Whose jar is this?',
-    sub: 'A little ghost will keep what you write here, safe in a jar.',
-    art: <WatchingGhost mood="open" size={86} float />,
+    title: () => 'Whose jar is this?',
+    sub: 'Kept in this tab until you seal it. Never sent.',
   },
   {
     label: 'Note',
     title: () => 'A note for everyone',
     sub: 'Everyone in your circle will read this first.',
-    art: <WatchingGhost mood="curious" costume="vampire" size={86} float />,
   },
   {
     label: 'Things',
     title: () => 'The things only you know',
-    sub: 'Accounts, how to get in, and where things are kept.',
-    art: <WatchingGhost mood="open" costume="witch" size={86} float emblem="key" />,
+    sub: 'Accounts, how to get in, where things are. Have your logins at hand.',
   },
   {
     label: 'Wishes',
     title: () => 'How you’d like things done',
     sub: 'Gentle instructions for the people left to do them.',
-    art: <WatchingGhost mood="open" costume="pumpkin" size={86} float />,
   },
   {
-    label: 'Circle',
+    label: 'Friends',
     title: () => 'Who keeps the cards?',
-    sub: 'One card each, for people who would come if you needed them.',
-    art: <WatchingGhost mood="curious" size={86} float emblem="heart" />,
+    sub: 'One card each, for people who would come.',
   },
   {
     label: 'Seal',
     title: (d) => `Ready, ${d.owner.trim().split(/\s+/)[0] || 'friend'}?`,
     sub: 'Once sealed, the cards are made. You will print them next.',
-    art: null,
   },
 ];
 
@@ -349,7 +342,8 @@ function Wizard({
             <div className="trail-fill" style={{ width: `${progress * 100}%` }} />
           </div>
           <div className="trail-ghost" style={{ left: `${progress * 100}%` }} aria-hidden="true">
-            <Ghost mood="happy" size={52} float />
+            {/* It keeps an eye on what you write. */}
+            <WatchingGhost mood="open" size={52} float />
           </div>
           <ol className="trail-steps">
             {STEPS.map((s, i) => (
@@ -376,10 +370,6 @@ function Wizard({
           key={step}
           aria-labelledby="step-title"
         >
-          {current.art && <div className="step-art">{current.art}</div>}
-          <p className="tag">
-            step {step + 1} of {STEPS.length}
-          </p>
           <h1 id="step-title" className="step-title" tabIndex={-1} ref={title}>
             {!corked ? current.title(draft) : wax === 'pressing' ? 'Sealed.' : corkIn ? 'Corked…' : 'By candlelight…'}
           </h1>
@@ -464,8 +454,6 @@ function Wizard({
                 <button type="button" className="text-btn quiet" onClick={() => goTo(step - 1)}>
                   ← Back
                 </button>
-              ) : !canContinue ? (
-                <span className="faint nav-hint">Add your name to go on.</span>
               ) : (
                 <span />
               )}

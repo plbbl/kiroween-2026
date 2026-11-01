@@ -133,7 +133,7 @@ export function Home() {
               Phylactery
             </h1>
             <p className="hero-sub rise" style={d(380)}>
-              Leave your passwords, papers and last words in a jar that only your friends, together, can open.
+              Leave your passwords and last words in a jar only your friends, together, can open.
             </p>
             <div className="row centered rise" style={d(520)}>
               <a className="btn on-purple" href={href('seal')}>
@@ -143,9 +143,6 @@ export function Home() {
                 Try a séance
               </a>
             </div>
-            <p className="hero-trust rise" style={d(620)}>
-              Free · No account · Locked in your browser
-            </p>
           </div>
           {/* A Halloween night inside the hero: the moon, bats, a hill with lit pumpkins. */}
           <div className="hero-night" aria-hidden="true">
@@ -229,14 +226,13 @@ export function Home() {
           <Pumpkin size={52} lit className="closing-pumpkin" />
         </div>
         <p className="closing-line">One day your friends will gather.</p>
-        <p className="closing-sub">Leave them something to open together.</p>
         <a className="btn primary" href={href('seal')}>
           Seal a jar
         </a>
       </section>
 
       <footer className="footer center faint">
-        Free and open source (MIT) · No account, no analytics, no tracking · Your jar never leaves your device unlocked
+        Free and open source · No account, no tracking
       </footer>
     </div>
   );

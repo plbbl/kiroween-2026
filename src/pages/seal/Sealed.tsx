@@ -9,7 +9,7 @@ import { Jar } from '../../ui/art/Jar.tsx';
 import { initialsOf } from '../../ui/art/WaxSeal.tsx';
 import { BuddyCard, EnvelopeMark, PrintableCard, PrintableKey } from '../../ui/components/Cards.tsx';
 import { ConfirmButton } from '../../ui/components/Confirm.tsx';
-import { capitalised, numberWord } from '../../ui/text.ts';
+import { numberWord } from '../../ui/text.ts';
 import { canMakeGrimoire, download, makeGrimoire, safeFilename } from '../../ui/grimoire.ts';
 import { href, useFocusOnArrival, useLeaveWarning } from '../../ui/shell.tsx';
 import { ApiError, jarHandoff, watchApi, watchAvailable } from '../../ui/watchApi.ts';
@@ -76,17 +76,17 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
           Sealed!
         </h1>
         <p className="lede">
-          {capitalised(numberWord(n))} cards were made; any {numberWord(k)} open the jar. Print them now: it’s the only time you can.
+          {k === n ? (n === 2 ? 'Both cards are needed to open it.' : `All ${numberWord(n)} cards are needed to open it.`) : `Any ${numberWord(k)} of these ${numberWord(n)} cards open it.`} Print them now;
+          you can’t later.
         </p>
         <p className={`proof${check ? (check.ok ? ' ok' : ' bad') : ''}`} role="status">
           <EmblemIcon name="spark" size={18} title="" />
           {!check && `Checking all ${combos(n, k)} ways to gather…`}
-          {check?.ok &&
-            `Checked: all ${check.opened} groups of ${numberWord(k)} open it${k > 2 ? `, and none of the ${check.refused} groups of ${numberWord(k - 1)} can` : ', and no one can alone'}.`}
+          {check?.ok && `Checked: every ${numberWord(k)} of you can open it, and ${k > 2 ? `no ${numberWord(k - 1)}` : 'no one alone'}.`}
           {check && !check.ok && 'Something is wrong with these cards. Please seal the jar again.'}
         </p>
         <p className="still-to-do" role="status">
-          {missing.length ? `Before you close this page: ${list(missing, 'and')}.` : 'All done. You can close this page.'}
+          {missing.length ? '' : 'All done. You can close this page.'}
         </p>
         {replaces && (
           <p className="faint replaces">
@@ -118,7 +118,7 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
           <span className="buddy-card-note">
             <EnvelopeMark />
           </span>
-          a private letter, opened with that card’s seal
+          has a letter
         </p>
       )}
 
@@ -126,10 +126,8 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
         <article className="todo-item card">
           <span className="todo-num">1</span>
           <div>
-            <h3>Print the cards, then your key</h3>
-            <p className="muted">
-              One page per friend: cut on the line and give both halves. Your key prints on its own: it opens everything, so keep it apart.
-            </p>
+            <h3>Print</h3>
+            <p className="muted">Cut each page in two and give both halves. Keep your key apart.</p>
             <div className="print-buttons">
               <button type="button" className={`btn${printed ? '' : ' primary'}`} onClick={() => print('cards')}>
                 {printed ? 'Print the cards again' : 'Print the cards'}
@@ -156,10 +154,8 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
         <article className="todo-item card">
           <span className="todo-num">2</span>
           <div>
-            <h3>Give everyone their card and the jar file</h3>
-            <p className="muted">
-              Email everyone the jar file. It’s safe to send, and opens in any browser, even offline.
-            </p>
+            <h3>Send</h3>
+            <p className="muted">Download the jar file and email it to everyone. It’s safe to send, and opens in any browser.</p>
             <button
               type="button"
               className="btn"
@@ -177,10 +173,10 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
         <article className="todo-item card">
           <span className="todo-num">3</span>
           <div>
-            <h3>Turn on the watch</h3>
-            <p className="muted">Now and then you’re asked if you’re still here. Go quiet, and your friends are asked to look in on you.</p>
+            <h3>Watch</h3>
+            <p className="muted">If you go quiet, your friends are asked to look in on you.</p>
             <a className="btn" href={href('watch')} onClick={() => jarHandoff.give(jar)}>
-              Set the watch
+              Turn on the watch
             </a>
           </div>
         </article>

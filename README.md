@@ -32,7 +32,7 @@ Phylactery joins the pieces, and makes a heavy subject gentle: death as a reunio
 
 ## The costume
 
-Kiroween purple and a cast of little ghosts drawn as SVG, shaded like soft vinyl toys: a sheet ghost with its curl, Frankenstein, a hooded skeleton, a pumpkin, a witch, a bat, a vampire and a mummy, one per friend. Around them is a Halloween world, drawn in the same soft style: by day a lilac afternoon with cobwebs in the corners and a spider on its thread, and at the bottom of every page a hill with an old house; at night the moon, fog, lit windows, a bat now and then and a ghost with a lantern drifting by. The seal steps are a row of jack-o'-lanterns that light as you go, and checklists light pumpkins. Content stays clean, in the spirit of Apple's Human Interface Guidelines: one headline, one short sentence and one main action per screen, flat buttons, few words, and motion only where it means something. Every spooky element that sits on the content does a job:
+Kiroween purple and a cast of little ghosts drawn as SVG, shaded like soft vinyl toys: a sheet ghost with its curl, Frankenstein, a hooded skeleton, a pumpkin, a witch, a bat, a vampire and a mummy, one per friend. Around them is a Halloween world, drawn in the same soft style: by day a lilac afternoon with cobwebs in the corners and a spider on its thread, and at the bottom of every page a hill with an old house; at night the moon, still fog, lit windows and a bat now and then. The seal steps are a row of jack-o'-lanterns that light as you go, and checklists light pumpkins. Content stays clean, in the spirit of Apple's Human Interface Guidelines: one headline, one short sentence and one main action per screen, flat buttons, few words, and motion only where it means something. Every spooky element that sits on the content does a job:
 
 ![The cast](docs/screenshots/cast.jpg)
 
@@ -47,7 +47,7 @@ Kiroween purple and a cast of little ghosts drawn as SVG, shaded like soft vinyl
 | Jack-o'-lanterns | Progress: each step of sealing lights one; each guide you've done lights one; each reminder on the watch's timeline is one |
 | Day and night | A starry night when you arrive; lilac paper while you write and keep watch; night falls when you seal, and again when friends gather. It falls from the top of the screen and lifts the same way |
 
-Motion marks a change of state, and is springy and small: night falls and a candle wakes, the cork drops in and the wax is stamped, a tapped card glows and its ghost flies to a candle, the candle wakes, the seal cracks, the cork spins away and the bats sleeping in the jar fly out, envelopes open and letters slide out. Besides the ghost in focus and lit flames, only the night scenery moves on its own: a passing bat, a drifting ghost, the fog. The jar's opening can be skipped. All sounds (a match, a flame, wax pressed and cracking, a bell) are synthesised live with the Web Audio API; there are no audio files, and sound is off until you turn it on. With *reduce motion* set, every state is kept and the movement is dropped. Printed cards are black-and-white line art.
+Motion marks a change of state, and is springy and small: night falls and a candle wakes, the cork drops in and the wax is stamped, a tapped card glows and its ghost flies to a candle, the candle wakes, the seal cracks, the cork spins away and the bats sleeping in the jar fly out, envelopes open and letters slide out. Besides the ghost in focus and lit flames, only a few bats cross the night sky on their own. The jar's opening can be skipped. All sounds (a match, a flame, wax pressed and cracking, a bell) are synthesised live with the Web Audio API; there are no audio files, and sound is off until you turn it on. With *reduce motion* set, every state is kept and the movement is dropped. Printed cards are black-and-white line art.
 
 ## Three promises
 
@@ -57,7 +57,7 @@ Motion marks a change of state, and is springy and small: night falls and a cand
 
 ## Try it
 
-- **June's jar.** On the home page press *Try a séance*, then *Gather three friends for me*: the candles light, the jar rattles, and the ghost jumps out. Or click any three cards on the table yourself, or type a card's 30 words. Then open a letter with that person's seal.
+- **June's jar.** On the home page press *Try a séance*, then *Pick three for me*: the candles light, the jar rattles, and the ghost jumps out. Or click any three cards on the table yourself, or type a card's 30 words. Then open a letter with that person's seal.
 - **The story in twenty seconds.** The home page plays it with the cast: write, seal, share the cards, keep watch, gather. Poke the jar in the hero, too.
 - **Seal your own.** Open *Seal*, write, choose your circle, seal, and print the cards (one page per friend; cut off the seal half) and then, on its own, your key.
 - **Change it later.** Open *Seal*, choose *Change what's inside*, give it your jar file and your key, edit, and seal again. The same cards open the new words.

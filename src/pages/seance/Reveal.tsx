@@ -131,7 +131,6 @@ export function Reveal({ jar, opened, circle, buddies }: { jar: JarFile; opened:
       <div className="narrow reveal-body">
         {c.message.trim() && (
           <article className="paper message rise" style={{ '--d': '300ms' } as CSSProperties}>
-            <p className="paper-tag">to everyone</p>
             <Paragraphs text={c.message} start={500} />
             <p className="signature rise" style={{ '--d': '1400ms' } as CSSProperties}>
               — {first}
@@ -204,7 +203,7 @@ export function Reveal({ jar, opened, circle, buddies }: { jar: JarFile; opened:
             <h2 id="letters-title" className="center section-title">
               Letters
             </h2>
-            <p className="center muted">Each one opens only with its reader’s private seal, the half cut from their card.</p>
+            <p className="center muted">Each opens only with its reader’s seal.</p>
             <Letters jar={jar} opened={opened} holders={letters} buddies={buddies} />
           </section>
         )}
@@ -219,7 +218,7 @@ export function Reveal({ jar, opened, circle, buddies }: { jar: JarFile; opened:
                   Seal your own jar
                 </a>
                 <a className="btn" href={`${href('guides')}#after`} target="_blank" rel="noopener">
-                  For the days that follow
+                  What to do next
                 </a>
               </div>
             </>
@@ -228,7 +227,7 @@ export function Reveal({ jar, opened, circle, buddies }: { jar: JarFile; opened:
               <p className="muted">There is a gentle checklist for the days that follow. It opens in a new tab, so this stays open.</p>
               <div className="row centered">
                 <a className="btn primary" href={`${href('guides')}#after`} target="_blank" rel="noopener">
-                  For the days that follow
+                  What to do next
                 </a>
                 <button type="button" className="btn" onClick={() => window.print()}>
                   Print what {first} left

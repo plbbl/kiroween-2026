@@ -31,12 +31,6 @@ export function StepName({ draft, setOwner }: { draft: Draft; setOwner: (s: stri
         <span>Your name</span>
         <input type="text" autoFocus value={draft.owner} onChange={(e) => setOwner(e.target.value)} placeholder="As your people know you" autoComplete="name" />
       </label>
-      <p className="note">
-        <Ghost size={30} mood="wink" />
-        <span>
-          Kept in this tab only until you seal it, and never sent anywhere. Have your logins at hand.
-        </span>
-      </p>
       <p className="faint update-link">
         Sealed one before? <a href={`${href('seal')}?update`}>Change what’s inside</a> with your key.
       </p>
@@ -138,7 +132,7 @@ export function StepLeave({ content, setContent }: { content: JarContent; setCon
         </ul>
       )}
       <button type="button" className="btn small" onClick={() => addAccount()}>
-        + Add an account
+        Add an account
       </button>
 
       <div className="sub-head spaced">
@@ -167,7 +161,7 @@ export function StepLeave({ content, setContent }: { content: JarContent; setCon
         </ul>
       )}
       <button type="button" className="btn small" onClick={() => setDocuments([...documents, { item: '', location: '' }])}>
-        + Add a place
+        Add a place
       </button>
     </>
   );
@@ -258,7 +252,7 @@ export function StepCircle({
                 aria-expanded={h.writing}
                 aria-label={h.writing ? `Remove the letter for ${h.name || `friend ${i + 1}`}` : `Write a letter for ${h.name || `friend ${i + 1}`}`}
               >
-                {h.writing ? 'Remove letter' : '+ Letter'}
+                {h.writing ? 'Remove letter' : 'Add a letter'}
               </button>
               {n > 2 && !locked && (
                 <button type="button" className="icon-btn small" onClick={() => setHolders(draft.holders.filter((_, j) => j !== i))} aria-label={`Remove ${h.name || `friend ${i + 1}`}`}>
@@ -282,7 +276,7 @@ export function StepCircle({
       </ul>
       {n < 10 && !locked && (
         <button type="button" className="btn small" onClick={() => setHolders([...draft.holders, { name: '', letter: '', writing: false }])}>
-          + Add a friend
+          Add a friend
         </button>
       )}
       {locked && onNewJar && (

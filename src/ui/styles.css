@@ -252,7 +252,7 @@ h1[tabindex='-1']:focus {
   right: max(2vw, 10px);
 }
 
-/* Fog drifts over the hill at night. */
+/* Fog lies over the hill at night. */
 .scenery-fog {
   position: absolute;
   left: -20%;
@@ -263,13 +263,6 @@ h1[tabindex='-1']:focus {
     radial-gradient(ellipse 30% 60% at 20% 100%, rgba(185, 160, 230, 0.16), transparent 70%),
     radial-gradient(ellipse 26% 50% at 55% 100%, rgba(185, 160, 230, 0.14), transparent 70%),
     radial-gradient(ellipse 30% 60% at 85% 100%, rgba(185, 160, 230, 0.16), transparent 70%);
-  animation: fog-drift 26s ease-in-out infinite alternate;
-}
-
-@keyframes fog-drift {
-  to {
-    transform: translateX(8%);
-  }
 }
 
 /* Bats cross the sky now and then, each on its own schedule. */
@@ -351,12 +344,9 @@ h1[tabindex='-1']:focus {
 }
 
 @media (max-width: 640px) {
-  /* Small, in the corner under the menu, so it never crowds a heading. */
+  /* The moon is fixed, so on a phone it would sit behind the content as you scroll. */
   .scenery-moon {
-    width: 76px;
-    height: 76px;
-    top: 74px;
-    right: 6px;
+    display: none;
   }
 
   .scenery-web {
@@ -453,6 +443,7 @@ a {
   font-size: 1.2rem;
   color: var(--fg-soft);
   max-width: 34em;
+  text-wrap: balance;
 }
 
 .muted {
@@ -926,7 +917,7 @@ select {
 .note {
   display: flex;
   gap: 12px;
-  align-items: flex-start;
+  align-items: center;
   padding: 14px 18px;
   border-radius: 20px;
   background: var(--surface-2);
@@ -1672,55 +1663,7 @@ select {
   background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(6, 2, 14, 0.5) 100%);
 }
 
-/* A lantern-carrying ghost drifts across the night sky. */
-.drifter {
-  position: absolute;
-  top: 20vh;
-  left: -90px;
-  display: flex;
-  align-items: flex-end;
-  opacity: 0;
-  animation: drift 90s linear infinite;
-  animation-delay: 6s;
-}
 
-.drifter-lantern {
-  margin: 0 0 8px -8px;
-}
-
-@keyframes drift {
-  0% {
-    opacity: 0;
-    transform: translate(0, 0);
-  }
-  3% {
-    opacity: 0.55;
-  }
-  45% {
-    opacity: 0.55;
-    transform: translate(60vw, -6vh);
-  }
-  50% {
-    opacity: 0;
-    transform: translate(70vw, -4vh);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(70vw, -4vh);
-  }
-}
-
-@media (max-width: 640px) {
-  .drifter {
-    top: 26vh;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .drifter {
-    display: none;
-  }
-}
 
 .watching-ghost {
   display: inline-flex;

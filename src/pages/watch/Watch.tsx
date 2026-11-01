@@ -16,7 +16,7 @@ const FIRST = OWNER.split(' ')[0]!;
 const HOLDERS = DEMO_JAR.holders.map((h) => h.name);
 
 const MOOD: Record<WatchStatus, { mood: Mood; say: string }> = {
-  well: { mood: 'happy', say: 'All good! See you soon.' },
+  well: { mood: 'happy', say: '' },
   paused: { mood: 'sleep', say: 'Resting while you’re away.' },
   due: { mood: 'curious', say: 'Still here?' },
   reminding: { mood: 'worried', say: 'Hello? Tap to say you’re okay.' },
@@ -120,8 +120,9 @@ export function Watch({ params }: { params: URLSearchParams }) {
       ) : (
         <section className="narrow center watch-head">
           <div className="watch-hero">
-            <div className="speech pop" key={relieved ? 'relieved' : run.status}>
-              {face.say}
+            {/* Nothing to say until something happens; the space stays, so nothing jumps. */}
+            <div className={`speech pop${face.say ? '' : ' quiet'}`} key={relieved ? 'relieved' : run.status} aria-hidden={!face.say}>
+              {face.say || '…'}
             </div>
             <span className="presence" style={{ opacity: presence }}>
               <WatchingGhost mood={face.mood} size={130} float shadow />
@@ -131,7 +132,7 @@ export function Watch({ params }: { params: URLSearchParams }) {
           </div>
           <h1>Still here?</h1>
           <p className="lede">
-            One gentle question now and then. Go quiet, and your friends are asked to look in on you.
+            Go quiet, and your friends are asked to look in on you.
           </p>
         </section>
       )}
@@ -201,7 +202,7 @@ export function Watch({ params }: { params: URLSearchParams }) {
           <div className="card timeline">
             <div className="spread">
               <h2 className="card-title">
-                <span className="tag try-tag">try it</span> Day <span className="day-num">{Math.floor(day)}</span>
+                Day <span className="day-num">{Math.floor(day)}</span>
               </h2>
               <span className={`status-pill s-${run.status}`}>
                 {run.status === 'reminding'
@@ -244,17 +245,14 @@ export function Watch({ params }: { params: URLSearchParams }) {
             </div>
 
             <div className="row controls">
-              <button type="button" className="btn primary small" onClick={() => setPlaying(!playing)} disabled={day >= horizon}>
-                {playing ? 'Pause time' : day >= horizon ? 'That’s all' : 'Let time pass'}
+              <button type="button" className="btn primary small" onClick={() => (day >= horizon ? reset() : setPlaying(!playing))}>
+                {playing ? 'Pause time' : day >= horizon ? 'Start over' : 'Let time pass'}
               </button>
               <button type="button" className="btn small" onClick={() => act('checkin')} disabled={paused}>
                 I’m here
               </button>
               <button type="button" className="btn small" onClick={() => act(paused ? 'resume' : 'pause')}>
                 {paused ? 'Resume' : 'Pause, I’m away'}
-              </button>
-              <button type="button" className="text-btn quiet" onClick={reset}>
-                Start over
               </button>
             </div>
           </div>

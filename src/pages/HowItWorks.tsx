@@ -224,9 +224,6 @@ export function HowItWorks() {
         </div>
       </div>
       <p className="hiw-line center" aria-live="off">
-        <b>
-          {scene + 1}. {SCENES[scene]!.title}.
-        </b>{' '}
         {SCENES[scene]!.line}
       </p>
       <div className="hiw-controls">

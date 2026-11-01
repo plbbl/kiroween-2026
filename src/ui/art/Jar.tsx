@@ -28,12 +28,12 @@ interface JarProps {
 // Where the little paper notes fly to when the jar opens: x and y (for a
 // 220px jar), and how far each one turns.
 const NOTES: [number, number, number][] = [
-  [-150, -120, -30],
-  [-70, -190, 14],
-  [60, -200, -12],
-  [150, -110, 34],
-  [-120, -40, 22],
-  [130, -30, -26],
+  [-140, -90, -30],
+  [-64, -140, 14],
+  [56, -146, -12],
+  [140, -84, 34],
+  [-120, -30, 22],
+  [126, -24, -26],
 ];
 
 // A round-bellied jar with a short neck.

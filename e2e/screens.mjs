@@ -61,7 +61,7 @@ for (const which of sizes) {
     await wait(600);
     await p.getByRole('button', { name: '+ Password manager' }).click();
     await p.getByPlaceholder('Login, and the password or where it is').fill('master password in the red notebook');
-    await p.getByRole('button', { name: '+ Add a place' }).click();
+    await p.getByRole('button', { name: 'Add a place' }).click();
     await p.getByPlaceholder('Will, deed, insurance, spare key…').fill('Will');
     await p.getByPlaceholder('Blue folder, top drawer of the desk').fill('Blue folder, top drawer');
     await wait(600);

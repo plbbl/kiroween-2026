@@ -144,7 +144,7 @@ export function LinkAction({ params }: { params: URLSearchParams }) {
             <li>
               {view.jar
                 ? `A locked copy of your jar is kept: version ${view.jar.revision}, given ${day(view.jar.keptAt)}. If your friends are asked, each gets a link to it.`
-                : 'No copy of your jar is kept. If your friends are asked, they will need the jar file you gave them.'}
+                : 'Your friends will need the jar file you gave them.'}
             </li>
           </ul>
           <KeptJarActions view={view} busy={busy} onKeep={(jar) => act(() => watchApi.keepJar(token, jar))} />
@@ -195,7 +195,7 @@ function KeptJarActions({ view, busy, onKeep }: { view: WatchView; busy: boolean
           Keep the jar you just {versionOf(fresh) > 1 ? 'updated' : 'sealed'}
         </button>
       )}
-      <JarFileButton label={view.jar ? 'Give a newer jar file' : 'Keep a copy of my jar file'} onJar={onKeep} />
+      <JarFileButton label={view.jar ? 'Give a newer jar file' : 'Keep a copy of my jar file'} onJar={onKeep} className="text-btn" />
       {view.jar && (
         <button type="button" className="text-btn quiet" disabled={busy} onClick={() => onKeep(null)}>
           Remove the copy
@@ -349,7 +349,7 @@ export function StartWatch({ config }: { config: WatchConfig }) {
     <form className="card start-watch" onSubmit={submit} aria-labelledby="start-title" noValidate>
       <h2 id="start-title">Start your watch</h2>
       <p className="muted">
-        Uses your rhythm<span className="rhythm-where"> (beside this)</span>. Only names, emails and times are stored. Pause or delete it any time.
+        Only names, emails and times are stored. Pause or delete it any time.
       </p>
       <div className="person-grid">
         <label className="field">
@@ -380,7 +380,7 @@ export function StartWatch({ config }: { config: WatchConfig }) {
         </label>
       </div>
       <p className="label friends-label">Friends to ask, if you go quiet</p>
-      <p className="faint friends-hint">Each one will see the others’ names and emails, so they can find each other.</p>
+      <p className="faint friends-hint">They’ll see each other’s names and emails.</p>
       {friends.map((f, i) => {
         const problem = shown(`friend-${i}`) ? friendErrors[i] : '';
         return (
@@ -442,7 +442,7 @@ export function StartWatch({ config }: { config: WatchConfig }) {
       <div className="spread">
         {friends.length < 10 ? (
           <button type="button" className="text-btn" onClick={() => setFriends([...friends, { name: '', email: '' }])}>
-            + another friend
+            Add a friend
           </button>
         ) : (
           <span />

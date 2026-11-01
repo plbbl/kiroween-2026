@@ -84,7 +84,7 @@ await next();
 await settle(500);
 await page.getByRole('button', { name: '+ Password manager' }).click();
 await page.getByPlaceholder('Login, and the password or where it is').fill('master password: engine-of-difference');
-await page.getByRole('button', { name: '+ Add a place' }).click();
+await page.getByRole('button', { name: 'Add a place' }).click();
 await page.getByPlaceholder('Will, deed, insurance, spare key…').fill('Notebooks');
 await page.getByPlaceholder('Blue folder, top drawer of the desk').fill('The cedar chest');
 await settle(500);
@@ -112,8 +112,8 @@ await page.getByText(/^Checked:/).waitFor({ timeout: 10000 });
 await settle(2200);
 await shot('08-sealed');
 await audit(page, 'sealed');
-check(await page.getByText('Three cards were made; any two open the jar. Print them now: it’s the only time you can.').isVisible(), 'sealing makes three cards');
-check(await page.getByText('Checked: all 3 groups of two open it, and no one can alone.').isVisible(), 'the self-check proves every pair opens it');
+check(await page.getByText('Any two of these three cards open it. Print them now; you can’t later.').isVisible(), 'sealing makes three cards');
+check(await page.getByText('Checked: every two of you can open it, and no one alone.').isVisible(), 'the self-check proves every pair opens it');
 
 // Printed cards, then the key on its own (the print dialog itself is skipped)
 await page.evaluate(() => {
@@ -219,7 +219,7 @@ try {
   await g.getByRole('button', { name: 'Seal the jar' }).click();
   await g.getByRole('heading', { name: /Sealed!/ }).waitFor({ timeout: 10000 });
   check(
-    (await g.getByText('Two cards were made; any two open the jar. Print them now: it’s the only time you can.').isVisible()) && (await g.getByText(/replaces your earlier one/).isVisible()),
+    (await g.getByText('Both cards are needed to open it. Print them now; you can’t later.').isVisible()) && (await g.getByText(/replaces your earlier one/).isVisible()),
     'the new jar has the new circle, and says what to do about the old cards',
   );
 } catch (e) {
@@ -230,7 +230,7 @@ await g.close();
 // One click from the home page: June's jar, and three friends gathered for you.
 await page.goto(`${app}#/seance?demo`);
 await settle(1200);
-await page.getByRole('button', { name: /^Gather three friends for me/ }).click();
+await page.getByRole('button', { name: 'Pick three for me' }).click();
 await page.getByText(/opened by/).waitFor({ timeout: 15000 });
 check(true, 'one click gathers the demo circle and opens June’s jar');
 
