@@ -82,7 +82,7 @@ export function Home() {
           </div>
           <div className="hero-altar">
             <div className="hero-jar pop" style={d(650)}>
-              <Jar initials="JA" size={250} warmth={0.45} />
+              <Jar initials="ME" size={250} warmth={0.45} />
             </div>
           </div>
         </section>

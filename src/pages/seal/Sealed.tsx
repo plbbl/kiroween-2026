@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from
 import { flushSync } from 'react-dom';
 import { circleBuddies } from '../../core/buddy.ts';
 import { verifyCircle, type CircleCheck, type JarFile, type SealResult } from '../../core/jar.ts';
+import { Candle } from '../../ui/art/Candle.tsx';
 import { Sparkles } from '../../ui/art/Decor.tsx';
 import { EmblemIcon } from '../../ui/art/Emblem.tsx';
 import { Jar } from '../../ui/art/Jar.tsx';
@@ -10,7 +11,7 @@ import { BuddyCard, EnvelopeMark, PrintableCard, PrintableKey } from '../../ui/c
 import { ConfirmButton } from '../../ui/components/Confirm.tsx';
 import { capitalised, numberWord } from '../../ui/text.ts';
 import { canMakeGrimoire, download, makeGrimoire, safeFilename } from '../../ui/grimoire.ts';
-import { href, useLeaveWarning } from '../../ui/shell.tsx';
+import { href, useFocusOnArrival, useLeaveWarning } from '../../ui/shell.tsx';
 import { ApiError, jarHandoff, watchApi, watchAvailable } from '../../ui/watchApi.ts';
 
 function combos(n: number, k: number): number {
@@ -21,6 +22,7 @@ function combos(n: number, k: number): number {
 
 export function Sealed({ result, onStartOver, replaces }: { result: SealResult; onStartOver: () => void; replaces?: string }) {
   const { jar, cards } = result;
+  const heading = useFocusOnArrival();
   const buddies = useMemo(() => circleBuddies(cards[0]!.shard.jarId, cards.map((c) => c.x)), [cards]);
   const [check, setCheck] = useState<CircleCheck | null>(null);
   const grimoireOk = canMakeGrimoire();
@@ -46,7 +48,7 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
     setChecking(null);
   };
   const missing = [...(printed ? [] : ['print the cards']), ...(keyPrinted ? [] : ['print your key']), ...(saved ? [] : ['download the jar file'])];
-  const list = (xs: string[]) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} or ${xs[xs.length - 1]}` : xs[0]);
+  const list = (xs: string[], last = 'or') => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} ${last} ${xs[xs.length - 1]}` : xs[0]);
   useLeaveWarning(
     missing.length ? `You haven’t ${list(missing)} yet. Closing this page forgets them for good. Close anyway?` : null,
     { inApp: false },
@@ -66,8 +68,13 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
         <div className="sealed-jar pop">
           <Jar initials={initialsOf(jar.owner)} size={250} warmth={0.6} />
           <Sparkles burst="sealed" radius={150} count={18} />
+          <div className="sealed-candle">
+            <Candle lit size={70} label="The candle lit for the sealing, still burning" />
+          </div>
         </div>
-        <h1 className="sealed-title">Sealed!</h1>
+        <h1 className="sealed-title" tabIndex={-1} ref={heading}>
+          Sealed!
+        </h1>
         <p className="lede">
           {capitalised(numberWord(n))} cards were made. Any {numberWord(k)} of them open the jar. This is the only time they can be printed.
         </p>
@@ -79,7 +86,7 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
           {check && !check.ok && 'Something is wrong with these cards. Please seal the jar again.'}
         </p>
         <p className="still-to-do" role="status">
-          {missing.length ? `Before you close this page: ${list(missing)}.` : 'All done. You can close this page.'}
+          {missing.length ? `Before you close this page: ${list(missing, 'and')}.` : 'All done. You can close this page.'}
         </p>
         {replaces && (
           <p className="faint replaces">
@@ -209,6 +216,7 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
 /** After the owner changed what is inside: the same cards, a new jar file. */
 export function Updated({ jar }: { jar: JarFile }) {
   const grimoireOk = canMakeGrimoire();
+  const heading = useFocusOnArrival();
   // The version and the day in the name, so the newest file is easy to tell apart.
   const base = safeFilename(`${jar.owner}'s jar, version ${jar.revision ?? 2} (${jar.sealedAt.slice(0, 10)})`);
   const [saved, setSaved] = useState(false);
@@ -224,8 +232,13 @@ export function Updated({ jar }: { jar: JarFile }) {
         <div className="sealed-jar pop">
           <Jar initials={initialsOf(jar.owner)} size={250} warmth={0.6} />
           <Sparkles burst="updated" radius={150} count={18} />
+          <div className="sealed-candle">
+            <Candle lit size={70} label="The candle lit for the sealing, still burning" />
+          </div>
         </div>
-        <h1 className="sealed-title">Updated!</h1>
+        <h1 className="sealed-title" tabIndex={-1} ref={heading}>
+          Updated!
+        </h1>
         <p className="lede">
           Version {jar.revision ?? 2} of {first}’s jar. Every card still opens it, and nothing new needs printing. Keep your key for next time.
         </p>

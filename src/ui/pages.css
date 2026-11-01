@@ -168,8 +168,10 @@
   transform: translateY(6px);
 }
 
+/* The séance happens at night: a deep, glowing panel that still reads as one on a dark card. */
 .act-art.candles {
-  background: #1f1536;
+  background: radial-gradient(ellipse at 50% 100%, rgba(255, 181, 71, 0.28), transparent 60%), linear-gradient(180deg, #3a2470, #1f1536);
+  border: 2px solid rgba(205, 184, 255, 0.22);
 }
 
 .act h3 {
@@ -594,6 +596,9 @@ input[aria-invalid='true'] {
 .person-ghost {
   display: grid;
   place-items: center;
+  /* A fixed slot: a witch's hat or a bat's ears never make one row taller than another. */
+  height: 52px;
+  overflow: visible;
 }
 
 .person-name {
@@ -603,10 +608,15 @@ input[aria-invalid='true'] {
   padding-left: 4px;
 }
 
-/* The same width whether it says “+ Letter” or “✓ Letter”, so names line up. */
+/* The same width whether it says “+ Letter” or “Remove letter”, so names line up. */
 .person-row .chip {
-  min-width: 96px;
+  min-width: 128px;
   justify-content: center;
+}
+
+.nav-hint {
+  align-self: center;
+  font-size: 0.92rem;
 }
 
 .icon-btn.small {
@@ -715,6 +725,74 @@ input[aria-invalid='true'] {
 /* The jar, and a candle that wakes for the sealing. */
 .seal-altar {
   position: relative;
+}
+
+/* While sealing, only the jar and its candle matter: the rest folds away. */
+.trail {
+  transition: opacity 600ms var(--soft);
+}
+
+.step-card .summary,
+.step-card .seal-stage > .btn,
+.step-card > .lede {
+  max-height: 240px;
+  transition:
+    opacity 500ms var(--soft),
+    max-height 700ms var(--soft),
+    margin 700ms var(--soft);
+}
+
+.step-card.sealing .summary,
+.step-card.sealing .seal-stage > .btn,
+.step-card.sealing > .lede {
+  opacity: 0;
+  max-height: 0;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.step-card.sealing .seal-stage {
+  gap: 0;
+}
+
+.step-card.sealing .seal-altar {
+  margin: 30px 0 40px;
+  transform: scale(1.2);
+}
+
+.step-card .seal-altar {
+  transition:
+    transform 900ms var(--soft),
+    margin 700ms var(--soft);
+}
+
+/* On a phone the jar already fills the card: it stays its size, and the candle stays inside. */
+@media (max-width: 520px) {
+  .seal-candle {
+    right: -6px;
+  }
+
+  .step-card.sealing .seal-altar {
+    transform: none;
+    margin: 16px 0 24px;
+  }
+
+  .sealed-candle {
+    right: -14px;
+  }
+}
+
+.trail.hushed {
+  opacity: 0.3;
+}
+
+.sealed-candle {
+  position: absolute;
+  right: -46px;
+  bottom: -6px;
+  z-index: 2;
 }
 
 .seal-candle {
@@ -1381,21 +1459,17 @@ textarea.mono-input {
   align-items: center;
 }
 
+/* Every buddy stands beside its own candle, on the outer side. */
 .spot-buddy {
   position: absolute;
-  bottom: 60%;
-  left: 62%;
+  bottom: 4%;
+  left: 84%;
   animation: pop 700ms var(--spring) both;
 }
 
 .spot-buddy.left {
   left: auto;
-  right: 62%;
-}
-
-.spot-buddy.front {
-  left: 88%;
-  bottom: 8%;
+  right: 84%;
 }
 
 .spot-name {
@@ -1554,10 +1628,41 @@ textarea.mono-input {
   margin-top: 6px;
 }
 
+/* The open jar, with the candles of the friends who opened it still lit. */
+.reveal-altar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 18px;
+  margin: 70px auto 6px;
+}
+
+.reveal-seats {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.reveal-seat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
 .reveal-jar {
   position: relative;
   width: fit-content;
-  margin: 70px auto 6px;
+}
+
+@media (max-width: 520px) {
+  .reveal-altar {
+    gap: 6px;
+  }
+
+  .reveal-seats {
+    gap: 4px;
+  }
 }
 
 .reveal-body {
@@ -1904,6 +2009,32 @@ textarea.mono-input {
 
 .opened .envelope-letter {
   transform: translateY(-34%);
+}
+
+/* The first line of the letter shows on the sheet that rose out. */
+.envelope-line {
+  display: block;
+  padding: 10px 12px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.78rem;
+  color: #5b4a73;
+}
+
+/* Once open, the buddy climbs onto the corner of its letter instead of hiding behind it. */
+.envelope-buddy {
+  transition: transform 700ms var(--spring) 500ms;
+}
+
+.opened .envelope-buddy {
+  z-index: 3;
+  transform: translate(10%, -30px);
+}
+
+/* Both buttons the same width, so opening a letter never shifts the row. */
+.envelope-wrap > .btn {
+  width: min(100%, 240px);
 }
 
 /* The one whose seal is being asked for. */
@@ -2513,7 +2644,7 @@ textarea.mono-input {
   }
 
   /* An opened jar prints as plain pages of what was left; letters stay private. */
-  .print-self .reveal-jar,
+  .print-self .reveal-altar,
   .print-self .letters,
   .print-self .after,
   .print-self .sparkles {

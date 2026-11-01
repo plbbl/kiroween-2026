@@ -14,11 +14,11 @@ Phylactery joins the pieces, and makes a heavy subject gentle: death as a reunio
 
 ## Three acts
 
-**I. Seal.** Write a note for everyone, the accounts you keep and how to get in, where things are, and your wishes. Add a private letter for anyone. Everything is encrypted in your browser and the key is split into one card per friend. You choose how many must gather. Before you print, Phylactery proves it works: every group of that size opens the jar, and no smaller group does. Each friend's page is cut in two: the card, and below it a private seal. Your own page, your key, prints on its own: with it you can change what is inside later, and everyone keeps the card they have.
+**I. Seal.** Write a note for everyone, the accounts you keep and how to get in, where things are, and your wishes. Add a private letter for anyone. Everything is encrypted in your browser and the key is split into one card per friend. You choose how many must gather. Before you print, Phylactery proves it works: every group of that size opens the jar, and no smaller group does. Each friend's page is cut in two: the card, and below it a private seal. Your own page, your key, prints on its own: with it you can change what is inside later, and everyone keeps the card they have. To change who holds the cards, open the old jar with your key and start a new one from it. While you write, the draft is kept in this browser tab only, so a reload doesn't lose it; nothing is stored once the tab is closed.
 
 **II. Watch.** Every so often, one gentle question: *still here?* One tap answers it. Go quiet, and you are reminded. Only then are your friends asked to *check on you*, never told you are gone; they learn who else was asked and how to reach them, who holds the cards and, if you left the watch a locked copy of your jar, get a link to it. Answer late, and they hear that all is well. Once a year, on the Day of the Dead (November 2), the watch also asks whether your jar is still up to date.
 
-**III. Séance.** When the time comes, friends bring their cards. Each card lights a sleepy candle and its little ghost buddy floats in. When enough candles are lit, the wax seal cracks, the cork pops, and the ghost wakes up and hands over your words. Each letter then opens only with the private seal cut from its reader's card.
+**III. Séance.** When the time comes, friends bring their cards. Each card lights a sleepy candle and its little ghost buddy floats in. When enough candles are lit, the wax seal cracks, the cork pops, and the ghost wakes up and hands over your words, with the candles of the friends who came still burning beside the jar. Each letter then opens only with the private seal cut from its reader's card. If a card is lost, any others will do, as many as the card says.
 
 | | |
 |---|---|
@@ -122,7 +122,7 @@ Limits worth knowing: this is browser cryptography; the app as a whole has not h
 
 The property tests caught a real bug: the base32 decoder accepted non-canonical padding bits, so a damaged QR code could decode to the same card. Decoding is now strict.
 
-`npm run e2e` seals a jar, checks the self-check, prints the cards and then the key on its own, downloads the jar file and opens it from disk with two typed cards, opens a letter with a typed seal, runs June's séance and the watch preview, changes the jar with the printed key and opens the new file with the original cards, does a whole seal, séance and letter with the keyboard alone, starts and confirms a real watch against a local server, checks phone layouts, and runs axe-core accessibility audits on eight screens (no serious or critical WCAG 2 A/AA issues allowed).
+`npm run e2e` seals a jar, checks the self-check, prints the cards and then the key on its own, downloads the jar file and opens it from disk with two typed cards, opens a letter with a typed seal, runs June's séance and the watch preview, changes the jar with the printed key and opens the new file with the original cards, starts a new jar with a smaller circle from the old one, checks that a reload keeps a draft and that the owner's key typed at the séance is recognised, does a whole seal, séance and letter with the keyboard alone, points out a friend without an email, starts and confirms a real watch against a local server, checks phone layouts, and runs axe-core accessibility audits on eight screens (no serious or critical WCAG 2 A/AA issues allowed).
 
 ## Project layout
 

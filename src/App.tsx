@@ -38,6 +38,13 @@ function SoundIcon({ on }: { on: boolean }) {
   );
 }
 
+function focusHeading() {
+  const h = document.querySelector<HTMLElement>('#main h1');
+  if (!h) return;
+  if (!h.hasAttribute('tabindex')) h.setAttribute('tabindex', '-1');
+  h.focus({ preventScroll: true });
+}
+
 export function App() {
   const embedded = useMemo(() => embeddedJar(), []);
   const { route: hashRoute, anchor, params } = useHashRoute();
@@ -63,6 +70,19 @@ export function App() {
   }, [candlelight]);
 
   const shell = useMemo(() => ({ setTheme, setCandlelight }), []);
+
+  // After a move to another page, keyboard and screen reader users land on its
+  // heading, unless the page already put focus somewhere (a field to fill).
+  const firstRoute = useRef(true);
+  useEffect(() => {
+    if (firstRoute.current) {
+      firstRoute.current = false;
+      return;
+    }
+    const active = document.activeElement;
+    if (active && active !== document.body && !active.closest('.topbar')) return;
+    focusHeading();
+  }, [route]);
 
   // The purple pill under the current page slides from link to link.
   const nav = useRef<HTMLElement>(null);
@@ -104,6 +124,18 @@ export function App() {
       <div className="backdrop day" aria-hidden="true" />
       <div className="backdrop night" aria-hidden="true" />
       {theme === 'night' && <Stars />}
+
+      <a
+        className="skip-link no-print"
+        href="#main"
+        onClick={(e) => {
+          // The address is the route here, so move focus without changing it.
+          e.preventDefault();
+          focusHeading();
+        }}
+      >
+        Skip to the page
+      </a>
 
       <header className="topbar no-print">
         <a className="wordmark" href={href('home')} aria-label="Phylactery, home">

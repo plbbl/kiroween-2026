@@ -147,7 +147,7 @@ function SealFace({ owner, card, buddy }: PrintProps) {
         </div>
         <Qr text={cardToQrText(card.seal)} size={104} label={`Code for ${card.name}'s seal`} />
       </div>
-      <WordGrid words={cardToWords(card.seal)} columns={6} />
+      <WordGrid words={cardToWords(card.seal)} columns={5} />
     </section>
   );
 }

@@ -4,7 +4,7 @@ import type { WatchConfig } from '../../core/watch.ts';
 import { Sparkles } from '../../ui/art/Decor.tsx';
 import { Ghost, type Mood } from '../../ui/art/Ghost.tsx';
 import { sound } from '../../ui/sound.ts';
-import { firstName, numberWord, plural } from '../../ui/text.ts';
+import { firstName, plural } from '../../ui/text.ts';
 import { jarFromText } from '../../ui/grimoire.ts';
 import { ConfirmButton } from '../../ui/components/Confirm.tsx';
 import { ApiError, jarHandoff, watchApi, type WatchView } from '../../ui/watchApi.ts';
@@ -138,7 +138,7 @@ export function LinkAction({ params }: { params: URLSearchParams }) {
             </li>
             <li>
               Ask every <b>{view.config.cadenceDays}</b> {plural(view.config.cadenceDays, 'day')}, then wait <b>{view.config.graceDays}</b> days with{' '}
-              <b>{numberWord(view.config.reminders)}</b> {plural(view.config.reminders, 'reminder')}
+              <b>{view.config.reminders}</b> {plural(view.config.reminders, 'reminder')}
             </li>
             {view.lastSign && <li>Last sign from you: {day(view.lastSign)}</li>}
             <li>

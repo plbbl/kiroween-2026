@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { circleBuddies, circleCostumes } from '../../core/buddy.ts';
 import { fromBase32, randomBytes, toBase32 } from '../../core/bytes.ts';
 import { JAR_ID_LENGTH, type KeyCard } from '../../core/cards.ts';
@@ -215,6 +215,16 @@ function Wizard({
   const [step, setStep] = useState(updating ? 1 : (memory?.step ?? 0));
   const [reached, setReached] = useState(updating ? STEPS.length - 1 : (memory?.reached ?? 0));
   const [direction, setDirection] = useState<1 | -1>(1);
+  // A new step is announced by moving focus to its title (not on the first one, whose field takes focus).
+  const title = useRef<HTMLHeadingElement>(null);
+  const firstStep = useRef(true);
+  useEffect(() => {
+    if (firstStep.current) {
+      firstStep.current = false;
+      return;
+    }
+    title.current?.focus({ preventScroll: true });
+  }, [step]);
   const [wax, setWax] = useState<WaxState | 'none'>('none');
   // Sealing has begun (the button waits); the cork is in.
   const [corked, setCorked] = useState(false);
@@ -327,7 +337,7 @@ function Wizard({
   return (
     <div className="page seal-page">
       <div className="narrow">
-        <div className="trail" aria-label={`Step ${step + 1} of ${STEPS.length}`}>
+        <div className={`trail${corked ? ' hushed' : ''}`} aria-label={`Step ${step + 1} of ${STEPS.length}`}>
           <div className="trail-track">
             <div className="trail-fill" style={{ width: `${progress * 100}%` }} />
           </div>
@@ -351,13 +361,17 @@ function Wizard({
           </ol>
         </div>
 
-        <section className={`step-card card ${direction > 0 ? 'enter-right' : 'enter-left'}`} key={step} aria-labelledby="step-title">
+        <section
+          className={`step-card card ${direction > 0 ? 'enter-right' : 'enter-left'}${corked ? ' sealing' : ''}`}
+          key={step}
+          aria-labelledby="step-title"
+        >
           {current.art && <div className="step-art">{current.art}</div>}
           <p className="tag">
             step {step + 1} of {STEPS.length}
           </p>
-          <h1 id="step-title" className="step-title">
-            {current.title(draft)}
+          <h1 id="step-title" className="step-title" tabIndex={-1} ref={title}>
+            {!corked ? current.title(draft) : wax === 'pressing' ? 'Sealed.' : corkIn ? 'Corked…' : 'By candlelight…'}
           </h1>
           <p className="lede">{current.sub}</p>
 
@@ -427,6 +441,8 @@ function Wizard({
                 <button type="button" className="text-btn quiet" onClick={() => goTo(step - 1)}>
                   ← Back
                 </button>
+              ) : !canContinue ? (
+                <span className="faint nav-hint">Add your name to go on.</span>
               ) : (
                 <span />
               )}

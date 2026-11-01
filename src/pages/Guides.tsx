@@ -51,6 +51,10 @@ const AFTER: Item[] = [
     link: { href: 'https://www.usa.gov/death-certificate', label: 'USAGov' },
   },
   {
+    title: 'Gather the circle and open the jar',
+    body: 'Bring the jar file (or the link from the watch) and enough cards. If a card is lost, any others will do, as many as the card says. The owner’s own key page, if you find it, opens the jar alone: choose Seal, then “Change what’s inside”.',
+  },
+  {
     title: 'Look after the home, the car and the animals',
     body: 'Lock up, collect the mail, water the plants. The jar may say who takes the pets.',
   },

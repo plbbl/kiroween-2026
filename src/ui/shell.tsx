@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { parseJar, type JarFile } from '../core/jar.ts';
 
 export type Route = 'home' | 'seal' | 'watch' | 'seance' | 'guides' | 'gallery';
@@ -115,6 +115,15 @@ export function useAtmosphere(theme: 'day' | 'night', candlelight: number | null
     shell.setTheme(theme);
     if (candlelight !== null) shell.setCandlelight(candlelight);
   }, [shell, theme, candlelight]);
+}
+
+/** A heading that takes focus when its view appears, so keyboard and screen reader users land on it. */
+export function useFocusOnArrival<T extends HTMLElement = HTMLHeadingElement>() {
+  const ref = useRef<T>(null);
+  useEffect(() => {
+    ref.current?.focus({ preventScroll: true });
+  }, []);
+  return ref;
 }
 
 export function prefersReducedMotion(): boolean {

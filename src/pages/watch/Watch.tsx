@@ -172,13 +172,13 @@ export function Watch({ params }: { params: URLSearchParams }) {
           <Segmented
             label="Wait for my answer"
             value={config.graceDays}
-            options={[2, 4, 7, 14].map((v) => ({ value: v, label: `${v}d` }))}
+            options={[2, 4, 7, 14].map((v) => ({ value: v, label: `${v} days` }))}
             onChange={(graceDays) => setConfig({ ...config, graceDays })}
           />
           <Segmented
             label="Remind me"
             value={config.reminders}
-            options={[1, 2, 3, 5].map((v) => ({ value: v, label: `${v}×` }))}
+            options={[1, 2, 3, 5].map((v) => ({ value: v, label: v === 1 ? 'once' : v === 2 ? 'twice' : `${v} times` }))}
             onChange={(reminders) => setConfig({ ...config, reminders })}
           />
           <p className="rhythm-sum">
@@ -201,7 +201,9 @@ export function Watch({ params }: { params: URLSearchParams }) {
                 <span className="tag try-tag">try it</span> Day <span className="day-num">{Math.floor(day)}</span>
               </h2>
               <span className={`status-pill s-${run.status}`}>
-                {run.status === 'reminding' ? `reminder ${remindersNow} of ${config.reminders}` : run.status === 'notified' ? 'friends asked' : run.status}
+                {run.status === 'reminding'
+                  ? `Reminder ${remindersNow} of ${config.reminders}`
+                  : { well: 'All well', due: 'Hello due', notified: 'Friends asked', paused: 'Paused' }[run.status]}
               </span>
             </div>
 

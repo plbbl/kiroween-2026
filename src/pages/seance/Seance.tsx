@@ -13,7 +13,7 @@ import { capitalised, numberWord } from '../../ui/text.ts';
 import { CardInput } from '../../ui/components/CardInput.tsx';
 import { ConfirmButton } from '../../ui/components/Confirm.tsx';
 import { jarFromText } from '../../ui/grimoire.ts';
-import { href, useAtmosphere, useLeaveWarning, useShell, wait } from '../../ui/shell.tsx';
+import { href, useAtmosphere, useFocusOnArrival, useLeaveWarning, useShell, wait } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
 import { watchApi } from '../../ui/watchApi.ts';
 import { Reveal } from './Reveal.tsx';
@@ -211,6 +211,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
 
   const k = jar.threshold;
   const demo = isDemo(jar);
+  const heading = useFocusOnArrival();
   const angles = useMemo(() => candleAngles(k), [k]);
   const buddies = useMemo(() => circleBuddies(jarIdBytes(jar), jar.holders.map((h) => h.x)), [jar]);
   const first = jar.owner.split(/\s+/)[0] ?? jar.owner;
@@ -294,7 +295,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
   const endFlight = useCallback(() => setFlight(null), []);
 
   if (phase === 'revealed' && opened) {
-    return <Reveal jar={jar} opened={opened} circle={offered.map((o) => o.holder.name)} buddies={buddies} />;
+    return <Reveal jar={jar} opened={opened} circle={offered.map((o) => o.holder)} buddies={buddies} />;
   }
 
   const jarState: JarState = phase === 'open' ? 'open' : phase === 'waking' || offered.length > 0 ? 'stirring' : 'sealed';
@@ -313,7 +314,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
           {sealedOn ? `sealed ${sealedOn}` : 'séance'}
           {jar.revision && jar.revision > 1 ? ` · version ${jar.revision}` : ''}
         </p>
-        <h1 className="pop" style={{ '--d': '80ms' } as CSSProperties}>
+        <h1 className="pop" style={{ '--d': '80ms' } as CSSProperties} tabIndex={-1} ref={heading}>
           {first}’s jar
         </h1>
         <p className="lede rise" style={{ '--d': '180ms' } as CSSProperties}>

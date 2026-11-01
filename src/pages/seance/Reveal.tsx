@@ -3,6 +3,7 @@ import type { Buddy, Emblem } from '../../core/buddy.ts';
 import { CardError, parseCard } from '../../core/cards.ts';
 import { openLetter, type JarFile, type JarHolder, type Letter, type OpenedJar } from '../../core/jar.ts';
 import { DEMO_CARDS, isDemo } from '../../demo/demo.ts';
+import { Candle } from '../../ui/art/Candle.tsx';
 import { Sparkles } from '../../ui/art/Decor.tsx';
 import { EmblemIcon } from '../../ui/art/Emblem.tsx';
 import { Ghost, GhostHand } from '../../ui/art/Ghost.tsx';
@@ -10,7 +11,7 @@ import { Jar } from '../../ui/art/Jar.tsx';
 import { WaxSeal, initialsOf } from '../../ui/art/WaxSeal.tsx';
 import { CardInput } from '../../ui/components/CardInput.tsx';
 import { ConfirmButton } from '../../ui/components/Confirm.tsx';
-import { href, useLeaveWarning } from '../../ui/shell.tsx';
+import { href, useFocusOnArrival, useLeaveWarning } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
 
 const WISH_LABELS: Record<string, string> = {
@@ -85,7 +86,7 @@ function names(list: string[]): string {
   return first.length > 1 ? `${first.slice(0, -1).join(', ')} & ${first[first.length - 1]}` : (first[0] ?? '');
 }
 
-export function Reveal({ jar, opened, circle, buddies }: { jar: JarFile; opened: OpenedJar; circle: string[]; buddies: Map<number, Buddy> }) {
+export function Reveal({ jar, opened, circle, buddies }: { jar: JarFile; opened: OpenedJar; circle: JarHolder[]; buddies: Map<number, Buddy> }) {
   const c = opened.content;
   const first = jar.owner.split(/\s+/)[0] ?? jar.owner;
   const wishes = WISHES.filter(([k]) => c.wishes[k].trim());
@@ -98,16 +99,31 @@ export function Reveal({ jar, opened, circle, buddies }: { jar: JarFile; opened:
   useEffect(() => {
     if (closing) window.location.reload();
   }, [closing]);
+  const heading = useFocusOnArrival();
+  // The friends who opened it keep their candles burning beside the open jar.
+  const seats = circle.map((h) => ({ holder: h, buddy: buddies.get(h.x) }));
+  const half = Math.ceil(seats.length / 2);
+  const seatSize = seats.length > 4 ? 30 : 40;
+  const seat = (s: (typeof seats)[number], i: number) => (
+    <div className="reveal-seat rise" key={s.holder.x} style={{ '--d': `${200 + i * 90}ms` } as CSSProperties}>
+      {s.buddy && <Ghost costume={s.buddy.costume} emblem={s.buddy.emblem} tilt={s.buddy.tilt} mood="happy" size={seatSize + 6} float phase={i * 0.6} />}
+      <Candle lit size={seatSize} phase={i * 0.7} label={`${s.holder.name}'s candle, lit`} />
+    </div>
+  );
 
   return (
     <div className="page reveal-page print-self">
       <header className="narrow center reveal-head">
-        <div className="reveal-jar">
-          <Jar initials={initialsOf(jar.owner)} state="open" wax="broken" warmth={1} notes={false} size={150} label={`${first}’s jar, open`} />
-          <Sparkles burst="reveal" radius={120} count={14} />
+        <div className="reveal-altar">
+          <div className="reveal-seats">{seats.slice(0, half).map(seat)}</div>
+          <div className="reveal-jar">
+            <Jar initials={initialsOf(jar.owner)} state="open" wax="broken" warmth={1} notes={false} size={150} label={`${first}’s jar, open`} />
+            <Sparkles burst="reveal" radius={120} count={14} />
+          </div>
+          <div className="reveal-seats">{seats.slice(half).map((s, i) => seat(s, i + half))}</div>
         </div>
-        <p className="tag rise">opened by {names(circle)}</p>
-        <h1 className="rise" style={{ '--d': '120ms' } as CSSProperties}>
+        <p className="tag rise">opened by {names(circle.map((h) => h.name))}</p>
+        <h1 className="rise" style={{ '--d': '120ms' } as CSSProperties} tabIndex={-1} ref={heading}>
           {first} left you this
         </h1>
       </header>
@@ -265,7 +281,7 @@ function Letters({ jar, opened, holders, buddies }: { jar: JarFile; opened: Open
                   <GhostHand costume={buddy.costume} size={17} />
                 </span>
                 <div className="envelope-back" />
-                <div className="envelope-letter" />
+                <div className="envelope-letter">{isOpen && <span className="envelope-line">{read[h.x]!.text.trim().split('\n')[0]}</span>}</div>
                 <div className="envelope-front">
                   <span className="envelope-to">
                     for <span className="full-name">{h.name}</span>
