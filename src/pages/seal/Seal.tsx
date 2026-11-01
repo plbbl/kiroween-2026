@@ -27,17 +27,17 @@ const STEPS: { label: string; title: (d: Draft) => string; sub: string }[] = [
   {
     label: 'Note',
     title: () => 'A note for everyone',
-    sub: 'Everyone in your circle will read this first.',
+    sub: 'Your friends read this first.',
   },
   {
     label: 'Things',
     title: () => 'The things only you know',
-    sub: 'Accounts, how to get in, where things are. Have your logins at hand.',
+    sub: 'Accounts, logins, where things are.',
   },
   {
     label: 'Wishes',
     title: () => 'How you’d like things done',
-    sub: 'Gentle instructions for the people left to do them.',
+    sub: 'Gentle instructions for those left behind.',
   },
   {
     label: 'Friends',
@@ -47,7 +47,7 @@ const STEPS: { label: string; title: (d: Draft) => string; sub: string }[] = [
   {
     label: 'Seal',
     title: (d) => `Ready, ${d.owner.trim().split(/\s+/)[0] || 'friend'}?`,
-    sub: 'Once sealed, the cards are made. You will print them next.',
+    sub: 'Seal it, then print the cards.',
   },
 ];
 
@@ -56,12 +56,12 @@ const UPDATE_STEPS: Partial<Record<number, (typeof STEPS)[number]>> = {
   4: {
     ...STEPS[4]!,
     title: () => 'Letters for your circle',
-    sub: 'The circle stays the same, so every card still works. To change who holds one, seal a new jar.',
+    sub: 'Same friends, same cards. To change who holds one, seal a new jar.',
   },
   5: {
     ...STEPS[5]!,
     title: (d) => `Ready, ${d.owner.trim().split(/\s+/)[0] || 'friend'}?`,
-    sub: 'The same cards will open the new words. Nothing new to print.',
+    sub: 'Same cards, new words. Nothing to print.',
   },
 };
 

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { Costume } from '../core/buddy.ts';
-import { EmblemIcon } from '../ui/art/Emblem.tsx';
 import { Ghost, GhostHand, type Mood } from '../ui/art/Ghost.tsx';
 import { Jar } from '../ui/art/Jar.tsx';
 import { HowItWorks } from './HowItWorks.tsx';
@@ -133,13 +132,13 @@ export function Home() {
               Phylactery
             </h1>
             <p className="hero-sub rise" style={d(380)}>
-              Leave your passwords and last words in a jar only your friends, together, can open.
+              Passwords and last words, in a jar only your friends can open together.
             </p>
             <div className="row centered rise" style={d(520)}>
-              <a className="btn on-purple" href={href('seal')}>
+              <a className="btn on-purple big" href={href('seal')}>
                 Seal a jar
               </a>
-              <a className="btn ghosty" href={`${href('seance')}?demo`}>
+              <a className="btn ghosty big" href={`${href('seance')}?demo`}>
                 Try a séance
               </a>
             </div>
@@ -169,7 +168,7 @@ export function Home() {
             <button type="button" className="hero-jar pop" style={d(650)} ref={jarButton} onClick={boo} aria-label="Wake the little ghost">
               <Jar
                 initials="ME"
-                size={250}
+                size={280}
                 warmth={look || gag ? 0.7 : 0.45}
                 mood={gag ?? (look ? 'open' : 'sleep')}
                 look={gag ? undefined : (look ?? undefined)}
@@ -190,43 +189,45 @@ export function Home() {
 
       <HowItWorks />
 
-      <section className="promises wrap" aria-labelledby="promises-title">
-        <h2 id="promises-title" className="center">
+      <section className="facts wrap" aria-labelledby="facts-title">
+        <h2 id="facts-title" className="center">
           Kind, and hard to break
         </h2>
-        <div className="promise-grid">
-          <div className="promise">
-            <span className="promise-icon" style={{ background: '#efe7ff', color: '#8e47ff' }}>
-              <EmblemIcon name="key" size={26} />
+        <div className="fact-grid">
+          <div className="fact f-purple">
+            <span className="fact-big">2 of 3</span>
+            <p>friends open it, together. One alone sees nothing.</p>
+            <span className="fact-art" aria-hidden="true">
+              <Ghost costume="witch" mood="happy" size={74} />
+              <Ghost costume="pumpkin" mood="happy" size={74} />
+              <Ghost costume="vampire" mood="sleep" size={74} />
             </span>
-            <h3>No one opens it alone</h3>
-            <p className="muted">Not one friend, not a company, not this website. Too few cards reveal nothing.</p>
           </div>
-          <div className="promise">
-            <span className="promise-icon" style={{ background: '#ffe7f1', color: '#e0457a' }}>
-              <EmblemIcon name="heart" size={26} />
+          <div className="fact f-pink">
+            <span className="fact-big">0</span>
+            <p>servers that can read it. It’s locked in your browser.</p>
+            <span className="fact-art" aria-hidden="true">
+              <Jar initials="ME" size={120} mood="sleep" label="" />
             </span>
-            <h3>Nothing leaves unlocked</h3>
-            <p className="muted">Locked in your browser before anything is saved or sent. No account, no tracking.</p>
           </div>
-          <div className="promise">
-            <span className="promise-icon" style={{ background: '#fff3d6', color: '#e39a14' }}>
-              <EmblemIcon name="star" size={26} />
+          <div className="fact f-amber">
+            <span className="fact-big">1 file</span>
+            <p>that opens offline, years from now.</p>
+            <span className="fact-art" aria-hidden="true">
+              <Ghost mood="happy" size={92} emblem="key" />
             </span>
-            <h3>It outlives this website</h3>
-            <p className="muted">Your jar is one small file. It opens offline, years from now.</p>
           </div>
         </div>
       </section>
 
       <section className="closing wrap" data-theme="night">
         <div className="closing-ghost">
+          <Pumpkin size={80} lit className="closing-pumpkin" />
+          <Ghost mood="happy" size={150} float rim={0.5} />
           <Pumpkin size={64} lit className="closing-pumpkin" />
-          <Ghost mood="happy" size={110} float rim={0.5} />
-          <Pumpkin size={52} lit className="closing-pumpkin" />
         </div>
         <p className="closing-line">One day your friends will gather.</p>
-        <a className="btn primary" href={href('seal')}>
+        <a className="btn primary big" href={href('seal')}>
           Seal a jar
         </a>
       </section>

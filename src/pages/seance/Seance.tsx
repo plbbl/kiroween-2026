@@ -96,7 +96,7 @@ function Choose({ onChoose, notice = '' }: { onChoose: (jar: JarFile) => void; n
       <section className="choose wrap">
         <button type="button" className="choose-card card pop" style={{ '--d': '300ms' } as CSSProperties} onClick={() => onChoose(DEMO_JAR)}>
           <span className="choose-art">
-            <Jar initials="JA" size={130} warmth={0.4} />
+            <Jar initials="JA" size={180} warmth={0.4} />
           </span>
           <span className="choose-title">Try June’s jar</span>
           <span className="muted">Five cards on the table. Any three open it.</span>
@@ -127,7 +127,7 @@ function Choose({ onChoose, notice = '' }: { onChoose: (jar: JarFile) => void; n
             }}
           />
           <span className="choose-art">
-            <Ghost costume="witch" mood="wow" size={92} float />
+            <Ghost costume="witch" mood="wow" size={130} float />
           </span>
           <span className="choose-title">Open a jar you were given</span>
           <span className="muted">Drop the jar file here, or tap to choose it.</span>

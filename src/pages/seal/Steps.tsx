@@ -86,7 +86,7 @@ export function StepLeave({ content, setContent }: { content: JarContent; setCon
       <div className="sub-head">
         <h3>Accounts</h3>
         <span className="faint">
-          Start with your phone: it gets most sign-in codes. Everyone who opens the jar sees these; for one person only, write them a letter.
+          Everyone who opens the jar sees these. Start with your phone.
         </span>
       </div>
       <div className="starters">
@@ -189,7 +189,7 @@ export function StepWishes({ content, setContent }: { content: JarContent; setCo
       </div>
       <p className="note">
         <EmblemIcon name="key" size={22} color="#8e47ff" title="" />
-        <span>These are wishes, not a legal will. If you have a will, say where it is in the previous step.</span>
+        <span>Wishes, not a legal will.</span>
       </p>
     </>
   );
@@ -284,8 +284,7 @@ export function StepCircle({
           <Ghost size={30} mood="open" />
           <div>
             <p>
-              To add or remove someone, start a new jar from this one: your words come along, and everyone gets a new card. Change any password the old
-              jar holds that someone shouldn’t have.
+              To add or remove someone, start a new jar from this one. Everyone gets a new card; change any password the old circle shouldn’t keep.
             </p>
             <button type="button" className="btn small" onClick={onNewJar}>
               Start a new jar from this one
@@ -297,7 +296,7 @@ export function StepCircle({
       <div className="threshold" data-theme="night">
         <h3>How many must gather?</h3>
         <p className="faint">
-          {locked ? 'Set when the jar was sealed, and printed on every card.' : 'Fewer is easier to gather. More keeps a stolen card useless.'}
+          {locked ? 'Set when the jar was sealed, and printed on every card.' : 'Fewer is easier. More is safer.'}
         </p>
         <div className="threshold-candles" role="radiogroup" aria-label="Cards needed to open the jar">
           {draft.holders.map((_, i) => {

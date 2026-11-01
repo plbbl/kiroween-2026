@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { DEFAULT_WATCH, holderMessage, ownerReminder, runWatch, type OwnerAction, type WatchConfig, type WatchEvent, type WatchStatus } from '../../core/watch.ts';
 import { DEMO_JAR } from '../../demo/demo.ts';
 import { Ghost, type Mood } from '../../ui/art/Ghost.tsx';
-import { numberWord, plural } from '../../ui/text.ts';
+import { plural } from '../../ui/text.ts';
 import { Lantern, Spider } from '../../ui/art/Spooky.tsx';
 import { WatchingGhost } from '../../ui/art/WatchingGhost.tsx';
 import { homeAddress, homeUrl } from '../../ui/grimoire.ts';
@@ -21,6 +21,16 @@ const MOOD: Record<WatchStatus, { mood: Mood; say: string }> = {
   due: { mood: 'curious', say: 'Still here?' },
   reminding: { mood: 'worried', say: 'Hello? Tap to say you’re okay.' },
   notified: { mood: 'sad', say: 'I’ve asked your friends to check on you.' },
+};
+
+/** What each mark on the track means, said when you point at it. */
+const MARK: Partial<Record<WatchEvent['kind'], string>> = {
+  checkin: 'You said hi',
+  due: 'A hello is due',
+  reminder: 'A reminder',
+  notify: 'Friends asked',
+  pause: 'Paused',
+  resume: 'Back',
 };
 
 function Segmented<T extends number>({ label, value, options, onChange }: { label: string; value: T; options: { value: T; label: string }[]; onChange: (v: T) => void }) {
@@ -48,6 +58,7 @@ export function Watch({ params }: { params: URLSearchParams }) {
   const [actions, setActions] = useState<OwnerAction[]>([]);
   const [day, setDay] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const [tuning, setTuning] = useState(false);
 
   const horizon = Math.max(21, Math.ceil((config.cadenceDays + config.graceDays + 7) / 7) * 7);
   const run = useMemo(() => runWatch(config, actions, day), [config, actions, day]);
@@ -125,9 +136,9 @@ export function Watch({ params }: { params: URLSearchParams }) {
               {face.say || '…'}
             </div>
             <span className="presence" style={{ opacity: presence }}>
-              <WatchingGhost mood={face.mood} size={130} float shadow />
+              <WatchingGhost mood={face.mood} size={168} float shadow />
               {/* The ghost keeps watch with a lantern. */}
-              <Lantern size={46} className="watch-lantern" />
+              <Lantern size={58} className="watch-lantern" />
             </span>
           </div>
           <h1>Still here?</h1>
@@ -138,152 +149,135 @@ export function Watch({ params }: { params: URLSearchParams }) {
       )}
 
       {service === false && !linked && (
-        <div className="narrow service">
-          <p className="note">
-            <Ghost size={30} mood="sleep" />
-            <span>
-              {home ? (
-                <>
-                  A jar file can’t send email, so here you can only try the rhythm. To start a real watch, go to{' '}
-                  <a href={`${home}/#/watch`} target="_blank" rel="noopener">
-                    {homeAddress()}
-                  </a>
-                  .
-                </>
-              ) : (
-                'This copy can’t send email, so here you can only try the rhythm.'
-              )}
-            </span>
-          </p>
+        <p className="center faint service-line">
+          {home ? (
+            <>
+              A jar file can’t send email. Start a real watch at{' '}
+              <a href={`${home}/#/watch`} target="_blank" rel="noopener">
+                {homeAddress()}
+              </a>
+              .
+            </>
+          ) : (
+            'This copy can’t send email. Try the rhythm here.'
+          )}
+        </p>
+      )}
+
+      {realFirst && (
+        <div className="narrow real-first">
+          <StartWatch config={config} />
+          <ResendManage />
+          <h2 className="center how-title">See how it works</h2>
         </div>
       )}
 
       <section className="wrap watch-grid">
-        <div className="card rhythm">
-          <h2 className="card-title">Your rhythm</h2>
-          <Segmented
-            label="Ask me every"
-            value={config.cadenceDays}
-            options={[
-              { value: 1, label: 'day' },
-              { value: 3, label: '3 days' },
-              { value: 7, label: 'week' },
-              { value: 14, label: '2 weeks' },
-              { value: 30, label: 'month' },
-            ]}
-            onChange={(cadenceDays) => setConfig({ ...config, cadenceDays })}
-          />
-          <Segmented
-            label="Wait for my answer"
-            value={config.graceDays}
-            options={[2, 4, 7, 14].map((v) => ({ value: v, label: `${v} days` }))}
-            onChange={(graceDays) => setConfig({ ...config, graceDays })}
-          />
-          <Segmented
-            label="Remind me"
-            value={config.reminders}
-            options={[1, 2, 3, 5].map((v) => ({ value: v, label: v === 1 ? 'once' : v === 2 ? 'twice' : `${v} times` }))}
-            onChange={(reminders) => setConfig({ ...config, reminders })}
-          />
-          <p className="rhythm-sum">
-            Friends are asked only after <b>{config.cadenceDays + config.graceDays} days</b> of silence and <b>{numberWord(config.reminders)}</b>{' '}
-            reminder{config.reminders > 1 ? 's' : ''}. Never sooner.
+        <div className="card timeline">
+          <div className="spread">
+            <h2 className="card-title">
+              Day <span className="day-num">{Math.floor(day)}</span>
+            </h2>
+            <span className={`status-pill s-${run.status}`}>
+              {run.status === 'reminding'
+                ? `Reminder ${remindersNow} of ${config.reminders}`
+                : { well: 'All well', due: 'Hello due', notified: 'Friends asked', paused: 'Paused' }[run.status]}
+            </span>
+          </div>
+          <p className="timeline-sum">
+            Friends are asked after <b>{config.cadenceDays + config.graceDays} quiet days</b> and{' '}
+            <b>
+              {config.reminders} {plural(config.reminders, 'reminder')}
+            </b>
+            .{' '}
+            <button type="button" className="text-btn rhythm-toggle" aria-expanded={tuning} aria-controls="rhythm" onClick={() => setTuning(!tuning)}>
+              {tuning ? 'Done' : 'Change'}
+            </button>
           </p>
-        </div>
 
-        <div className="watch-main">
-          {realFirst && (
-            <>
-              <StartWatch config={config} />
-              <ResendManage />
-              <h2 className="section-title how-title">See how it works</h2>
-            </>
-          )}
-          <div className="card timeline">
-            <div className="spread">
-              <h2 className="card-title">
-                Day <span className="day-num">{Math.floor(day)}</span>
-              </h2>
-              <span className={`status-pill s-${run.status}`}>
-                {run.status === 'reminding'
-                  ? `Reminder ${remindersNow} of ${config.reminders}`
-                  : { well: 'All well', due: 'Hello due', notified: 'Friends asked', paused: 'Paused' }[run.status]}
+          <div className="track" aria-label={`Day ${Math.floor(day)} of ${horizon}`}>
+            <div className="track-line" />
+            <div className="track-past" style={{ width: pct(day) }} />
+            {Array.from({ length: horizon + 1 }, (_, d) => (
+              <span key={d} className={`day${d % 7 === 0 ? ' week' : ''}`} style={{ left: pct(d) }}>
+                {d % 7 === 0 && <i>{d}</i>}
               </span>
-            </div>
-
-            <div className="track" aria-label={`Day ${Math.floor(day)} of ${horizon}`}>
-              <div className="track-line" />
-              <div className="track-past" style={{ width: pct(day) }} />
-              {Array.from({ length: horizon + 1 }, (_, d) => (
-                <span key={d} className={`day${d % 7 === 0 ? ' week' : ''}`} style={{ left: pct(d) }}>
-                  {d % 7 === 0 && <i>{d}</i>}
-                </span>
+            ))}
+            {full.events
+              .filter((e) => e.at <= horizon)
+              .map((e, i) => (
+                <span key={i} className={`mark m-${e.kind}${e.at <= day ? ' passed' : ''}`} style={{ left: pct(e.at) }} title={`${MARK[e.kind] ?? e.kind}, day ${Math.floor(e.at)}`} />
               ))}
-              {full.events
-                .filter((e) => e.at <= horizon)
-                .map((e, i) => (
-                  <span key={i} className={`mark m-${e.kind}${e.at <= day ? ' passed' : ''}`} style={{ left: pct(e.at) }} title={`${e.kind}, day ${e.at.toFixed(1)}`} />
-                ))}
-              <span className="walker" style={{ left: pct(day), opacity: presence } as CSSProperties} aria-hidden="true">
-                <Ghost mood={face.mood} size={54} float />
-              </span>
-            </div>
-
-            <div className="legend">
-              <span>
-                <i className="m-checkin" /> you said hi
-              </span>
-              <span>
-                <i className="m-due" /> a hello is due
-              </span>
-              <span>
-                <i className="m-reminder" /> a reminder
-              </span>
-              <span>
-                <i className="m-notify" /> friends asked
-              </span>
-            </div>
-
-            <div className="row controls">
-              <button type="button" className="btn primary small" onClick={() => (day >= horizon ? reset() : setPlaying(!playing))}>
-                {playing ? 'Pause time' : day >= horizon ? 'Start over' : 'Let time pass'}
-              </button>
-              <button type="button" className="btn small" onClick={() => act('checkin')} disabled={paused}>
-                I’m here
-              </button>
-              <button type="button" className="btn small" onClick={() => act(paused ? 'resume' : 'pause')}>
-                {paused ? 'Resume' : 'Pause, I’m away'}
-              </button>
-            </div>
+            <span className="walker" style={{ left: pct(day), opacity: presence } as CSSProperties} aria-hidden="true">
+              <Ghost mood={face.mood} size={54} float />
+            </span>
           </div>
 
-          <section className="card inbox" aria-labelledby="inbox-title">
-            <div className="spread">
-              <h2 id="inbox-title" className="card-title">
-                What would be sent
-              </h2>
-              <span className="faint">{messages.length > 0 && `${messages.length} ${plural(messages.length, 'message')}`}</span>
-            </div>
-            {messages.length === 0 ? (
-              <div className="inbox-empty">
-                <Spider size={26} className="inbox-spider" />
-                <Ghost mood="sleep" size={56} float />
-                <p className="faint">Quiet so far. Let time pass, and don’t answer.</p>
-              </div>
-            ) : (
-              <ol className="inbox-list" ref={inbox} tabIndex={0} aria-label="Messages, oldest first">
-                {messages.map((e, i) => (
-                  <Message key={`${e.kind}-${e.at}-${e.n ?? 0}`} event={e} of={config.reminders} silentDays={config.cadenceDays + config.graceDays} afterNotify={e.kind === 'checkin' && messages[i - 1]?.kind === 'notify'} />
-                ))}
-              </ol>
-            )}
-            <p className="inbox-foot faint">
-              A preview. Nothing is sent, and a real watch never sees what your jar says.
-            </p>
-          </section>
-        </div>
-      </section>
+          <div className="row controls">
+            <button type="button" className="btn primary" onClick={() => (day >= horizon ? reset() : setPlaying(!playing))}>
+              {playing ? 'Pause time' : day >= horizon ? 'Start over' : 'Let time pass'}
+            </button>
+            <button type="button" className="btn" onClick={() => act('checkin')} disabled={paused}>
+              I’m here
+            </button>
+            <button type="button" className="btn" onClick={() => act(paused ? 'resume' : 'pause')}>
+              {paused ? 'Resume' : 'Pause, I’m away'}
+            </button>
+          </div>
 
+          {tuning && (
+            <div className="rhythm-panel" id="rhythm">
+              <Segmented
+                label="Ask me every"
+                value={config.cadenceDays}
+                options={[
+                  { value: 1, label: 'day' },
+                  { value: 3, label: '3 days' },
+                  { value: 7, label: 'week' },
+                  { value: 14, label: '2 weeks' },
+                  { value: 30, label: 'month' },
+                ]}
+                onChange={(cadenceDays) => setConfig({ ...config, cadenceDays })}
+              />
+              <Segmented
+                label="Wait for my answer"
+                value={config.graceDays}
+                options={[2, 4, 7, 14].map((v) => ({ value: v, label: `${v} days` }))}
+                onChange={(graceDays) => setConfig({ ...config, graceDays })}
+              />
+              <Segmented
+                label="Remind me"
+                value={config.reminders}
+                options={[1, 2, 3, 5].map((v) => ({ value: v, label: v === 1 ? 'once' : v === 2 ? 'twice' : `${v} times` }))}
+                onChange={(reminders) => setConfig({ ...config, reminders })}
+              />
+            </div>
+          )}
+        </div>
+
+        <section className="card inbox" aria-labelledby="inbox-title">
+          <div className="spread">
+            <h2 id="inbox-title" className="card-title">
+              Inbox
+            </h2>
+            <span className="faint">{messages.length > 0 && `${messages.length} ${plural(messages.length, 'message')}`}</span>
+          </div>
+          {messages.length === 0 ? (
+            <div className="inbox-empty">
+              <Spider size={26} className="inbox-spider" />
+              <Ghost mood="sleep" size={64} float />
+              <p className="faint">Quiet so far.</p>
+            </div>
+          ) : (
+            <ol className="inbox-list" ref={inbox} tabIndex={0} aria-label="Messages, oldest first">
+              {messages.map((e, i) => (
+                <Message key={`${e.kind}-${e.at}-${e.n ?? 0}`} event={e} of={config.reminders} silentDays={config.cadenceDays + config.graceDays} afterNotify={e.kind === 'checkin' && messages[i - 1]?.kind === 'notify'} />
+              ))}
+            </ol>
+          )}
+          <p className="inbox-foot faint">A preview. Nothing is sent.</p>
+        </section>
+      </section>
     </div>
   );
 }

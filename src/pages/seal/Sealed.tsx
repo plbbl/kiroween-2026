@@ -127,7 +127,7 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
           <span className="todo-num">1</span>
           <div>
             <h3>Print</h3>
-            <p className="muted">Cut each page in two and give both halves. Keep your key apart.</p>
+            <p className="muted">Give each friend their page. Keep your key apart.</p>
             <div className="print-buttons">
               <button type="button" className={`btn${printed ? '' : ' primary'}`} onClick={() => print('cards')}>
                 {printed ? 'Print the cards again' : 'Print the cards'}
@@ -155,7 +155,7 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
           <span className="todo-num">2</span>
           <div>
             <h3>Send</h3>
-            <p className="muted">Download the jar file and email it to everyone. It’s safe to send, and opens in any browser.</p>
+            <p className="muted">Email the jar file to everyone. It’s safe to send.</p>
             <button
               type="button"
               className="btn"
@@ -174,7 +174,7 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
           <span className="todo-num">3</span>
           <div>
             <h3>Watch</h3>
-            <p className="muted">If you go quiet, your friends are asked to look in on you.</p>
+            <p className="muted">Go quiet, and your friends are asked to look in.</p>
             <a className="btn" href={href('watch')} onClick={() => jarHandoff.give(jar)}>
               Turn on the watch
             </a>

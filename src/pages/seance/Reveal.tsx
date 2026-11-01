@@ -224,7 +224,7 @@ export function Reveal({ jar, opened, circle, buddies }: { jar: JarFile; opened:
             </>
           ) : (
             <>
-              <p className="muted">There is a gentle checklist for the days that follow. It opens in a new tab, so this stays open.</p>
+              <p className="muted">A gentle checklist for the days that follow.</p>
               <div className="row centered">
                 <a className="btn primary" href={`${href('guides')}#after`} target="_blank" rel="noopener">
                   What to do next

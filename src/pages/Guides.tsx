@@ -86,7 +86,9 @@ const AFTER: Item[] = [
 
 function Checklist({ items, id }: { items: Item[]; id: string }) {
   const [done, setDone] = useState<boolean[]>(() => items.map(() => false));
+  const [open, setOpen] = useState<boolean[]>(() => items.map(() => false));
   const count = done.filter(Boolean).length;
+  const flip = (list: boolean[], i: number) => list.map((v, j) => (j === i ? !v : v));
   return (
     <>
       <div className="meter" aria-hidden="true">
@@ -97,20 +99,31 @@ function Checklist({ items, id }: { items: Item[]; id: string }) {
       </p>
       <ol className="checklist">
         {items.map((it, i) => (
-          <li key={it.title} className={done[i] ? 'done' : ''}>
-            <label className="check">
-              <input type="checkbox" checked={done[i]} onChange={() => setDone(done.map((d, j) => (j === i ? !d : d)))} aria-describedby={`${id}-${i}`} />
-              {/* Done things light up like jack-o'-lanterns. */}
-              <span className="check-box" aria-hidden="true">
-                <Pumpkin size={34} lit={done[i]} />
-              </span>
-              <span className="check-title">{it.title}</span>
-            </label>
-            <p id={`${id}-${i}`}>{it.body}</p>
-            {it.link && (
-              <a href={it.link.href} target="_blank" rel="noreferrer noopener">
-                {it.link.label} ↗
-              </a>
+          <li key={it.title} className={`${done[i] ? 'done' : ''}${open[i] ? ' open' : ''}`}>
+            <div className="check-row">
+              <label className="check">
+                <input type="checkbox" checked={done[i]} onChange={() => setDone(flip(done, i))} aria-label={`Done: ${it.title}`} />
+                {/* Done things light up like jack-o'-lanterns. */}
+                <span className="check-box" aria-hidden="true">
+                  <Pumpkin size={34} lit={done[i]} />
+                </span>
+              </label>
+              <button type="button" className="check-title" aria-expanded={open[i]} aria-controls={`${id}-${i}`} onClick={() => setOpen(flip(open, i))}>
+                <span>{it.title}</span>
+                <svg className="chevron" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+                  <path d="M3 5 L7 9 L11 5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+            {open[i] && (
+              <div className="check-body" id={`${id}-${i}`}>
+                <p>{it.body}</p>
+                {it.link && (
+                  <a href={it.link.href} target="_blank" rel="noreferrer noopener">
+                    {it.link.label} ↗
+                  </a>
+                )}
+              </div>
             )}
           </li>
         ))}
@@ -119,13 +132,12 @@ function Checklist({ items, id }: { items: Item[]; id: string }) {
   );
 }
 
-function GuideCard({ id, tag, title, sub, costume, mood, items }: { id: string; tag: string; title: string; sub: string; costume: Costume; mood: Mood; items: Item[] }) {
+function GuideCard({ id, title, sub, costume, mood, items }: { id: string; title: string; sub: string; costume: Costume; mood: Mood; items: Item[] }) {
   return (
     <section className="card guide" id={id} aria-labelledby={`${id}-title`}>
       <div className="guide-ghost">
         <WatchingGhost costume={costume} mood={mood} size={84} float />
       </div>
-      <p className="tag">{tag}</p>
       <h2 id={`${id}-title`}>{title}</h2>
       <p className="muted">{sub}</p>
       <Checklist items={items} id={id} />
@@ -147,12 +159,12 @@ export function Guides({ anchor }: { anchor: string }) {
           Before, and after
         </h1>
         <p className="lede rise" style={{ '--d': '200ms' } as CSSProperties}>
-          Doors the world already has, and what to do when the time comes.
+          Doors to open now, and what to do later.
         </p>
       </section>
       <div className="narrow guides">
-        <GuideCard id="before" tag="before" title="Doors you can leave open" sub="Each company has its own way to let someone in. Most people never set one up." costume="witch" mood="wink" items={BEFORE} />
-        <GuideCard id="after" tag="after" title="For the days that follow" sub="For the people left to do things. Written for the United States." costume="sheet" mood="happy" items={AFTER} />
+        <GuideCard id="before" title="Doors you can leave open" sub="Most people never set these up." costume="witch" mood="wink" items={BEFORE} />
+        <GuideCard id="after" title="For the days that follow" sub="For those left behind. Written for the U.S." costume="sheet" mood="happy" items={AFTER} />
         <p className="center faint">
           More from the U.S. government:{' '}
           <a href="https://www.usa.gov/death-loved-one" target="_blank" rel="noreferrer noopener">

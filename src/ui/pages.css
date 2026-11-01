@@ -6,16 +6,19 @@
 
 .hero-stage {
   position: relative;
-  max-width: 1180px;
+  max-width: 1360px;
   margin: 0 auto;
 }
 
+/* The first screen is one Halloween night: the name, one line, two buttons, the jar. */
 .hero {
   position: relative;
   z-index: 1;
-  display: flow-root;
-  padding: 84px 24px 0;
-  border-radius: 44px;
+  display: flex;
+  flex-direction: column;
+  min-height: min(920px, calc(100svh - 112px));
+  padding: clamp(64px, 9vh, 110px) 24px 0;
+  border-radius: 48px;
   /* A Halloween sky: deep at the top, glowing purple at the horizon. */
   background: linear-gradient(180deg, #1b1036 0%, #3a1f78 48%, #7a3bea 100%);
   border: 2px solid rgba(205, 184, 255, 0.24);
@@ -86,22 +89,24 @@
   position: relative;
   z-index: 2;
   text-align: center;
-  max-width: 680px;
+  max-width: 980px;
   margin: 0 auto;
 }
 
 .hero-title {
-  font-size: clamp(3.4rem, 11vw, 7.2rem);
-  line-height: 1;
-  letter-spacing: -0.02em;
-  margin: 12px 0 18px;
-  text-shadow: 0 6px 0 rgba(74, 24, 170, 0.55);
+  font-size: clamp(4rem, 14vw, 11rem);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  margin: 0 0 22px;
+  text-shadow: 0 8px 0 rgba(74, 24, 170, 0.55);
 }
 
 .hero-sub {
-  font-size: 1.22rem;
+  max-width: 24em;
+  margin: 0 auto 36px;
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  line-height: 1.35;
   color: #fff;
-  margin-bottom: 28px;
   text-wrap: balance;
 }
 
@@ -178,15 +183,20 @@
 
 @media (max-width: 640px) {
   .hero-moon {
-    width: 96px;
-    height: 96px;
-    top: 14px;
-    right: 2%;
+    width: 60px;
+    height: 60px;
+    top: 16px;
+    right: 18px;
   }
 
   .hero-bat.b2,
   .hero-bat.b3 {
     display: none;
+  }
+
+  .hero-bat.b1 {
+    top: 28px;
+    left: 30%;
   }
 
   .hero-pumpkin.left {
@@ -206,41 +216,81 @@
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  /* The jar stands inside the hero: glass over an edge shows the edge through it. */
-  margin-top: 4px;
-  padding-bottom: 34px;
+  margin-top: auto;
+  padding: 8px 0 30px;
 }
 
-
-.promises {
-  margin-top: 110px;
+/* Section headings on the home page are statements. */
+.home h2 {
+  font-size: clamp(2.3rem, 5vw, 3.8rem);
 }
 
-.promise-grid {
+/* Three facts, each a colored tile with one big number and one line. */
+.facts {
+  margin-top: 150px;
+}
+
+.fact-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 34px;
-  margin-top: 40px;
+  gap: 20px;
+  margin-top: 48px;
 }
 
-.promise-icon {
-  display: inline-grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 18px;
-  margin-bottom: 14px;
-  transform: rotate(-6deg);
+.fact {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 380px;
+  padding: 36px 34px 0;
+  border-radius: 40px;
+  overflow: hidden;
+  color: #fff;
 }
 
-.promise h3 {
-  margin-bottom: 6px;
+.fact-big {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(4rem, 7vw, 6.4rem);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+}
+
+.fact p {
+  max-width: 14em;
+  margin: 16px 0 0;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(1.3rem, 1.8vw, 1.55rem);
+  line-height: 1.25;
+}
+
+/* The cast peeks up from the bottom of each tile. */
+.fact-art {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  margin: auto 0 -22px auto;
+  padding-top: 24px;
+}
+
+.f-purple {
+  background: linear-gradient(160deg, #9a5cff, #5a22c4);
+}
+
+.f-pink {
+  background: linear-gradient(160deg, #ff7aa8, #c92f66);
+}
+
+.f-amber {
+  background: linear-gradient(160deg, #ffd166, #f08a12);
+  color: #3b1c00;
 }
 
 .closing {
   position: relative;
-  margin-top: 110px;
-  padding: 64px 24px 60px;
+  margin-top: 150px;
+  padding: 80px 24px 76px;
   border-radius: 44px;
   background: radial-gradient(ellipse at 50% 0%, #3a2366, #1a1130 70%);
   color: var(--fg);
@@ -274,8 +324,8 @@
 
 .closing-line {
   font-family: var(--display);
-  font-weight: 600;
-  font-size: clamp(1.9rem, 4vw, 2.8rem);
+  font-weight: 700;
+  font-size: clamp(2.3rem, 5vw, 3.8rem);
   line-height: 1.15;
   text-wrap: balance;
   margin: 0 0 28px;
@@ -307,13 +357,21 @@
 }
 
 @media (max-width: 860px) {
-  .promise-grid {
+  .fact-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  .fact {
+    min-height: 300px;
+    padding: 30px 28px 0;
+    border-radius: 34px;
   }
 
   .hero {
     min-height: 0;
-    padding-top: 70px;
+    padding-top: 92px;
     border-radius: 34px;
   }
 
@@ -321,26 +379,10 @@
     padding-bottom: 24px;
   }
 
-  .promises,
-  .closing {
-    margin-top: 72px;
-  }
-
-  .promise-grid {
-    gap: 24px;
-    margin-top: 28px;
-  }
-
-  /* Icon on the left, words on the right: three promises in one glance. */
-  .promise {
-    display: grid;
-    grid-template-columns: 56px 1fr;
-    column-gap: 16px;
-  }
-
-  .promise-icon {
-    grid-row: span 2;
-    margin-bottom: 0;
+  .facts,
+  .closing,
+  .hiw {
+    margin-top: 96px;
   }
 }
 
@@ -470,7 +512,7 @@
 
 
 .step-title {
-  font-size: clamp(2rem, 4.6vw, 2.8rem);
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
   margin: 0 0 8px;
 }
 
@@ -1333,9 +1375,9 @@ textarea.mono-input {
 .choose {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 22px;
-  max-width: 860px;
-  margin-top: 40px;
+  gap: 20px;
+  max-width: 1000px;
+  margin-top: 48px;
 }
 
 .choose-card {
@@ -1371,16 +1413,16 @@ textarea.mono-input {
 }
 
 .choose-art {
-  height: 170px;
+  height: 230px;
   display: grid;
   place-items: end center;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .choose-title {
   font-family: var(--display);
-  font-weight: 600;
-  font-size: 1.6rem;
+  font-weight: 700;
+  font-size: clamp(1.6rem, 2.6vw, 2.1rem);
 }
 
 /* Above the altar, so notes flying out of the jar pass behind the words. */
@@ -2178,22 +2220,16 @@ textarea.mono-input {
 
 .watch-grid {
   display: grid;
-  grid-template-columns: 372px 1fr;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
   gap: 20px;
-  margin-top: 40px;
+  margin-top: 48px;
   align-items: start;
 }
 
-/* The rhythm stays in view while the preview plays. */
-.rhythm {
+/* The timeline stays in view while the messages come in. */
+.timeline {
   position: sticky;
   top: 100px;
-}
-
-.watch-main {
-  display: grid;
-  gap: 20px;
-  min-width: 0;
 }
 
 .card-title {
@@ -2234,19 +2270,6 @@ textarea.mono-input {
   background: var(--purple);
   color: #fff;
   transform: scale(1.04);
-}
-
-.rhythm-sum {
-  margin: 4px 0 0;
-  padding: 14px 16px;
-  border-radius: 18px;
-  background: var(--lilac);
-  color: var(--fg-soft);
-  font-size: 0.98rem;
-}
-
-.rhythm-sum b {
-  color: var(--purple-text);
 }
 
 .day-num {
@@ -2340,8 +2363,7 @@ textarea.mono-input {
   color: var(--fg-faint);
 }
 
-.mark,
-.legend i {
+.mark {
   position: absolute;
   top: 73px;
   width: 16px;
@@ -2399,29 +2421,34 @@ textarea.mono-input {
   transition: opacity 500ms var(--soft);
 }
 
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
-  margin: 14px 0 6px;
-  font-size: 0.9rem;
-  color: var(--fg-soft);
-}
-
-.legend span {
-  position: relative;
-  padding-left: 22px;
-}
-
-.legend i {
-  top: 50%;
-  left: 8px;
-  opacity: 1;
-  margin-top: -8px;
-}
-
 .controls {
-  margin-top: 16px;
+  margin-top: 18px;
+  align-items: center;
+}
+
+.rhythm-toggle {
+  font-size: inherit;
+}
+
+.timeline-sum {
+  margin: -4px 0 0;
+  color: var(--fg-soft);
+  font-size: 1.05rem;
+}
+
+.timeline-sum b {
+  color: var(--purple-text);
+}
+
+.rhythm-panel {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 2px dashed var(--line);
+  animation: rise 340ms var(--soft) both;
+}
+
+.service-line {
+  margin: -8px auto 0;
 }
 
 .inbox .card-title {
@@ -2566,27 +2593,21 @@ textarea.mono-input {
 }
 
 .checklist li {
-  padding: 16px 0 16px 46px;
   border-top: 2px dashed var(--line);
-  transition: opacity 400ms;
 }
 
-.checklist li.done p {
-  color: var(--fg-faint);
-}
-
-.checklist p {
-  margin: 4px 0;
-  color: var(--fg-soft);
-}
-
-.checklist a {
-  font-size: 0.95rem;
+.check-row {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  align-items: center;
 }
 
 .check {
   position: relative;
-  display: block;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 56px;
   cursor: pointer;
 }
 
@@ -2598,9 +2619,6 @@ textarea.mono-input {
 }
 
 .check-box {
-  position: absolute;
-  left: -48px;
-  top: -4px;
   display: grid;
   place-items: center;
   width: 36px;
@@ -2624,15 +2642,53 @@ textarea.mono-input {
   outline-offset: 3px;
 }
 
+/* The title opens the details; only the title shows until then. */
 .check-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 4px 10px 6px;
+  border: none;
+  background: none;
+  color: var(--fg);
+  text-align: left;
   font-family: var(--display);
   font-weight: 600;
-  font-size: 1.15rem;
+  font-size: 1.2rem;
+  cursor: pointer;
 }
 
-.done .check-title {
+.check-title .chevron {
+  flex: none;
+  color: var(--fg-faint);
+  transition: transform 300ms var(--spring);
+}
+
+.open .check-title .chevron {
+  transform: rotate(180deg);
+}
+
+.done .check-title span {
   text-decoration: line-through;
   text-decoration-thickness: 2px;
+  color: var(--fg-soft);
+}
+
+.check-body {
+  padding: 0 4px 18px 50px;
+  animation: rise 300ms var(--soft) both;
+}
+
+.check-body p {
+  margin: 0 0 6px;
+  color: var(--fg-soft);
+}
+
+.check-body a {
+  font-size: 0.95rem;
 }
 
 /* ── Printed cards ────────────────────────────────────────── */
@@ -2965,7 +3021,7 @@ textarea.mono-input {
     max-width: 94%;
   }
 
-  .rhythm {
+  .timeline {
     position: static;
   }
 
@@ -3114,12 +3170,12 @@ textarea.mono-input {
 }
 
 .how-title {
-  margin: 30px 0 0;
-  font-size: 1.6rem;
+  margin: 56px 0 0;
 }
 
-.watch-main .start-watch {
-  margin-top: 0;
+/* Where a real watch can start, its form comes first. */
+.real-first {
+  margin-top: 40px;
 }
 
 
@@ -3486,16 +3542,16 @@ button.hero-jar:focus-visible {
 /* ── How it works: the story in twenty seconds ────────────── */
 
 .hiw {
-  margin-top: 72px;
+  margin-top: 150px;
 }
 
 .hiw h2 {
-  margin-bottom: 18px;
+  margin-bottom: 36px;
 }
 
 .hiw-stage {
   position: relative;
-  max-width: 860px;
+  max-width: 1080px;
   margin: 0 auto;
   aspect-ratio: 2 / 1;
   border-radius: 34px;
@@ -3685,9 +3741,13 @@ button.hero-jar:focus-visible {
 
 .hiw-line {
   max-width: 640px;
-  min-height: 3.2em;
-  margin: 16px auto 0;
-  color: var(--fg-soft);
+  min-height: 1.3em;
+  margin: 28px auto 6px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  line-height: 1.15;
+  color: var(--fg);
   text-wrap: balance;
 }
 
