@@ -10,6 +10,7 @@ import { useAtmosphere } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
 import { watchAvailable } from '../../ui/watchApi.ts';
 import { LinkAction, linkActionOf, ResendManage, StartWatch } from './RealWatch.tsx';
+import { Typed } from '../../ui/components/Typed.tsx';
 
 const OWNER = DEMO_JAR.owner;
 const FIRST = OWNER.split(' ')[0]!;
@@ -133,7 +134,7 @@ export function Watch({ params }: { params: URLSearchParams }) {
           <div className="watch-hero">
             {/* Nothing to say until something happens; the space stays, so nothing jumps. */}
             <div className={`speech pop${face.say ? '' : ' quiet'}`} key={relieved ? 'relieved' : run.status} aria-hidden={!face.say}>
-              {face.say || '…'}
+              {face.say ? <Typed key={face.say} text={face.say} /> : '…'}
             </div>
             <span className="presence" style={{ opacity: presence }}>
               <WatchingGhost mood={face.mood} size={168} float shadow />
@@ -282,6 +283,16 @@ export function Watch({ params }: { params: URLSearchParams }) {
   );
 }
 
+/** A round postmark on every email the watch sends, like a stamp on a letter. */
+function Postmark({ when }: { when: string }) {
+  return (
+    <span className="postmark" aria-hidden="true">
+      <b>Sent</b>
+      {when}
+    </span>
+  );
+}
+
 const friendsLine = HOLDERS.map((h) => h.split(' ')[0]).join(', ');
 
 function Message({ event, of, silentDays, afterNotify = false }: { event: WatchEvent; of: number; silentDays: number; afterNotify?: boolean }) {
@@ -298,6 +309,7 @@ function Message({ event, of, silentDays, afterNotify = false }: { event: WatchE
         </li>
         {afterNotify && (
           <li className="msg to-friends relief pop">
+            <Postmark when={when} />
             <span className="msg-meta">
               to {friendsLine} · {when}
             </span>
@@ -312,6 +324,7 @@ function Message({ event, of, silentDays, afterNotify = false }: { event: WatchE
     const m = ownerReminder(FIRST, event.n ?? 1, of);
     return (
       <li className="msg to-owner pop">
+        <Postmark when={when} />
         <span className="msg-meta">to {FIRST} · {when}</span>
         <p className="msg-title">{m.subject}</p>
         <p>{m.body}</p>
@@ -321,6 +334,7 @@ function Message({ event, of, silentDays, afterNotify = false }: { event: WatchE
   const m = holderMessage(OWNER, HOLDERS[0]!, { days: silentDays, asked: of + 1 });
   return (
     <li className="msg to-friends pop">
+      <Postmark when={when} />
       <span className="msg-meta">
         to {friendsLine} · {when}
       </span>

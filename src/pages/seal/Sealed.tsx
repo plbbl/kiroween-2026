@@ -6,7 +6,7 @@ import { Candle } from '../../ui/art/Candle.tsx';
 import { Sparkles } from '../../ui/art/Decor.tsx';
 import { EmblemIcon } from '../../ui/art/Emblem.tsx';
 import { Jar } from '../../ui/art/Jar.tsx';
-import { initialsOf } from '../../ui/art/WaxSeal.tsx';
+import { initialsOf, WaxSeal } from '../../ui/art/WaxSeal.tsx';
 import { BuddyCard, EnvelopeMark, PrintableCard, PrintableKey } from '../../ui/components/Cards.tsx';
 import { ConfirmButton } from '../../ui/components/Confirm.tsx';
 import { numberWord } from '../../ui/text.ts';
@@ -71,6 +71,12 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
           <div className="sealed-candle">
             <Candle lit size={70} label="The candle lit for the sealing, still burning" />
           </div>
+          {/* A paper tag tied to the jar's neck. */}
+          <p className="jar-tag hanging">
+            <span>No. {jar.jarId}</span>
+            <span>{new Date(jar.sealedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+            <span>{k} of {n}</span>
+          </p>
         </div>
         <h1 className="sealed-title" tabIndex={-1} ref={heading}>
           Sealed!
@@ -80,10 +86,19 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
           you can’t later.
         </p>
         <p className={`proof${check ? (check.ok ? ' ok' : ' bad') : ''}`} role="status">
-          <EmblemIcon name="spark" size={18} title="" />
-          {!check && `Checking all ${combos(n, k)} ways to gather…`}
-          {check?.ok && `Checked: every ${numberWord(k)} of you can open it, and ${k > 2 ? `no ${numberWord(k - 1)}` : 'no one alone'}.`}
-          {check && !check.ok && 'Something is wrong with these cards. Please seal the jar again.'}
+          {/* When every way to gather has been tried, the check is stamped in wax. */}
+          {check?.ok ? (
+            <span className="proof-stamp" aria-hidden="true">
+              <WaxSeal initials={initialsOf(jar.owner)} size={30} />
+            </span>
+          ) : (
+            <EmblemIcon name="spark" size={18} title="" />
+          )}
+          <span>
+            {!check && `Checking all ${combos(n, k)} ways to gather…`}
+            {check?.ok && `Checked: every ${numberWord(k)} of you can open it, and ${k > 2 ? `no ${numberWord(k - 1)}` : 'no one alone'}.`}
+            {check && !check.ok && 'Something is wrong with these cards. Please seal the jar again.'}
+          </span>
         </p>
         <p className="still-to-do" role="status">
           {missing.length ? '' : 'All done. You can close this page.'}

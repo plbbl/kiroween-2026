@@ -15,6 +15,7 @@ import { sound } from '../../ui/sound.ts';
 import { Sealed, Updated } from './Sealed.tsx';
 import { OpenForUpdate } from './Update.tsx';
 import { StepCircle, StepLeave, StepMessage, StepName, StepWishes, type Draft } from './Steps.tsx';
+import { Typed } from '../../ui/components/Typed.tsx';
 
 const listNames = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : (names[0] ?? ''));
 
@@ -420,7 +421,7 @@ function Wizard({
                     />
                     {bedtime && (
                       <span className={`boo-bubble ${bedtime}`} key={bedtime}>
-                        {bedtime === 'night' ? 'Night night!' : 'Zzz…'}
+                        <Typed key={bedtime} text={bedtime === 'night' ? 'Night night!' : 'Zzz…'} speed={60} />
                       </span>
                     )}
                     <Sparkles burst={burst} radius={130} count={16} />

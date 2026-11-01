@@ -122,7 +122,9 @@ export function Reveal({ jar, opened, circle, buddies }: { jar: JarFile; opened:
           </div>
           <div className="reveal-seats">{seats.slice(half).map((s, i) => seat(s, i + half))}</div>
         </div>
-        <p className="tag rise">opened by {names(circle.map((h) => h.name))}</p>
+        <p className="jar-tag rise">
+          <span>Opened by {names(circle.map((h) => h.name))}</span>
+        </p>
         <h1 className="rise" style={{ '--d': '120ms' } as CSSProperties} tabIndex={-1} ref={heading}>
           {first} left you this
         </h1>

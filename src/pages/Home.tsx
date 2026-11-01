@@ -7,6 +7,7 @@ import { Jar } from '../ui/art/Jar.tsx';
 import { Bat, Moon, Pumpkin } from '../ui/art/Spooky.tsx';
 import { sound } from '../ui/sound.ts';
 import { href, prefersReducedMotion, useAtmosphere } from '../ui/shell.tsx';
+import { Typed } from '../ui/components/Typed.tsx';
 import { HowItWorks } from './HowItWorks.tsx';
 
 const d = (ms: number) => ({ '--d': `${ms}ms` }) as CSSProperties;
@@ -261,7 +262,9 @@ export function Home() {
             <div className="intro-candle">
               <Candle lit justLit size={84} />
             </div>
-            <p className="intro-line">Shh… it’s sleeping.</p>
+            <p className="intro-line">
+              <Typed text="Shh… it’s sleeping." delay={650} speed={45} />
+            </p>
             <span className="intro-skip">Skip</span>
           </div>,
           document.body,
@@ -357,7 +360,7 @@ export function Home() {
             />
             {gag && (
               <span className={`boo-bubble ${gag === 'found' ? 'laugh' : gag}`} key={gag} aria-live="polite">
-                {GAG_LINE[gag]}
+                {gag === 'boo' ? GAG_LINE.boo : <Typed key={gag} text={GAG_LINE[gag]} />}
               </span>
             )}
           </button>

@@ -450,6 +450,23 @@
   padding-bottom: 0.12em;
 }
 
+/* At night the big words glow a little, like the candles. */
+body[data-theme='night'] .page h1:not(.step-title) {
+  text-shadow:
+    0 0 38px rgba(196, 150, 255, 0.45),
+    0 6px 0 rgba(74, 24, 170, 0.5);
+}
+
+/* What you can touch at night warms up under the pointer, like a candle coming near. */
+body[data-theme='night'] .choose-card:hover,
+body[data-theme='night'] .choose-card.over {
+  border-color: rgba(255, 196, 87, 0.75);
+  box-shadow:
+    0 0 0 1px rgba(255, 196, 87, 0.5),
+    0 0 48px -6px rgba(255, 170, 60, 0.45),
+    0 30px 50px -30px rgba(0, 0, 0, 0.8);
+}
+
 /* Section headings on the home page are statements. */
 .home h2 {
   font-size: clamp(2.3rem, 5vw, 3.8rem);
@@ -1184,6 +1201,23 @@ input[aria-invalid='true'] {
   background: #effbf5;
 }
 
+.proof-stamp {
+  display: inline-grid;
+  margin: -8px 0 -8px -6px;
+  animation: stamp-in 560ms var(--spring) both;
+}
+
+@keyframes stamp-in {
+  0% {
+    transform: scale(2.4) rotate(-24deg);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(0.88) rotate(6deg);
+    opacity: 1;
+  }
+}
+
 .proof.bad {
   color: #c02a5a;
   border-color: #ffc3d6;
@@ -1642,10 +1676,408 @@ textarea.mono-input {
 }
 
 .altar {
+  --win-w: 260px;
+  --win-h: 357px;
+  /* Where the wall meets the floor, just behind the rug. */
+  --sill: 39%;
   position: relative;
   max-width: 980px;
   height: clamp(360px, 42vw, 470px);
-  margin: 0 auto;
+  margin: 226px auto 0;
+}
+
+/* ── Paper tags tied to jars ──────────────────────────────── */
+
+.jar-tag {
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px 10px;
+  margin: 0;
+  padding: 6px 14px 6px 26px;
+  border-radius: 4px 12px 12px 4px;
+  background: linear-gradient(180deg, #f7ecd4, #ecdcba);
+  color: #4a3416;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: 0 8px 16px -10px rgba(0, 0, 0, 0.7);
+  transform: rotate(-2deg);
+}
+
+.jar-tag span + span::before {
+  content: '·';
+  margin-right: 10px;
+  opacity: 0.55;
+}
+
+/* The hole the string goes through. */
+.jar-tag::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border-radius: 50%;
+  background: #1b1036;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5), 0 0 0 2px #d9c49a;
+}
+
+/* On the sealed jar, the tag hangs from the neck on a string. */
+.jar-tag.hanging {
+  position: absolute;
+  z-index: 3;
+  left: -104px;
+  top: 128px;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px 28px 10px 14px;
+  border-radius: 12px 4px 4px 12px;
+  transform: rotate(-9deg);
+}
+
+.jar-tag.hanging span + span::before {
+  content: none;
+}
+
+.jar-tag.hanging::before {
+  left: auto;
+  right: 10px;
+}
+
+.jar-tag.hanging::after {
+  content: '';
+  position: absolute;
+  right: -66px;
+  top: 50%;
+  width: 70px;
+  height: 2px;
+  background: #d9b47a;
+  transform-origin: 0 50%;
+  transform: rotate(-16deg);
+}
+
+@media (max-width: 640px) {
+  .jar-tag.hanging {
+    display: none;
+  }
+}
+
+/* ── The séance room ──────────────────────────────────────── */
+
+.seance-room {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* With a window onto the moon, the sky's own moon steps aside. */
+body:has(.seance-room) .scenery-moon {
+  display: none;
+}
+
+.room-window-wrap {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - var(--sill));
+  width: var(--win-w);
+  height: var(--win-h);
+  transform: translateX(-50%);
+}
+
+.room-window {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 60px rgba(150, 110, 255, 0.35));
+}
+
+.room-cloud {
+  animation: cloud-pass 26s ease-in-out infinite alternate;
+}
+
+@keyframes cloud-pass {
+  to {
+    translate: 46px 0;
+  }
+}
+
+/* A brass curtain rod above the window. */
+.room-rod {
+  position: absolute;
+  z-index: 3;
+  left: -32%;
+  right: -32%;
+  top: -20px;
+  height: 7px;
+  border-radius: 4px;
+  background: linear-gradient(#e3b45a, #8a6424);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+}
+
+.room-rod::before,
+.room-rod::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f3cf80, #8a6424);
+}
+
+.room-rod::before {
+  left: -8px;
+}
+
+.room-rod::after {
+  right: -8px;
+}
+
+.room-curtain {
+  position: absolute;
+  z-index: 2;
+  top: -16px;
+  width: 44%;
+  height: calc(100% + 40px);
+}
+
+.room-curtain.left {
+  left: -26%;
+}
+
+.room-curtain.right {
+  right: -26%;
+  transform: scaleX(-1);
+}
+
+/* Moonlight falls from the window onto the rug. */
+.room-moonbeam {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: calc(var(--sill) - 6%);
+  width: min(560px, 70%);
+  height: 50%;
+  transform: translateX(-50%);
+  clip-path: polygon(36% 0, 64% 0, 100% 100%, 0 100%);
+  background: linear-gradient(180deg, rgba(214, 196, 255, 0.2), rgba(214, 196, 255, 0) 90%);
+  mix-blend-mode: screen;
+}
+
+/* An ancestor's portrait. Its eyes follow you. */
+.room-portrait {
+  position: absolute;
+  left: 7%;
+  bottom: calc(100% - var(--sill) + 70px);
+  transform: rotate(-5deg);
+  transform-origin: 50% 0;
+  animation: portrait-sway 7s ease-in-out infinite alternate;
+}
+
+@keyframes portrait-sway {
+  to {
+    transform: rotate(-2deg);
+  }
+}
+
+.portrait-string {
+  position: absolute;
+  left: 50%;
+  top: -32px;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: #c9952f;
+}
+
+.portrait-string::before,
+.portrait-string::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 3px;
+  width: 2px;
+  height: 46px;
+  background: rgba(201, 149, 47, 0.75);
+  transform-origin: 50% 0;
+}
+
+.portrait-string::before {
+  transform: rotate(40deg);
+}
+
+.portrait-string::after {
+  transform: rotate(-40deg);
+}
+
+.portrait-frame {
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 136px;
+  border-radius: 50%;
+  border: 9px solid #8a6424;
+  box-shadow:
+    inset 0 0 0 3px #c9952f,
+    inset 0 0 26px rgba(0, 0, 0, 0.7),
+    0 14px 24px -10px rgba(0, 0, 0, 0.7);
+  background: radial-gradient(circle at 50% 40%, #4a2a7a, #1d0f36 75%);
+  overflow: hidden;
+}
+
+.portrait-frame .watching-ghost {
+  margin-top: 18px;
+}
+
+/* A candle in a brass sconce on the wall. */
+.room-sconce {
+  position: absolute;
+  right: 9%;
+  bottom: calc(100% - var(--sill) + 40px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sconce-arm {
+  width: 46px;
+  height: 10px;
+  margin-top: -6px;
+  border-radius: 0 0 20px 20px;
+  background: linear-gradient(#d3a24a, #8a6424);
+  box-shadow: 0 0 22px 6px rgba(255, 190, 90, 0.25);
+}
+
+/* Fog along the floor: it thickens as candles are lit and rolls away when the jar opens. */
+.room-fog {
+  position: absolute;
+  z-index: 2;
+  left: -12%;
+  right: -12%;
+  top: 46%;
+  height: 50%;
+  opacity: calc(0.3 + var(--lit, 0) * 0.5);
+  background:
+    radial-gradient(ellipse 30% 40% at 22% 55%, rgba(214, 196, 255, 0.28), transparent 72%),
+    radial-gradient(ellipse 28% 36% at 78% 60%, rgba(214, 196, 255, 0.24), transparent 72%),
+    radial-gradient(ellipse 22% 30% at 50% 78%, rgba(214, 196, 255, 0.2), transparent 72%);
+  filter: blur(6px);
+  transition: opacity 1.2s var(--soft);
+}
+
+.room-fog.f1 {
+  animation: fog-drift 34s ease-in-out infinite alternate;
+}
+
+.room-fog.f2 {
+  top: 58%;
+  animation: fog-drift 46s ease-in-out infinite alternate-reverse;
+}
+
+.altar.risen .room-fog.f1 {
+  animation: veil-left 2.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.altar.risen .room-fog.f2 {
+  animation: veil-right 2.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes veil-left {
+  to {
+    translate: -40% 0;
+    opacity: 0;
+  }
+}
+
+@keyframes veil-right {
+  to {
+    translate: 40% 0;
+    opacity: 0;
+  }
+}
+
+/* Bats roosting by the window fly off as the circle arrives. */
+.room-bats {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: 34%;
+}
+
+.room-bat {
+  position: absolute;
+  opacity: 0;
+  animation: bat-scatter 1.9s cubic-bezier(0.3, 0.6, 0.3, 1) forwards;
+  animation-delay: calc(500ms + var(--i) * 130ms);
+}
+
+.room-bat.b0 {
+  --to: -420px, -180px;
+}
+
+.room-bat.b1 {
+  --to: 380px, -240px;
+}
+
+.room-bat.b2 {
+  --to: -260px, -320px;
+}
+
+.room-bat.b3 {
+  --to: 520px, -60px;
+}
+
+.room-bat.b4 {
+  --to: -560px, -20px;
+}
+
+@keyframes bat-scatter {
+  0% {
+    transform: translate(0, 0) scale(0.2);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--to)) scale(1.1);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .altar {
+    --win-w: 170px;
+    --win-h: 233px;
+    margin-top: 150px;
+  }
+
+  .room-portrait,
+  .room-sconce {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-cloud,
+  .room-portrait,
+  .room-fog.f1,
+  .room-fog.f2,
+  .altar.risen .room-fog.f1,
+  .altar.risen .room-fog.f2 {
+    animation: none;
+  }
+
+  .room-bats {
+    display: none;
+  }
 }
 
 .rug {
@@ -2750,6 +3182,50 @@ textarea.mono-input {
   border-color: #a8e8cb;
 }
 
+/* Every email the watch sends is postmarked. */
+.msg.to-owner,
+.msg.to-friends {
+  position: relative;
+  padding-right: 78px;
+}
+
+.postmark {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: grid;
+  place-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 4px currentColor;
+  color: rgba(122, 53, 232, 0.55);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  line-height: 1.15;
+  text-align: center;
+  text-transform: uppercase;
+  transform: rotate(-14deg);
+  animation: stamp-in 520ms var(--spring) 120ms both;
+}
+
+.postmark b {
+  font-family: var(--display);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+}
+
+.to-friends .postmark {
+  color: rgba(214, 58, 112, 0.55);
+  box-shadow: inset 0 0 0 3px #fff0f6, inset 0 0 0 4px currentColor;
+}
+
+.to-friends.relief .postmark {
+  color: rgba(23, 112, 79, 0.55);
+  box-shadow: inset 0 0 0 3px #eafbf3, inset 0 0 0 4px currentColor;
+}
+
 /* ── Guides ───────────────────────────────────────────────── */
 
 .guides {
@@ -3717,7 +4193,7 @@ button.hero-jar:focus-visible {
   }
 
   .altar.risen {
-    margin-top: 56px;
+    margin-top: 196px;
   }
 
   .seal-jar .boo-bubble {

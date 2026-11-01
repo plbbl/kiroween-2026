@@ -185,7 +185,7 @@ for (const words of cardWords.slice(0, 2)) {
   await g.getByRole('button', { name: 'Use this card' }).click();
   await g.waitForTimeout(500);
 }
-await g.getByText(/opened by/).waitFor({ timeout: 15000 });
+await g.getByText(/opened by/i).waitFor({ timeout: 15000 });
 check(await g.getByText('Be gentle with each other.').isVisible(), 'two typed cards open the jar file');
 await g.getByRole('button', { name: 'Open with Charles’s seal' }).click();
 await g.getByLabel(/The 17 words/).fill(wordsOf(sealWords));
@@ -217,7 +217,7 @@ try {
     await h.getByRole('button', { name: 'Use this card' }).click();
     await h.waitForTimeout(500);
   }
-  await h.getByText(/opened by/).waitFor({ timeout: 15000 });
+  await h.getByText(/opened by/i).waitFor({ timeout: 15000 });
   check(await h.getByText('Version two: the spare key moved to the blue bowl.').isVisible(), 'after an update, the same printed cards open the new words');
   await h.close();
 
@@ -248,7 +248,7 @@ await g.close();
 await page.goto(`${app}#/seance?demo`);
 await settle(1200);
 await page.getByRole('button', { name: 'Pick three for me' }).click();
-await page.getByText(/opened by/).waitFor({ timeout: 15000 });
+await page.getByText(/opened by/i).waitFor({ timeout: 15000 });
 check(true, 'one click gathers the demo circle and opens June’s jar');
 
 // Demo séance
@@ -273,7 +273,7 @@ await table.nth(3).click();
 await settle(2000);
 await page.evaluate(() => window.scrollTo(0, 0));
 await shot('13-seance-waking', false);
-await page.getByText(/opened by/).waitFor({ timeout: 15000 });
+await page.getByText(/opened by/i).waitFor({ timeout: 15000 });
 await settle(3000);
 await shot('14-reveal');
 await audit(page, 'reveal');
@@ -364,7 +364,7 @@ await p.screenshot({ path: join(shots, '21-phone-seal.png'), fullPage: true });
     await kb.waitForTimeout(700);
     await press(/June’s jar/, 900);
     for (let i = 0; i < 3; i++) await press(/button "\d\/5/, 900);
-    await kb.getByText(/opened by/).waitFor({ timeout: 15000 });
+    await kb.getByText(/opened by/i).waitFor({ timeout: 15000 });
     await press(/Open with .*seal/, 400);
     await press(/from the demo/, 0);
     await kb.locator('.letter').waitFor({ timeout: 5000 });

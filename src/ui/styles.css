@@ -441,6 +441,11 @@ a {
   color: var(--accent);
 }
 
+/* The not-yet-typed rest of a ghost's line keeps its place. */
+.typed-rest {
+  visibility: hidden;
+}
+
 .lede {
   font-size: clamp(1.2rem, 1.8vw, 1.45rem);
   line-height: 1.4;

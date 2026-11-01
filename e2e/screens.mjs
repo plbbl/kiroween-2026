@@ -194,7 +194,7 @@ for (const which of sizes) {
     await shot('c7-waking');
     await wait(1700);
     await shot('c8-open');
-    await p.getByText(/opened by/).waitFor({ timeout: 10000 });
+    await p.getByText(/opened by/i).waitFor({ timeout: 10000 });
     await wait(2500);
     await shot('r1-top');
     await to('.account-list', -160);

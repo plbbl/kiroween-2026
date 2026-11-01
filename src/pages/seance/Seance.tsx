@@ -5,6 +5,7 @@ import { checkShard, JarError, jarIdBytes, openJar, type JarFile, type JarHolder
 import { DEMO_CARDS, DEMO_JAR, isDemo } from '../../demo/demo.ts';
 import { Candle } from '../../ui/art/Candle.tsx';
 import { Bat, Pumpkin } from '../../ui/art/Spooky.tsx';
+import { SeanceRoom } from '../../ui/art/Room.tsx';
 import { Sparkles } from '../../ui/art/Decor.tsx';
 import { Ghost } from '../../ui/art/Ghost.tsx';
 import { Jar, type JarState } from '../../ui/art/Jar.tsx';
@@ -18,6 +19,7 @@ import { href, useAtmosphere, useFocusOnArrival, useLeaveWarning, useShell, wait
 import { sound } from '../../ui/sound.ts';
 import { watchApi } from '../../ui/watchApi.ts';
 import { Reveal } from './Reveal.tsx';
+import { Typed } from '../../ui/components/Typed.tsx';
 
 const REFUSALS: Record<string, string> = {
   'other-jar': 'That card belongs to a different jar.',
@@ -220,7 +222,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
   const buddies = useMemo(() => circleBuddies(jarIdBytes(jar), jar.holders.map((h) => h.x)), [jar]);
   const first = jar.owner.split(/\s+/)[0] ?? jar.owner;
   const sealed = new Date(jar.sealedAt);
-  const sealedOn = Number.isNaN(sealed.getTime()) ? '' : sealed.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const sealedOn = Number.isNaN(sealed.getTime()) ? '' : sealed.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
   useEffect(() => {
     shell.setCandlelight(phase === 'gathering' ? offered.length / k : 1);
@@ -322,9 +324,10 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
       {flash > 0 && <div className="lightning" key={flash} aria-hidden="true" />}
 
       <section className="narrow center circle-head">
-        <p className="tag pop">
-          {sealedOn ? `sealed ${sealedOn}` : 'séance'}
-          {jar.revision && jar.revision > 1 ? ` · version ${jar.revision}` : ''}
+        <p className="jar-tag pop">
+          <span>No. {jar.jarId}</span>
+          {sealedOn && <span>Sealed {sealedOn}</span>}
+          {jar.revision && jar.revision > 1 ? <span>Version {jar.revision}</span> : null}
         </p>
         <h1 className="pop" style={{ '--d': '80ms' } as CSSProperties} tabIndex={-1} ref={heading}>
           {first}’s jar
@@ -347,6 +350,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
           {/* The ring warms to amber as the circle gathers. */}
           <ellipse className="rug-ring" cx="500" cy="150" rx="440" ry="122" fill="none" strokeWidth="4" strokeDasharray="1 12" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
         </svg>
+        <SeanceRoom />
         <div className="altar-glow" />
         <Pumpkin lit size={50} className="altar-pumpkin left" />
         <Pumpkin lit size={50} className="altar-pumpkin right" />
@@ -389,7 +393,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
           />
           {gag && (
             <span className={`boo-bubble ${gag}`} key={gag} aria-hidden="true">
-              {gag === 'boo' ? 'BOO!' : 'Ha! Hello, friends.'}
+              {gag === 'boo' ? 'BOO!' : <Typed text="Ha! Hello, friends." />}
             </span>
           )}
           <Sparkles burst={burst} radius={200} count={22} />
@@ -462,7 +466,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
         ) : (
           <>
             <p className="center waking-text pop" key={phase}>
-              {phase === 'waking' ? 'Wake up, little ghost…' : 'It’s open!'}
+              <Typed key={phase} text={phase === 'waking' ? 'Wake up, little ghost…' : 'It’s open!'} speed={55} />
             </p>
             <p className="center">
               <button type="button" className="text-btn quiet" onClick={() => setSkipped(true)}>
