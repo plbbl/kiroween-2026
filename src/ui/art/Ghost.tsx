@@ -30,9 +30,10 @@ export interface GhostProps {
 
 const INK = '#261d3a';
 
-// A wide dome with a gentle flare and four soft scallops at the hem.
+// A tall dome that flares into a hem of four soft tongues, the last one
+// flicking out to the right, as if the ghost were drifting.
 const BODY =
-  'M62 16 C91 16 109 35 109 62 C109 86 111 104 114 117 C114 129 90 131 88 120 C86 131 64 131 62 120 C60 131 38 131 36 120 C34 131 10 129 10 117 C13 104 15 86 15 62 C15 35 33 16 62 16 Z';
+  'M62 12 C93 12 111 34 111 63 C111 88 113 103 119 114 C122 121 118 127 110 123 C104 133 92 133 87 123 C81 134 68 134 62 123 C56 134 43 134 37 123 C31 133 17 132 13 120 C10 107 13 90 13 63 C13 34 31 12 62 12 Z';
 
 /** Light, middle, shade and edge tones of each body. */
 const TONES: Record<Costume, [string, string, string, string]> = {
@@ -42,7 +43,7 @@ const TONES: Record<Costume, [string, string, string, string]> = {
   skeleton: ['#504566', '#322a44', '#231c31', '#130e1c'],
   pumpkin: ['#ffd6a3', '#ffa352', '#f6852f', '#d6631b'],
   bat: ['#f3ecff', '#d5c0ff', '#b69bf6', '#8e70dc'],
-  bow: ['#fff6fa', '#ffdbe9', '#f8bad3', '#e392b4'],
+  vampire: ['#ffffff', '#f6f2ff', '#e2d9f5', '#bfb0e4'],
   mummy: ['#fffcf5', '#f7eedd', '#e7d8be', '#c9b493'],
 };
 
@@ -54,7 +55,7 @@ const EMBLEM_AT: Record<Costume, [number, number]> = {
   skeleton: [94, 103],
   pumpkin: [62, 101],
   bat: [62, 101],
-  bow: [62, 101],
+  vampire: [62, 101],
   mummy: [62, 97],
 };
 
@@ -117,6 +118,14 @@ function Defs({ ids, tones, rim }: { ids: Ids; tones: [string, string, string, s
       <clipPath id={id('clip')}>
         <path d={BODY} />
       </clipPath>
+      {/* A ghost thins out towards the hem. */}
+      <linearGradient id={id('fadeGrad')} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0.74" stopColor="#fff" />
+        <stop offset="1" stopColor="#fff" stopOpacity="0.55" />
+      </linearGradient>
+      <mask id={id('fade')} maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" x="-10" y="-40" width="150" height="185">
+        <rect x="-10" y="-40" width="150" height="176" fill={`url(#${id('fadeGrad')})`} />
+      </mask>
       {/* Costume materials */}
       <radialGradient id={id('purple')} cx="35%" cy="25%" r="85%">
         <stop offset="0" stopColor="#b98cff" />
@@ -133,10 +142,20 @@ function Defs({ ids, tones, rim }: { ids: Ids; tones: [string, string, string, s
         <stop offset="0.6" stopColor="#5b3a94" />
         <stop offset="1" stopColor="#3e2468" />
       </radialGradient>
-      <radialGradient id={id('pink')} cx="35%" cy="25%" r="85%">
-        <stop offset="0" stopColor="#ffa3c3" />
-        <stop offset="0.55" stopColor="#ff5c93" />
-        <stop offset="1" stopColor="#d93673" />
+      <radialGradient id={id('cape')} cx="40%" cy="30%" r="90%">
+        <stop offset="0" stopColor="#5b3a94" />
+        <stop offset="0.6" stopColor="#33195e" />
+        <stop offset="1" stopColor="#1d0d38" />
+      </radialGradient>
+      <radialGradient id={id('red')} cx="35%" cy="25%" r="85%">
+        <stop offset="0" stopColor="#ff7a8f" />
+        <stop offset="0.55" stopColor="#d81f45" />
+        <stop offset="1" stopColor="#8e0f2c" />
+      </radialGradient>
+      {/* Ghosts glow a little, on any background. */}
+      <radialGradient id={id('halo')}>
+        <stop offset="0.55" stopColor={light} stopOpacity="0.5" />
+        <stop offset="1" stopColor={light} stopOpacity="0" />
       </radialGradient>
       <radialGradient id={id('bone')} cx="40%" cy="28%" r="80%">
         <stop offset="0" stopColor="#ffffff" />
@@ -169,22 +188,22 @@ function Part({ d, fill, line, width = 2.4 }: { d: string; fill: string; line: b
   return <path d={d} fill={line ? '#fff' : fill} stroke={line ? INK : 'none'} strokeWidth={line ? width : 0} strokeLinejoin="round" />;
 }
 
-function Eye({ ids, cx, cy, ry = 8.2, line }: { ids: Ids; cx: number; cy: number; ry?: number; line: boolean }) {
+function Eye({ ids, cx, cy, ry = 10.2, line }: { ids: Ids; cx: number; cy: number; ry?: number; line: boolean }) {
   return (
     <g>
-      <ellipse cx={cx} cy={cy} rx={6.4} ry={ry} fill={line ? INK : ids.url('eye')} />
-      <circle cx={cx + 1.9} cy={cy - ry * 0.44} r={2.4} fill="#fff" />
-      {!line && <circle cx={cx - 2.2} cy={cy + ry * 0.46} r={1.1} fill="#fff" opacity="0.55" />}
+      <ellipse cx={cx} cy={cy} rx={7.8} ry={ry} fill={line ? INK : ids.url('eye')} />
+      <circle cx={cx + 2.3} cy={cy - ry * 0.42} r={3.2} fill="#fff" />
+      <circle cx={cx - 2.7} cy={cy + ry * 0.42} r={1.4} fill="#fff" opacity={line ? 1 : 0.7} />
     </g>
   );
 }
 
 const arc = (d: string, width = 2.5) => <path d={d} fill="none" stroke={INK} strokeWidth={width} strokeLinecap="round" strokeLinejoin="round" />;
 
-function Face({ ids, mood, line, mouthY }: { ids: Ids; mood: Mood; line: boolean; mouthY: number }) {
-  const L = 45;
-  const R = 79;
-  const Y = 63;
+function Face({ ids, mood, line, mouthY, costume }: { ids: Ids; mood: Mood; line: boolean; mouthY: number; costume: Costume }) {
+  const L = 43;
+  const R = 81;
+  const Y = 65;
   const m = mouthY;
   let eyes: ReactNode;
   switch (mood) {
@@ -215,8 +234,8 @@ function Face({ ids, mood, line, mouthY }: { ids: Ids; mood: Mood; line: boolean
     case 'wow':
       eyes = (
         <>
-          <Eye ids={ids} cx={L} cy={Y - 1} ry={9.6} line={line} />
-          <Eye ids={ids} cx={R} cy={Y - 1} ry={9.6} line={line} />
+          <Eye ids={ids} cx={L} cy={Y - 1} ry={11.8} line={line} />
+          <Eye ids={ids} cx={R} cy={Y - 1} ry={11.8} line={line} />
         </>
       );
       break;
@@ -255,13 +274,24 @@ function Face({ ids, mood, line, mouthY }: { ids: Ids; mood: Mood; line: boolean
   }
 
   const brows = mood === 'worried' || mood === 'sad';
+  // Vampires and bats show two little fangs; a jack-o'-lantern has a carved, glowing nose.
+  const fangs = costume === 'vampire' || costume === 'bat';
   return (
     <>
       {!line && (
         <>
-          <ellipse cx={L - 9} cy={Y + 11} rx="7.5" ry="4.6" fill={ids.url('blush')} />
-          <ellipse cx={R + 9} cy={Y + 11} rx="7.5" ry="4.6" fill={ids.url('blush')} />
+          <ellipse cx={L - 10} cy={Y + 12} rx="8" ry="4.8" fill={ids.url('blush')} />
+          <ellipse cx={R + 10} cy={Y + 12} rx="8" ry="4.8" fill={ids.url('blush')} />
         </>
+      )}
+      {costume === 'pumpkin' && (
+        <path d="M62 64.5 L58.8 69.4 L65.2 69.4 Z" fill={line ? '#fff' : '#ffd25e'} stroke={line ? INK : '#b8480f'} strokeWidth={line ? 1.8 : 1} strokeLinejoin="round" />
+      )}
+      {fangs && (
+        <g fill="#fff" stroke={line ? INK : '#c9bde0'} strokeWidth={line ? 1.2 : 0.6} strokeLinejoin="round">
+          <path d={`M57.6 ${m + 1.2} L59.2 ${m + 5.6} L60.8 ${m + 1.8} Z`} />
+          <path d={`M66.4 ${m + 1.2} L64.8 ${m + 5.6} L63.2 ${m + 1.8} Z`} />
+        </g>
       )}
       <g className="ghost-eyes">{eyes}</g>
       {brows && (
@@ -286,13 +316,36 @@ function Face({ ids, mood, line, mouthY }: { ids: Ids; mood: Mood; line: boolean
 
 /** Costume pieces worn behind the body (wings) and in front of it (everything else). */
 function Behind({ costume, ids, line }: { costume: Costume; ids: Ids; line: boolean }) {
-  if (costume !== 'bat') return null;
-  return (
-    <>
-      <Part line={line} fill={ids.url('wing')} d="M20 60 C10 46 -2 46 -6 56 C-1 58 0 64 -3 71 C4 69 8 73 8 80 C12 75 17 75 19 80 C18 72 18 66 20 60 Z" />
-      <Part line={line} fill={ids.url('wing')} d="M104 60 C114 46 126 46 130 56 C125 58 124 64 127 71 C120 69 116 73 116 80 C112 75 107 75 105 80 C106 72 106 66 104 60 Z" />
-    </>
-  );
+  if (costume === 'bat') {
+    // Wings with a scalloped trailing edge, and the bones that hold them.
+    const wing = 'M18 58 C8 42 -4 40 -5 50 C-1 53 -2 60 -5 66 C1 64 5 69 4 76 C8 71 13 72 15 78 C16 70 16 64 18 58 Z';
+    return (
+      <>
+        {[false, true].map((right) => (
+          <g key={String(right)} transform={right ? 'matrix(-1 0 0 1 124 0)' : undefined}>
+            <Part line={line} fill={ids.url('wing')} d={wing} />
+            <path d="M17 59 L-2 52 M16 62 L1 67 M16 65 L9 74" fill="none" stroke={line ? INK : '#2c1650'} strokeOpacity={line ? 0.7 : 0.45} strokeWidth="1.4" strokeLinecap="round" />
+          </g>
+        ))}
+      </>
+    );
+  }
+  if (costume === 'vampire') {
+    // A tall cape collar, dark outside and red within.
+    const collar = 'M34 52 C22 47 8 40 -3 30 C-2 46 2 62 12 74 C20 66 27 59 34 52 Z';
+    const lining = 'M31 53 C22 49 12 44 3 37 C4 49 7 59 14 67 C20 62 26 57 31 53 Z';
+    return (
+      <>
+        {[false, true].map((right) => (
+          <g key={String(right)} transform={right ? 'matrix(-1 0 0 1 124 0)' : undefined}>
+            <Part line={line} fill={ids.url('cape')} d={collar} />
+            {!line && <path d={lining} fill={ids.url('red')} />}
+          </g>
+        ))}
+      </>
+    );
+  }
+  return null;
 }
 
 function Front({ costume, ids, line }: { costume: Costume; ids: Ids; line: boolean }) {
@@ -347,6 +400,7 @@ function Front({ costume, ids, line }: { costume: Costume; ids: Ids; line: boole
           </g>
           <path d="M60 19 C58 10 61 3 69 0" fill="none" stroke={line ? INK : ids.url('stem')} strokeWidth={line ? 2.4 : 7} strokeLinecap="round" />
           <Part line={line} fill={ids.url('leaf')} d="M68 5 C73 -5 87 -6 92 -1 C87 8 75 11 68 5 Z" />
+          <path d="M58 8 C50 6 46 0 50 -4 C53 -7 57 -4 55 -1" fill="none" stroke={line ? INK : '#4f9a3c'} strokeWidth={line ? 1.6 : 2} strokeLinecap="round" />
           {!line && <path d="M70 4 C76 1 83 0 89 -1" fill="none" stroke="#2f7a2e" strokeOpacity="0.5" strokeWidth="1.2" strokeLinecap="round" />}
         </>
       );
@@ -361,6 +415,8 @@ function Front({ costume, ids, line }: { costume: Costume; ids: Ids; line: boole
             d="M38 17 C44 1 51 -17 69 -26 C76 -30 87 -29 93 -22 C85 -22 79 -18 79 -10 C79 0 82 8 86 17 C72 21 52 21 38 17 Z"
           />
           <path d="M40 10 C54 14 71 14 83 10 L85.5 16 C71 20 53 20 38.5 16 Z" fill={line ? INK : '#ffb547'} />
+          <rect x="57" y="10.5" width="10" height="8" rx="1.6" fill={line ? '#fff' : '#ffe08a'} stroke={line ? INK : '#c98a1c'} strokeWidth={line ? 1.6 : 1.2} />
+          <rect x="60" y="13" width="4" height="3" rx="0.6" fill={line ? INK : '#7a3fe0'} />
           {!line && <path d="M49 2 C53 -10 60 -18 68 -22" fill="none" stroke="#fff" strokeOpacity="0.28" strokeWidth="3" strokeLinecap="round" />}
         </g>
       );
@@ -371,26 +427,31 @@ function Front({ costume, ids, line }: { costume: Costume; ids: Ids; line: boole
           <Part line={line} fill={ids.url('body')} d="M97 33 C102 22 102 11 97 2 C88 8 81 16 76 23 C84 25 92 28 97 33 Z" />
           {!line && (
             <>
-              <path d="M30 25 C28 18 28 13 30 8 C35 12 39 17 41 21 C36 22 33 23 30 25 Z" fill="#9b78e6" opacity="0.7" />
-              <path d="M94 25 C96 18 96 13 94 8 C89 12 85 17 83 21 C88 22 91 23 94 25 Z" fill="#9b78e6" opacity="0.7" />
+              <path d="M30 25 C28 18 28 13 30 8 C35 12 39 17 41 21 C36 22 33 23 30 25 Z" fill="#ffb3cf" opacity="0.85" />
+              <path d="M94 25 C96 18 96 13 94 8 C89 12 85 17 83 21 C88 22 91 23 94 25 Z" fill="#ffb3cf" opacity="0.85" />
             </>
           )}
         </>
       );
-    case 'bow':
+    case 'vampire':
       return (
-        <g transform="translate(84 17) rotate(14)">
-          <Part line={line} fill={ids.url('pink')} d="M0 0 C-5 -12 -22 -15 -25 -4 C-27 7 -12 10 0 0 Z" />
-          <Part line={line} fill={ids.url('pink')} d="M0 0 C5 -12 22 -15 25 -4 C27 7 12 10 0 0 Z" />
-          <ellipse rx="5.6" ry="5.2" fill={line ? '#fff' : ids.url('pink')} stroke={line ? INK : '#c22a63'} strokeWidth={line ? 2.2 : 0.8} />
-          {!line && <path d="M-19 -6 C-15 -9 -10 -8 -6 -4 M19 -6 C15 -9 10 -8 6 -4" fill="none" stroke="#fff" strokeOpacity="0.4" strokeWidth="1.6" strokeLinecap="round" />}
-        </g>
+        <>
+          {/* Slicked hair with a widow's peak. */}
+          <Part
+            line={line}
+            fill={ids.url('dark')}
+            d="M13.6 54 C12 30 32 10 62 10 C92 10 112 30 110.4 54 C103 45 93 39 83 37 C75 39 68 42 62 49 C56 42 49 39 41 37 C31 39 21 45 13.6 54 Z"
+          />
+          {!line && <path d="M28 26 C38 17 50 14 60 14" fill="none" stroke="#fff" strokeOpacity="0.22" strokeWidth="3" strokeLinecap="round" />}
+          {/* A tiny red gem at the throat. */}
+          <circle cx="62" cy="88" r="4" fill={line ? '#fff' : ids.url('red')} stroke={line ? INK : '#7a0f2a'} strokeWidth={line ? 1.6 : 0.8} />
+        </>
       );
     case 'mummy':
       return (
         <>
           <g clipPath={ids.url('clip')} strokeLinecap="round" fill="none">
-            {['M4 38 L120 26', 'M4 86 L120 80', 'M4 108 L120 116', 'M10 126 L60 96'].map((d) => (
+            {['M4 38 L120 26', 'M4 48 L120 54', 'M4 86 L120 80', 'M4 108 L120 116', 'M10 126 L60 96'].map((d) => (
               <g key={d}>
                 <path d={d} stroke={line ? INK : ids.url('band')} strokeWidth={line ? 1.6 : 8} strokeOpacity={line ? 0.6 : 1} />
                 {!line && <path d={d} stroke="#b9a37c" strokeOpacity="0.35" strokeWidth="1" transform="translate(0 3.6)" />}
@@ -398,6 +459,7 @@ function Front({ costume, ids, line }: { costume: Costume; ids: Ids; line: boole
             ))}
           </g>
           <Part line={line} fill={ids.url('band')} d="M106 34 C114 31 121 36 124 43 L118 46 C115 41 111 39 106 40 Z" width={2} />
+          <Part line={line} fill={ids.url('band')} d="M14 84 C6 86 0 93 -2 101 L4 102 C6 96 10 92 15 91 Z" width={2} />
         </>
       );
     default:
@@ -447,15 +509,23 @@ export function Ghost({
       {shadow && <ellipse className="ghost-shadow" cx="62" cy="136" rx="40" ry="6" fill={line ? 'none' : ids.url('floor')} />}
       <g className="ghost-bob">
         <g transform={`rotate(${tilt} 62 70)`}>
-          <g className="ghost-body">
+          <g className="ghost-body" mask={line ? undefined : ids.url('fade')}>
+            {!line && costume !== 'skeleton' && <ellipse className="ghost-halo" cx="62" cy="72" rx="66" ry="70" fill={ids.url('halo')} />}
             <Behind costume={costume} ids={ids} line={line} />
+            {/* The classic curl on top of a sheet ghost's head. */}
+            {costume === 'sheet' && (
+              <path d="M56 15 C51 3 59 -6 68 -3 C76 0 75 11 67 11 C63 11 62 7 65 5" fill="none" stroke={line ? INK : ids.url('arm')} strokeWidth={line ? 2.4 : 7} strokeLinecap="round" strokeLinejoin="round" />
+            )}
             {/* Arms first in line art, so the body's outline crosses them. */}
             {line && arms && ARMS.map(([x, y, r]) => <ellipse key={x} cx={x} cy={y} rx="9" ry="7.2" transform={`rotate(${r} ${x} ${y})`} fill="#fff" stroke={INK} strokeWidth="2.6" />)}
             <path d={BODY} fill={line ? '#fff' : ids.url('body')} stroke={line ? INK : 'none'} strokeWidth={line ? 2.8 : 0} strokeLinejoin="round" />
             {!line && (
               <g clipPath={ids.url('clip')}>
-                <rect x="0" y="16" width="124" height="116" fill={ids.url('ao')} />
+                <rect x="0" y="16" width="124" height="118" fill={ids.url('ao')} />
                 <ellipse cx="44" cy="34" rx="26" ry="15" transform="rotate(-24 44 34)" fill={ids.url('sheen')} />
+                {/* The glossy spot of a vinyl toy. */}
+                <ellipse cx="36" cy="30" rx="9" ry="5" transform="rotate(-32 36 30)" fill="#fff" opacity="0.75" />
+                <circle cx="27" cy="40" r="2" fill="#fff" opacity="0.6" />
                 <circle cx="118" cy="92" r="50" fill={ids.url('rim')} />
               </g>
             )}
@@ -468,7 +538,7 @@ export function Ghost({
                 </g>
               ))}
             <Front costume={costume} ids={ids} line={line} />
-            <Face ids={ids} mood={mood} line={line} mouthY={costume === 'skeleton' ? 83 : 71} />
+            <Face ids={ids} mood={mood} line={line} mouthY={costume === 'skeleton' ? 84 : 75} costume={costume} />
             {emblem && <Sticker ids={ids} emblem={emblem} at={EMBLEM_AT[costume]} line={line} />}
           </g>
         </g>

@@ -119,6 +119,95 @@
   --b-edge: rgba(255, 255, 255, 0.55);
 }
 
+/* The hero's own Halloween night. */
+.hero-night {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-moon {
+  position: absolute;
+  top: 26px;
+  right: 6%;
+}
+
+.hero-bat {
+  position: absolute;
+  animation: hero-bat-bob 3.2s ease-in-out infinite alternate;
+}
+
+.hero-bat.b1 {
+  top: 70px;
+  left: 9%;
+}
+
+.hero-bat.b2 {
+  top: 130px;
+  left: 17%;
+  animation-delay: -1.2s;
+}
+
+.hero-bat.b3 {
+  top: 150px;
+  right: 22%;
+  animation-delay: -2s;
+}
+
+@keyframes hero-bat-bob {
+  to {
+    transform: translate(10px, -12px) rotate(-6deg);
+  }
+}
+
+.hero-hill {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 130px;
+}
+
+.hero-pumpkin {
+  align-self: flex-end;
+  margin-bottom: 4px;
+}
+
+.hero-pumpkin.left {
+  margin-right: -6px;
+}
+
+.hero-pumpkin.right {
+  margin-left: -2px;
+}
+
+@media (max-width: 640px) {
+  .hero-moon {
+    width: 96px;
+    height: 96px;
+    top: 14px;
+    right: 2%;
+  }
+
+  .hero-bat.b2,
+  .hero-bat.b3 {
+    display: none;
+  }
+
+  .hero-pumpkin.left {
+    width: 54px;
+    height: 51px;
+  }
+
+  .hero-pumpkin.right {
+    width: 40px;
+    height: 38px;
+  }
+}
+
 .hero-altar {
   position: relative;
   z-index: 3;
@@ -393,7 +482,7 @@
 
 .trail-steps li {
   position: absolute;
-  top: 38px;
+  top: 31px;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
@@ -401,24 +490,31 @@
 }
 
 .trail-dot {
-  width: 20px;
-  height: 20px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 32px;
+  border: none;
   border-radius: 50%;
-  border: 3px solid var(--line-strong);
-  background: var(--surface);
+  background: none;
   cursor: pointer;
   padding: 0;
-  transition: transform 300ms var(--spring), background-color 300ms, border-color 300ms;
+  transition: transform 300ms var(--spring);
 }
 
-.trail-dot.done {
-  background: var(--purple);
-  border-color: var(--purple);
+/* A pumpkin not reached yet is pale and waiting. */
+.trail-dot:not(.done) .pumpkin {
+  filter: saturate(0.25) brightness(1.15);
+  opacity: 0.75;
 }
 
 .trail-dot.current {
-  transform: scale(1.25);
-  box-shadow: 0 0 0 5px rgba(142, 71, 255, 0.18);
+  transform: scale(1.3);
+}
+
+.trail-dot:focus-visible {
+  outline: 3px solid var(--purple);
+  outline-offset: 2px;
 }
 
 .trail-dot:disabled {
@@ -1495,6 +1591,70 @@ textarea.mono-input {
   color: var(--ink);
 }
 
+/* Two jack-o'-lanterns keep the rug's ends. */
+.altar-pumpkin {
+  position: absolute;
+  top: 74%;
+  z-index: 700;
+}
+
+.altar-pumpkin.left {
+  left: 1%;
+}
+
+.altar-pumpkin.right {
+  right: 2%;
+  top: 70%;
+}
+
+@media (max-width: 640px) {
+  .altar-pumpkin {
+    display: none;
+  }
+}
+
+/* The watch ghost's lantern, held at its side. */
+.presence {
+  position: relative;
+}
+
+.watch-lantern {
+  position: absolute;
+  right: -26px;
+  bottom: 18px;
+  transform-origin: 50% 0;
+  animation: lantern-sway 3.4s ease-in-out infinite alternate;
+}
+
+@keyframes lantern-sway {
+  from {
+    transform: rotate(5deg);
+  }
+  to {
+    transform: rotate(-5deg);
+  }
+}
+
+.lantern-flame {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: flicker 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes flicker {
+  to {
+    transform: scale(0.86, 1.08);
+  }
+}
+
+/* A cobweb in the corner of each printed card. */
+.card-web {
+  position: absolute;
+  top: 6pt;
+  right: 6pt;
+  opacity: 0.28;
+}
+
 .altar-jar {
   position: absolute;
   left: 50%;
@@ -2566,40 +2726,24 @@ textarea.mono-input {
 
 .check-box {
   position: absolute;
-  left: -46px;
-  top: 0;
-  width: 30px;
-  height: 30px;
-  border-radius: 10px;
-  border: 3px solid var(--line-strong);
-  background: var(--surface);
-  transition: background-color 250ms, border-color 250ms, transform 300ms var(--spring);
+  left: -48px;
+  top: -4px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 34px;
+  border-radius: 12px;
+  transition: transform 300ms var(--spring);
 }
 
-.check-box svg {
-  width: 100%;
-  height: 100%;
-}
-
-.check-box path {
-  fill: none;
-  stroke: #fff;
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 20;
-  stroke-dashoffset: 20;
-  transition: stroke-dashoffset 400ms var(--soft) 80ms;
+/* Not done: a pale pumpkin. Done: a lit jack-o'-lantern. */
+.check-box .pumpkin:not(.lit) {
+  filter: saturate(0.2) brightness(1.18);
+  opacity: 0.8;
 }
 
 .check input:checked + .check-box {
-  background: var(--purple);
-  border-color: var(--purple);
   transform: rotate(-6deg) scale(1.08);
-}
-
-.check input:checked + .check-box path {
-  stroke-dashoffset: 0;
 }
 
 .check input:focus-visible + .check-box {
@@ -2686,6 +2830,7 @@ textarea.mono-input {
   }
 
   .print-card {
+    position: relative;
     page-break-after: always;
     break-after: page;
     width: 7.3in;

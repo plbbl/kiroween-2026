@@ -4,6 +4,7 @@ import { cardToQrText, cardToWords, SHARD_SHARED_WORDS } from '../../core/cards.
 import type { KeyCard } from '../../core/cards.ts';
 import type { HolderCards } from '../../core/jar.ts';
 import { Ghost } from '../art/Ghost.tsx';
+import { Cobweb } from '../art/Spooky.tsx';
 import { homeAddress, safeFilename } from '../grimoire.ts';
 import { numberWord } from '../text.ts';
 import { Qr } from './Qr.tsx';
@@ -155,6 +156,7 @@ function SealFace({ owner, card, buddy }: PrintProps) {
 export function PrintableCard(props: PrintProps) {
   return (
     <article className="print-card">
+      <Cobweb className="card-web" color="#000" size={64} corner="top-right" />
       <ShardFace {...props} />
       <div className="fold-line" aria-hidden="true">
         <span>cut here · the half below is yours alone</span>

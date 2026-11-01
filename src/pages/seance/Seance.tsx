@@ -4,6 +4,7 @@ import { CardError, parseCard, type Shard } from '../../core/cards.ts';
 import { checkShard, JarError, jarIdBytes, openJar, type JarFile, type JarHolder, type OpenedJar } from '../../core/jar.ts';
 import { DEMO_CARDS, DEMO_JAR, isDemo } from '../../demo/demo.ts';
 import { Candle } from '../../ui/art/Candle.tsx';
+import { Pumpkin } from '../../ui/art/Spooky.tsx';
 import { Sparkles } from '../../ui/art/Decor.tsx';
 import { Ghost } from '../../ui/art/Ghost.tsx';
 import { Jar, type JarState } from '../../ui/art/Jar.tsx';
@@ -336,6 +337,8 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
           <ellipse className="rug-ring" cx="500" cy="150" rx="440" ry="122" fill="none" strokeWidth="4" strokeDasharray="1 12" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
         </svg>
         <div className="altar-glow" />
+        <Pumpkin lit size={58} className="altar-pumpkin left" />
+        <Pumpkin lit size={46} className="altar-pumpkin right" />
 
         {angles.map((deg, i) => {
           const a = (deg * Math.PI) / 180;

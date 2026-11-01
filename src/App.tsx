@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Stars } from './ui/art/Decor.tsx';
+import { Scenery } from './ui/art/Spooky.tsx';
 import { Ghost } from './ui/art/Ghost.tsx';
 import { embeddedJar, href, ShellProvider, useHashRoute, type Route } from './ui/shell.tsx';
 import { sound } from './ui/sound.ts';
@@ -59,6 +60,10 @@ export function App() {
   useLayoutEffect(() => {
     document.body.dataset.theme = theme;
   }, [theme]);
+
+  useLayoutEffect(() => {
+    document.body.dataset.route = route;
+  }, [route]);
 
   useEffect(() => {
     const page = embedded && route === 'seance' ? `${embedded.owner}’s jar` : TITLES[route];
@@ -122,8 +127,9 @@ export function App() {
   return (
     <ShellProvider value={shell}>
       <div className="backdrop day" aria-hidden="true" />
-      <div className="backdrop night" aria-hidden="true" />
+      <div className="backdrop night nightfall" aria-hidden="true" />
       {theme === 'night' && <Stars />}
+      <Scenery />
 
       <a
         className="skip-link no-print"

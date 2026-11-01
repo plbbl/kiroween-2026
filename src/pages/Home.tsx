@@ -5,6 +5,7 @@ import { EmblemIcon } from '../ui/art/Emblem.tsx';
 import { Ghost, GhostHand, type Mood } from '../ui/art/Ghost.tsx';
 import { Jar } from '../ui/art/Jar.tsx';
 import { href, useAtmosphere } from '../ui/shell.tsx';
+import { Bat, Moon, Pumpkin } from '../ui/art/Spooky.tsx';
 
 const d = (ms: number) => ({ '--d': `${ms}ms` }) as CSSProperties;
 
@@ -80,10 +81,23 @@ export function Home() {
               Free · No account · Locked in your browser
             </p>
           </div>
+          {/* A Halloween night inside the hero: the moon, bats, a hill with lit pumpkins. */}
+          <div className="hero-night" aria-hidden="true">
+            <Moon size={150} className="hero-moon" />
+            <Bat size={70} color="#3b1680" className="hero-bat b1" />
+            <Bat size={48} color="#4a1fa0" className="hero-bat b2" />
+            <Bat size={40} color="#4a1fa0" className="hero-bat b3" />
+            <svg className="hero-hill" viewBox="0 0 1000 120" preserveAspectRatio="none">
+              <path d="M0 70 C140 40 260 46 380 64 C470 78 540 50 620 44 C760 34 860 70 1000 52 L1000 120 L0 120 Z" fill="#6a2ee0" />
+              <path d="M0 92 C160 70 300 80 430 90 C560 100 680 76 820 78 C900 79 960 88 1000 84 L1000 120 L0 120 Z" fill="#5a22c4" />
+            </svg>
+          </div>
           <div className="hero-altar">
+            <Pumpkin size={78} lit className="hero-pumpkin left pop" style={d(800)} />
             <div className="hero-jar pop" style={d(650)}>
               <Jar initials="ME" size={250} warmth={0.45} />
             </div>
+            <Pumpkin size={56} lit className="hero-pumpkin right pop" style={d(900)} />
           </div>
         </section>
         <HeroPeekers layer="hands" />

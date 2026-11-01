@@ -4,6 +4,7 @@ import { fromBase32, randomBytes, toBase32 } from '../../core/bytes.ts';
 import { JAR_ID_LENGTH, type KeyCard } from '../../core/cards.ts';
 import { emptyContent, jarIdBytes, resealJar, sealJar, validateSealInput, type JarContent, type JarFile, type OwnedJar, type SealResult } from '../../core/jar.ts';
 import { Candle } from '../../ui/art/Candle.tsx';
+import { Pumpkin } from '../../ui/art/Spooky.tsx';
 import { Sparkles } from '../../ui/art/Decor.tsx';
 import { Ghost } from '../../ui/art/Ghost.tsx';
 import { Jar } from '../../ui/art/Jar.tsx';
@@ -28,7 +29,7 @@ const STEPS: { label: string; title: (d: Draft) => string; sub: string; art: Rea
     label: 'Note',
     title: () => 'A note for everyone',
     sub: 'Everyone in your circle will read this first.',
-    art: <Ghost mood="wink" costume="bow" size={86} float />,
+    art: <Ghost mood="wink" costume="vampire" size={86} float />,
   },
   {
     label: 'Things',
@@ -347,6 +348,7 @@ function Wizard({
           <ol className="trail-steps">
             {STEPS.map((s, i) => (
               <li key={s.label} style={{ left: `${(i / (STEPS.length - 1)) * 100}%` }}>
+                {/* Each step is a jack-o'-lantern on the path: lit once you've been there. */}
                 <button
                   type="button"
                   className={`trail-dot${i <= step ? ' done' : ''}${i === step ? ' current' : ''}`}
@@ -354,7 +356,9 @@ function Wizard({
                   onClick={() => goTo(i)}
                   aria-current={i === step ? 'step' : undefined}
                   aria-label={`Step ${i + 1}: ${s.label}`}
-                />
+                >
+                  <Pumpkin size={30} lit={i <= step} face={i <= reached} />
+                </button>
                 <span className="trail-label">{s.label}</span>
               </li>
             ))}

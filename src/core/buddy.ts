@@ -7,7 +7,7 @@
 
 import { sha256 } from '@noble/hashes/sha2.js';
 
-export const COSTUMES = ['sheet', 'franken', 'skeleton', 'pumpkin', 'witch', 'bat', 'bow', 'mummy'] as const;
+export const COSTUMES = ['sheet', 'franken', 'skeleton', 'pumpkin', 'witch', 'bat', 'vampire', 'mummy'] as const;
 export const EMBLEMS = ['star', 'moon', 'heart', 'bone', 'drop', 'flower', 'key', 'bell', 'clover', 'spark', 'leaf', 'candy'] as const;
 
 export type Costume = (typeof COSTUMES)[number];

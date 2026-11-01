@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import type { Costume } from '../core/buddy.ts';
 import { Ghost, type Mood } from '../ui/art/Ghost.tsx';
 import { useAtmosphere } from '../ui/shell.tsx';
+import { Pumpkin } from '../ui/art/Spooky.tsx';
 
 interface Item {
   title: string;
@@ -98,10 +99,9 @@ function Checklist({ items, id }: { items: Item[]; id: string }) {
           <li key={it.title} className={done[i] ? 'done' : ''}>
             <label className="check">
               <input type="checkbox" checked={done[i]} onChange={() => setDone(done.map((d, j) => (j === i ? !d : d)))} aria-describedby={`${id}-${i}`} />
+              {/* Done things light up like jack-o'-lanterns. */}
               <span className="check-box" aria-hidden="true">
-                <svg viewBox="0 0 20 20">
-                  <path d="M4.5 10.5 L8.5 14.5 L15.5 6" />
-                </svg>
+                <Pumpkin size={34} lit={done[i]} face={done[i]} />
               </span>
               <span className="check-title">{it.title}</span>
             </label>
