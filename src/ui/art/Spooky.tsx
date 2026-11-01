@@ -101,7 +101,7 @@ export function Bat({ size = 40, color = '#2a1846', flap = true, className = '',
 }
 
 /** A full moon with soft craters and a halo. */
-export function Moon({ size = 160, className = '', style }: { size?: number; className?: string; style?: CSSProperties }) {
+export function Moon({ size = 160, cloud = false, className = '', style }: { size?: number; cloud?: boolean; className?: string; style?: CSSProperties }) {
   const { id, url } = useIds();
   return (
     <svg className={`moon ${className}`} viewBox="0 0 200 200" width={size} height={size} style={style} aria-hidden="true">
@@ -112,19 +112,27 @@ export function Moon({ size = 160, className = '', style }: { size?: number; cla
           <stop offset="1" stopColor="#ffd98a" stopOpacity="0" />
         </radialGradient>
         <radialGradient id={id('face')} cx="40%" cy="35%" r="70%">
-          <stop offset="0" stopColor="#fffbea" />
-          <stop offset="0.6" stopColor="#ffe7a6" />
-          <stop offset="1" stopColor="#f2c66b" />
+          <stop offset="0" stopColor="#fffdf4" />
+          <stop offset="0.6" stopColor="#fff4d6" />
+          <stop offset="1" stopColor="#efdcab" />
         </radialGradient>
       </defs>
       <circle cx="100" cy="100" r="100" fill={url('halo')} />
       <circle cx="100" cy="100" r="46" fill={url('face')} />
-      <g fill="#e8b85c" opacity="0.45">
+      <g fill="#e2cf9f" opacity="0.5">
         <ellipse cx="84" cy="88" rx="10" ry="8" />
         <ellipse cx="116" cy="110" rx="7" ry="6" />
         <ellipse cx="96" cy="122" rx="5" ry="4" />
         <ellipse cx="118" cy="82" rx="4" ry="3.5" />
       </g>
+      {cloud && (
+        <path
+          className="moon-cloud"
+          d="M40 128 C42 120 52 118 58 122 C62 113 76 112 82 120 C88 116 98 118 100 126 C110 124 118 130 116 136 L42 136 C36 136 34 130 40 128 Z"
+          fill="#d9c8ff"
+          opacity="0.55"
+        />
+      )}
     </svg>
   );
 }
@@ -259,7 +267,6 @@ export function Scenery() {
         <div className="scenery-spider">
           <Spider size={26} />
         </div>
-        <Skyline night={false} className="scenery-hill" />
         <div className="scenery-bats">
           <Bat size={30} color="rgba(106, 46, 224, 0.45)" className="flyer f1" />
           <Bat size={22} color="rgba(106, 46, 224, 0.35)" className="flyer f2" />
@@ -270,11 +277,25 @@ export function Scenery() {
         <Cobweb className="scenery-web left" size={150} color="rgba(205, 184, 255, 0.18)" />
         <Cobweb className="scenery-web right" corner="top-right" size={120} color="rgba(205, 184, 255, 0.14)" />
         <div className="scenery-bats">
-          <Bat size={34} color="#0e0719" className="flyer f1" />
-          <Bat size={24} color="#160c28" className="flyer f2" />
-          <Bat size={28} color="#120a22" className="flyer f3" />
+          <Bat size={64} color="#0b0714" className="flyer f1" />
+          <Bat size={46} color="#0b0714" className="flyer f2" />
+          <Bat size={54} color="#0b0714" className="flyer f3" />
         </div>
-        <Skyline night className="scenery-hill" />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The bottom of every page: the hill with the old house, where the page ends,
+ * so it never sits under the words. Fog and lit windows at night.
+ */
+export function HillScene() {
+  return (
+    <div className="hill-scene no-print" aria-hidden="true">
+      <Skyline night={false} className="hill day-hill" />
+      <div className="hill night-hill nightfall">
+        <Skyline night />
         <div className="scenery-fog" />
       </div>
     </div>

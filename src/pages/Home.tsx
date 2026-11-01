@@ -83,13 +83,22 @@ export function Home() {
           </div>
           {/* A Halloween night inside the hero: the moon, bats, a hill with lit pumpkins. */}
           <div className="hero-night" aria-hidden="true">
-            <Moon size={150} className="hero-moon" />
+            <Moon size={150} cloud className="hero-moon" />
             <Bat size={70} color="#3b1680" className="hero-bat b1" />
             <Bat size={48} color="#4a1fa0" className="hero-bat b2" />
             <Bat size={40} color="#4a1fa0" className="hero-bat b3" />
-            <svg className="hero-hill" viewBox="0 0 1000 120" preserveAspectRatio="none">
-              <path d="M0 70 C140 40 260 46 380 64 C470 78 540 50 620 44 C760 34 860 70 1000 52 L1000 120 L0 120 Z" fill="#6a2ee0" />
-              <path d="M0 92 C160 70 300 80 430 90 C560 100 680 76 820 78 C900 79 960 88 1000 84 L1000 120 L0 120 Z" fill="#5a22c4" />
+            <svg className="hero-hill" viewBox="0 0 1000 120" preserveAspectRatio="xMidYMax slice">
+              <path d="M0 70 C140 40 260 46 380 64 C470 78 540 50 620 44 C760 34 860 70 1000 52 L1000 120 L0 120 Z" fill="#3a1f78" />
+              {/* A small old house on the far hill, its windows lit. */}
+              <g transform="translate(0 16)">
+              <path d="M792 52 L792 26 L784 26 L804 8 L824 26 L816 26 L816 48 Z M806 30 L806 4 L802 4 L810 -12 L818 4 L815 4 L815 40 Z" fill="#3a1f78" />
+              <g fill="#ffc65a">
+                <rect x="796" y="32" width="5" height="7" rx="1" />
+                <rect x="806" y="32" width="5" height="7" rx="1" />
+                <rect x="808" y="8" width="3.5" height="5" rx="0.8" />
+              </g>
+              </g>
+              <path d="M0 92 C160 70 300 80 430 90 C560 100 680 76 820 78 C900 79 960 88 1000 84 L1000 120 L0 120 Z" fill="#2a1458" />
             </svg>
           </div>
           <div className="hero-altar">
@@ -180,7 +189,7 @@ export function Home() {
         </div>
         <p className="closing-line">One day your friends will gather.</p>
         <p className="closing-sub">Leave them something to open together.</p>
-        <a className="btn primary" href={href('seal')}>
+        <a className="btn primary drip" href={href('seal')}>
           Seal a jar
         </a>
       </section>

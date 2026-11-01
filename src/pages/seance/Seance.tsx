@@ -337,8 +337,8 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
           <ellipse className="rug-ring" cx="500" cy="150" rx="440" ry="122" fill="none" strokeWidth="4" strokeDasharray="1 12" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
         </svg>
         <div className="altar-glow" />
-        <Pumpkin lit size={58} className="altar-pumpkin left" />
-        <Pumpkin lit size={46} className="altar-pumpkin right" />
+        <Pumpkin lit size={50} className="altar-pumpkin left" />
+        <Pumpkin lit size={50} className="altar-pumpkin right" />
 
         {angles.map((deg, i) => {
           const a = (deg * Math.PI) / 180;
@@ -372,9 +372,9 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
           {/* When the cork pops, a few bats that were sleeping in the jar fly out. */}
           {phase === 'open' && (
             <span className="jar-bats" aria-hidden="true">
-              <Bat size={46} color="#1d0f38" className="jar-bat b1" />
-              <Bat size={34} color="#24133f" className="jar-bat b2" />
-              <Bat size={28} color="#1d0f38" className="jar-bat b3" />
+              <Bat size={64} color="#0b0714" className="jar-bat b1" />
+              <Bat size={50} color="#0b0714" className="jar-bat b2" />
+              <Bat size={42} color="#0b0714" className="jar-bat b3" />
             </span>
           )}
         </div>
@@ -397,7 +397,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
               </ul>
             )}
 
-            <div className="card offer-card">
+            <div className="card offer-card webbed">
               <h2 className="center">{offered.length === 0 ? 'Who’s here first?' : `${capitalised(numberWord(remaining))} more to go`}</h2>
               {demo && <DemoTable jar={jar} offered={offered} buddies={buddies} onOffer={offer} />}
               <CardInput kind="shard" onCard={(t) => offer(t)} />

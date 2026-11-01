@@ -158,7 +158,7 @@ export function Watch({ params }: { params: URLSearchParams }) {
       )}
 
       <section className="wrap watch-grid">
-        <div className="card rhythm">
+        <div className="card rhythm webbed">
           <h2 className="card-title">Your rhythm</h2>
           <Segmented
             label="Ask me every"

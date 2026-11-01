@@ -16,9 +16,13 @@
   display: flow-root;
   padding: 84px 24px 0;
   border-radius: 44px;
-  background: radial-gradient(ellipse at 50% 0%, #a06bff, var(--purple) 55%, #7b36ef);
+  /* A Halloween sky: deep at the top, glowing purple at the horizon. */
+  background: linear-gradient(180deg, #1b1036 0%, #3a1f78 48%, #7a3bea 100%);
+  border: 2px solid rgba(205, 184, 255, 0.24);
   color: #fff;
-  box-shadow: 0 30px 60px -30px rgba(90, 34, 196, 0.7);
+  box-shadow:
+    0 30px 60px -30px rgba(90, 34, 196, 0.8),
+    0 0 80px -20px rgba(142, 71, 255, 0.45);
 }
 
 /* Friends behind the hero, peeking over its edges; their hands in front. */
@@ -531,10 +535,10 @@
   transition: transform 300ms var(--spring);
 }
 
-/* A pumpkin not reached yet is pale and waiting. */
+/* A pumpkin not reached yet is carved but dark, waiting for its candle. */
 .trail-dot:not(.done) .pumpkin {
-  filter: saturate(0.25) brightness(1.15);
-  opacity: 0.75;
+  filter: saturate(0.6);
+  opacity: 0.8;
 }
 
 .trail-dot.current {
@@ -1620,20 +1624,23 @@ textarea.mono-input {
   color: var(--ink);
 }
 
-/* Two jack-o'-lanterns keep the rug's ends. */
+/* Two jack-o'-lanterns sit at the back of the rug, behind the jar, and
+   glow brighter as the circle gathers. */
 .altar-pumpkin {
   position: absolute;
-  top: 74%;
-  z-index: 700;
+  top: 47%;
+  z-index: 300;
+  transform: translate(-50%, -100%);
+  filter: brightness(calc(0.55 + var(--lit, 0) * 0.55)) drop-shadow(0 5px 3px rgba(0, 0, 0, 0.45));
+  transition: filter 900ms var(--soft);
 }
 
 .altar-pumpkin.left {
-  left: 1%;
+  left: 33%;
 }
 
 .altar-pumpkin.right {
-  right: 2%;
-  top: 70%;
+  left: 67%;
 }
 
 @media (max-width: 640px) {
@@ -2765,10 +2772,10 @@ textarea.mono-input {
   transition: transform 300ms var(--spring);
 }
 
-/* Not done: a pale pumpkin. Done: a lit jack-o'-lantern. */
+/* Not done: a carved pumpkin, dark. Done: a lit jack-o'-lantern. */
 .check-box .pumpkin:not(.lit) {
-  filter: saturate(0.2) brightness(1.18);
-  opacity: 0.8;
+  filter: saturate(0.6);
+  opacity: 0.85;
 }
 
 .check input:checked + .check-box {

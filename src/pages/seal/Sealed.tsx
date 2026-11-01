@@ -132,7 +132,7 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
               included, so keep it apart from the cards.
             </p>
             <div className="print-buttons">
-              <button type="button" className={`btn${printed ? '' : ' primary'}`} onClick={() => print('cards')}>
+              <button type="button" className={`btn${printed ? '' : ' primary drip'}`} onClick={() => print('cards')}>
                 {printed ? 'Print the cards again' : 'Print the cards'}
               </button>
               <button type="button" className={`btn${printed && !keyPrinted ? ' primary' : ''}`} onClick={() => print('key')}>

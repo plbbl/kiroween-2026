@@ -101,7 +101,7 @@ function Checklist({ items, id }: { items: Item[]; id: string }) {
               <input type="checkbox" checked={done[i]} onChange={() => setDone(done.map((d, j) => (j === i ? !d : d)))} aria-describedby={`${id}-${i}`} />
               {/* Done things light up like jack-o'-lanterns. */}
               <span className="check-box" aria-hidden="true">
-                <Pumpkin size={34} lit={done[i]} face={done[i]} />
+                <Pumpkin size={34} lit={done[i]} />
               </span>
               <span className="check-title">{it.title}</span>
             </label>
@@ -120,7 +120,7 @@ function Checklist({ items, id }: { items: Item[]; id: string }) {
 
 function GuideCard({ id, tag, title, sub, costume, mood, items }: { id: string; tag: string; title: string; sub: string; costume: Costume; mood: Mood; items: Item[] }) {
   return (
-    <section className="card guide" id={id} aria-labelledby={`${id}-title`}>
+    <section className={`card guide${id === 'before' ? ' webbed' : ''}`} id={id} aria-labelledby={`${id}-title`}>
       <div className="guide-ghost">
         <Ghost costume={costume} mood={mood} size={84} float />
       </div>

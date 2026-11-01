@@ -35,10 +35,16 @@ const INK = '#261d3a';
 const BODY =
   'M62 12 C93 12 111 34 111 63 C111 88 113 103 119 114 C122 121 118 127 110 123 C104 133 92 133 87 123 C81 134 68 134 62 123 C56 134 43 134 37 123 C31 133 17 132 13 120 C10 107 13 90 13 63 C13 34 31 12 62 12 Z';
 
+// Witches and bats wear a tattered hem, so the cast doesn't read as one ghost in eight hats.
+const TATTERED =
+  'M62 12 C93 12 111 34 111 63 C111 88 113 104 120 121 L105 113 L97 129 L85 115 L74 131 L62 116 L50 131 L39 115 L27 129 L19 113 L4 121 C11 104 13 88 13 63 C13 34 31 12 62 12 Z';
+
+const bodyOf = (costume: Costume) => (costume === 'witch' || costume === 'bat' ? TATTERED : BODY);
+
 /** Light, middle, shade and edge tones of each body. */
 const TONES: Record<Costume, [string, string, string, string]> = {
   sheet: ['#ffffff', '#fcf8f9', '#efe7f4', '#d3c6e8'],
-  witch: ['#ffffff', '#fcf8f9', '#efe7f4', '#d3c6e8'],
+  witch: ['#fbf7ff', '#efe4ff', '#dccaf7', '#b9a0e6'],
   franken: ['#f0fcf3', '#c6f0d3', '#a0dbb5', '#74bb8f'],
   skeleton: ['#504566', '#322a44', '#231c31', '#130e1c'],
   pumpkin: ['#ffd6a3', '#ffa352', '#f6852f', '#d6631b'],
@@ -73,7 +79,7 @@ function useIds() {
 
 type Ids = ReturnType<typeof useIds>;
 
-function Defs({ ids, tones, rim }: { ids: Ids; tones: [string, string, string, string]; rim: number }) {
+function Defs({ ids, tones, rim, body }: { ids: Ids; tones: [string, string, string, string]; rim: number; body: string }) {
   const [light, mid, shade, edge] = tones;
   const { id } = ids;
   return (
@@ -116,12 +122,12 @@ function Defs({ ids, tones, rim }: { ids: Ids; tones: [string, string, string, s
         <stop offset="1" stopColor="#2a1650" stopOpacity="0" />
       </radialGradient>
       <clipPath id={id('clip')}>
-        <path d={BODY} />
+        <path d={body} />
       </clipPath>
       {/* A ghost thins out towards the hem. */}
       <linearGradient id={id('fadeGrad')} x1="0" y1="0" x2="0" y2="1">
         <stop offset="0.74" stopColor="#fff" />
-        <stop offset="1" stopColor="#fff" stopOpacity="0.55" />
+        <stop offset="1" stopColor="#fff" stopOpacity="0.78" />
       </linearGradient>
       <mask id={id('fade')} maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" x="-10" y="-40" width="150" height="185">
         <rect x="-10" y="-40" width="150" height="176" fill={`url(#${id('fadeGrad')})`} />
@@ -138,9 +144,9 @@ function Defs({ ids, tones, rim }: { ids: Ids; tones: [string, string, string, s
         <stop offset="1" stopColor="#1b1822" />
       </radialGradient>
       <radialGradient id={id('wing')} cx="40%" cy="30%" r="85%">
-        <stop offset="0" stopColor="#8a64c8" />
-        <stop offset="0.6" stopColor="#5b3a94" />
-        <stop offset="1" stopColor="#3e2468" />
+        <stop offset="0" stopColor="#8f72e0" />
+        <stop offset="0.6" stopColor="#6a4bc4" />
+        <stop offset="1" stopColor="#4a2f96" />
       </radialGradient>
       <radialGradient id={id('cape')} cx="40%" cy="30%" r="90%">
         <stop offset="0" stopColor="#5b3a94" />
@@ -332,12 +338,14 @@ function Behind({ costume, ids, line }: { costume: Costume; ids: Ids; line: bool
   }
   if (costume === 'vampire') {
     // A tall cape collar, dark outside and red within.
+    const cape = 'M30 40 C14 52 6 82 2 126 C9 121 15 125 21 131 C22 100 22 70 30 40 Z';
     const collar = 'M34 52 C22 47 8 40 -3 30 C-2 46 2 62 12 74 C20 66 27 59 34 52 Z';
     const lining = 'M31 53 C22 49 12 44 3 37 C4 49 7 59 14 67 C20 62 26 57 31 53 Z';
     return (
       <>
         {[false, true].map((right) => (
           <g key={String(right)} transform={right ? 'matrix(-1 0 0 1 124 0)' : undefined}>
+            <Part line={line} fill={ids.url('cape')} d={cape} />
             <Part line={line} fill={ids.url('cape')} d={collar} />
             {!line && <path d={lining} fill={ids.url('red')} />}
           </g>
@@ -358,7 +366,7 @@ function Front({ costume, ids, line }: { costume: Costume; ids: Ids; line: boole
             fill={ids.url('dark')}
             d="M15 46 L15 24 C15 12 23 6 35 6 L89 6 C101 6 109 12 109 24 L109 46 L101 39 L94 46 L86 39 L78 46 L70 39 L62 46 L54 39 L46 46 L38 39 L30 46 L22 39 Z"
           />
-          {!line && <path d="M24 12 C40 9 70 8 96 11" fill="none" stroke="#fff" strokeOpacity="0.18" strokeWidth="3" strokeLinecap="round" />}
+          {!line && <path d="M24 13 C40 10 70 9 96 12" fill="none" stroke="#6d6290" strokeOpacity="0.7" strokeWidth="4" strokeLinecap="round" />}
           <g stroke={line ? INK : '#3f7a57'} strokeWidth="2" strokeLinecap="round">
             <path d="M74 52 L94 49" />
             <path d="M78 48 L79 55 M84 47 L85 54 M90 46 L91 53" />
@@ -406,7 +414,7 @@ function Front({ costume, ids, line }: { costume: Costume; ids: Ids; line: boole
       );
     case 'witch':
       return (
-        <g transform="rotate(-9 62 18)">
+        <g transform="translate(0 2) rotate(-12 62 18) translate(62 19) scale(1.15) translate(-62 -19)">
           <ellipse cx="62" cy="19" rx="50" ry="10" fill={line ? '#fff' : ids.url('purple')} stroke={line ? INK : 'none'} strokeWidth={line ? 2.4 : 0} />
           {!line && <ellipse cx="62" cy="21" rx="46" ry="6" fill="#4b1ba8" opacity="0.35" />}
           <Part
@@ -453,6 +461,7 @@ function Front({ costume, ids, line }: { costume: Costume; ids: Ids; line: boole
           <g clipPath={ids.url('clip')} strokeLinecap="round" fill="none">
             {['M4 38 L120 26', 'M4 48 L120 54', 'M4 86 L120 80', 'M4 108 L120 116', 'M10 126 L60 96'].map((d) => (
               <g key={d}>
+                {!line && <path d={d} stroke="#a8916c" strokeWidth="10.4" strokeOpacity="0.55" />}
                 <path d={d} stroke={line ? INK : ids.url('band')} strokeWidth={line ? 1.6 : 8} strokeOpacity={line ? 0.6 : 1} />
                 {!line && <path d={d} stroke="#b9a37c" strokeOpacity="0.35" strokeWidth="1" transform="translate(0 3.6)" />}
               </g>
@@ -505,7 +514,7 @@ export function Ghost({
       role="img"
       aria-label={title ?? `A little ${costume === 'sheet' ? '' : costume + ' '}ghost`}
     >
-      <Defs ids={ids} tones={TONES[costume]} rim={rim} />
+      <Defs ids={ids} tones={TONES[costume]} rim={rim} body={bodyOf(costume)} />
       {shadow && <ellipse className="ghost-shadow" cx="62" cy="136" rx="40" ry="6" fill={line ? 'none' : ids.url('floor')} />}
       <g className="ghost-bob">
         <g transform={`rotate(${tilt} 62 70)`}>
@@ -518,7 +527,15 @@ export function Ghost({
             )}
             {/* Arms first in line art, so the body's outline crosses them. */}
             {line && arms && ARMS.map(([x, y, r]) => <ellipse key={x} cx={x} cy={y} rx="9" ry="7.2" transform={`rotate(${r} ${x} ${y})`} fill="#fff" stroke={INK} strokeWidth="2.6" />)}
-            <path d={BODY} fill={line ? '#fff' : ids.url('body')} stroke={line ? INK : 'none'} strokeWidth={line ? 2.8 : 0} strokeLinejoin="round" />
+            {/* A soft edge keeps the body defined on a white card. */}
+            <path
+              d={bodyOf(costume)}
+              fill={line ? '#fff' : ids.url('body')}
+              stroke={line ? INK : TONES[costume][3]}
+              strokeOpacity={line ? 1 : 0.6}
+              strokeWidth={line ? 2.8 : 1.4}
+              strokeLinejoin="round"
+            />
             {!line && (
               <g clipPath={ids.url('clip')}>
                 <rect x="0" y="16" width="124" height="118" fill={ids.url('ao')} />

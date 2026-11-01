@@ -357,7 +357,7 @@ function Wizard({
                   aria-current={i === step ? 'step' : undefined}
                   aria-label={`Step ${i + 1}: ${s.label}`}
                 >
-                  <Pumpkin size={30} lit={i <= step} face={i <= reached} />
+                  <Pumpkin size={30} lit={i <= step} />
                 </button>
                 <span className="trail-label">{s.label}</span>
               </li>
@@ -366,7 +366,7 @@ function Wizard({
         </div>
 
         <section
-          className={`step-card card ${direction > 0 ? 'enter-right' : 'enter-left'}${corked ? ' sealing' : ''}`}
+          className={`step-card card webbed ${direction > 0 ? 'enter-right' : 'enter-left'}${corked ? ' sealing' : ''}`}
           key={step}
           aria-labelledby="step-title"
         >
@@ -420,7 +420,7 @@ function Wizard({
                     <Candle lit={candleLit} justLit={candleLit} size={64} label={candleLit ? 'A candle, lit for the sealing' : 'A candle, waiting to be lit'} />
                   </div>
                 </div>
-                <button type="button" className="btn primary big" onClick={seal} disabled={corked}>
+                <button type="button" className="btn primary big drip" onClick={seal} disabled={corked}>
                   {corked ? 'Sealing…' : updating ? 'Seal the new words' : 'Seal the jar'}
                 </button>
                 {error && (

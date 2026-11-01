@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Stars } from './ui/art/Decor.tsx';
-import { Scenery } from './ui/art/Spooky.tsx';
+import { HillScene, Scenery } from './ui/art/Spooky.tsx';
 import { Ghost } from './ui/art/Ghost.tsx';
 import { embeddedJar, href, ShellProvider, useHashRoute, type Route } from './ui/shell.tsx';
 import { sound } from './ui/sound.ts';
@@ -172,6 +172,7 @@ export function App() {
           {route === 'gallery' && <Gallery />}
         </div>
       </main>
+      <HillScene />
     </ShellProvider>
   );
 }

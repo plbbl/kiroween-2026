@@ -450,7 +450,7 @@ export function StartWatch({ config }: { config: WatchConfig }) {
         ) : (
           <span />
         )}
-        <button type="submit" className="btn primary" disabled={state === 'sending'}>
+        <button type="submit" className="btn primary drip" disabled={state === 'sending'}>
           {state === 'sending' ? 'Sending…' : 'Start the watch'}
         </button>
       </div>

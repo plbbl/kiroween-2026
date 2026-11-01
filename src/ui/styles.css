@@ -139,8 +139,8 @@ h1[tabindex='-1']:focus {
   background:
     radial-gradient(circle at 12% 8%, rgba(205, 184, 255, 0.45), transparent 34%),
     radial-gradient(circle at 92% 30%, rgba(255, 143, 184, 0.16), transparent 30%),
-    /* A faint Halloween wallpaper: bats, stars, moons and pumpkins. */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg fill='%238e47ff' fill-opacity='0.08'%3E%3Cpath d='M38 30 C35 25 29 24 22 27 C25 28 25 31 24 34 C27 33 29 34 29 37 C32 35 34 36 35 38 C35 35 36 32 38 30 C40 32 41 35 41 38 C42 36 44 35 47 37 C47 34 49 33 52 34 C51 31 51 28 54 27 C47 24 41 25 38 30 Z'/%3E%3Cpath d='M118 22 L120.5 28 L127 28.5 L122 32.5 L123.5 39 L118 35.5 L112.5 39 L114 32.5 L109 28.5 L115.5 28 Z'/%3E%3Cpath d='M42 112 A14 14 0 1 0 58 128 A11 11 0 1 1 42 112 Z'/%3E%3Cpath d='M120 104 C128 104 133 109 133 116 C133 123 128 127 120 127 C112 127 107 123 107 116 C107 109 112 104 120 104 Z M119 104 C119 100 120 98 123 97 L124 99 C122 100 121 101 121 104 Z'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 160px 160px,
+    /* A faint Halloween wallpaper: a few bats and crescent moons. */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'%3E%3Cg fill='%238e47ff' fill-opacity='0.05'%3E%3Cpath d='M68 52 C65 47 59 46 52 49 C55 50 55 53 54 56 C57 55 59 56 59 59 C62 57 64 58 65 60 C65 57 66 54 68 52 C70 54 71 57 71 60 C72 58 74 57 77 59 C77 56 79 55 82 56 C81 53 81 50 84 49 C77 46 71 47 68 52 Z'/%3E%3Cpath d='M232 92 A14 14 0 1 0 248 108 A11 11 0 1 1 232 92 Z'/%3E%3Cpath d='M196 236 C193 231 187 230 180 233 C183 234 183 237 182 240 C185 239 187 240 187 243 C190 241 192 242 193 244 C193 241 194 238 196 236 C198 238 199 241 199 244 C200 242 202 241 205 243 C205 240 207 239 210 240 C209 237 209 234 212 233 C205 230 199 231 196 236 Z' transform='rotate%28-14 196 237%29'/%3E%3Cpath d='M70 222 A10 10 0 1 0 82 234 A8 8 0 1 1 70 222 Z'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 320px 320px,
     var(--lilac-soft);
 }
 
@@ -189,12 +189,33 @@ h1[tabindex='-1']:focus {
   opacity: 0;
 }
 
-.scenery-hill {
+/* The hill closes every page, below the last words. */
+.hill-scene {
+  position: relative;
+  height: clamp(120px, 16vw, 230px);
+  margin-top: 40px;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hill-scene .hill {
   position: absolute;
-  left: 0;
-  bottom: 0;
+  inset: 0;
   width: 100%;
-  height: clamp(110px, 16vw, 230px);
+  height: 100%;
+}
+
+.hill-scene .hill svg {
+  width: 100%;
+  height: 100%;
+}
+
+.day-hill {
+  transition: opacity 700ms var(--soft);
+}
+
+[data-theme='night'] .day-hill {
+  opacity: 0;
 }
 
 .scenery-web {
@@ -249,7 +270,7 @@ h1[tabindex='-1']:focus {
   left: -20%;
   right: -20%;
   bottom: 0;
-  height: 26vh;
+  height: 100%;
   background:
     radial-gradient(ellipse 30% 60% at 20% 100%, rgba(185, 160, 230, 0.16), transparent 70%),
     radial-gradient(ellipse 26% 50% at 55% 100%, rgba(185, 160, 230, 0.14), transparent 70%),
@@ -272,19 +293,19 @@ h1[tabindex='-1']:focus {
 }
 
 .flyer.f1 {
-  top: 16vh;
+  top: 9vh;
   animation-duration: 19s;
   animation-delay: 3s;
 }
 
 .flyer.f2 {
-  top: 26vh;
+  top: 13vh;
   animation-duration: 27s;
   animation-delay: 11s;
 }
 
 .flyer.f3 {
-  top: 11vh;
+  top: 6vh;
   animation-duration: 33s;
   animation-delay: 19s;
 }
@@ -316,6 +337,12 @@ h1[tabindex='-1']:focus {
   }
 }
 
+/* At night, bats are darker than the sky and edged with moonlight. */
+.night-set .bat,
+.jar-bat {
+  filter: drop-shadow(0 0 2px rgba(205, 184, 255, 0.75)) drop-shadow(0 0 6px rgba(205, 184, 255, 0.25));
+}
+
 .bat.flap .bat-wing {
   transform-box: fill-box;
   animation: wing-beat 260ms ease-in-out infinite alternate;
@@ -336,12 +363,12 @@ h1[tabindex='-1']:focus {
 }
 
 @media (max-width: 640px) {
-  /* Small and half out of the corner, so it never crowds a heading. */
+  /* Small, in the corner under the menu, so it never crowds a heading. */
   .scenery-moon {
-    width: 92px;
-    height: 92px;
-    top: 66px;
-    right: -26px;
+    width: 76px;
+    height: 76px;
+    top: 74px;
+    right: 6px;
   }
 
   .scenery-web {
@@ -1621,65 +1648,76 @@ select {
   color: var(--ink);
 }
 
-/* Every little label flies a bat. */
+/* Every little label hangs from a crescent moon. */
 .tag::before {
   content: '';
   display: inline-block;
-  width: 1.9em;
+  width: 0.95em;
   height: 0.95em;
-  margin-right: 0.45em;
+  margin-right: 0.4em;
   vertical-align: -0.1em;
   background: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 32'%3E%3Cpath d='M28 14 C22 6 12 4 2 8 C6 10 7 14 5 18 C10 16 13 18 13 22 C17 19 21 20 23 23 C24 19 26 16 28 14 Z M36 14 C42 6 52 4 62 8 C58 10 57 14 59 18 C54 16 51 18 51 22 C47 19 43 20 41 23 C40 19 38 16 36 14 Z M32 8 C36 8 38.5 12 38.5 16 C38.5 21 35.5 24 32 24 C28.5 24 25.5 21 25.5 16 C25.5 12 28 8 32 8 Z M27.5 10 L28 3.5 L30.6 8.4 Z M36.5 10 L36 3.5 L33.4 8.4 Z'/%3E%3C/svg%3E") center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 32'%3E%3Cpath d='M28 14 C22 6 12 4 2 8 C6 10 7 14 5 18 C10 16 13 18 13 22 C17 19 21 20 23 23 C24 19 26 16 28 14 Z M36 14 C42 6 52 4 62 8 C58 10 57 14 59 18 C54 16 51 18 51 22 C47 19 43 20 41 23 C40 19 38 16 36 14 Z M32 8 C36 8 38.5 12 38.5 16 C38.5 21 35.5 24 32 24 C28.5 24 25.5 21 25.5 16 C25.5 12 28 8 32 8 Z M27.5 10 L28 3.5 L30.6 8.4 Z M36.5 10 L36 3.5 L33.4 8.4 Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M8 1.5 A8.5 8.5 0 1 0 18.5 12 A7 7 0 1 1 8 1.5 Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M8 1.5 A8.5 8.5 0 1 0 18.5 12 A7 7 0 1 1 8 1.5 Z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
 /* Primary buttons drip, like candle wax or a witch's brew. */
-.btn.primary::after {
+.btn.primary.drip::after {
   content: '';
   position: absolute;
   left: 18%;
   width: 64%;
-  top: calc(100% + 4px);
+  top: calc(100% + 2px);
   height: 11px;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'%3E%3Cpath d='M0 0 H100 V2 C96 2 95 4 95 7 C95 10 92 11 90 9 C89 7 89 4 86 3 C80 2 78 4 77 9 C76 13 72 13 71 9 C70 5 68 3 62 3 C55 3 53 5 52 7 C51 9 48 9 47 7 C46 4 43 2 36 3 C30 4 29 7 28 11 C27 14 22 14 22 10 C21 5 18 3 12 3 C6 3 5 5 4 7 C3 9 0 8 0 6 Z' fill='%235a22c4'/%3E%3C/svg%3E") center top / 100% 100% no-repeat;
   pointer-events: none;
 }
 
-.btn.primary:not(:disabled):hover::after {
+.btn.primary.drip:not(:disabled):hover::after {
   height: 15px;
 }
 
-.btn.primary::after {
+.btn.primary.drip::after {
   transition: height 400ms var(--spring);
 }
 
-.btn.primary:active::after {
+.btn.primary.drip:disabled::after {
+  display: none;
+}
+
+.btn.primary.drip:active::after {
   top: calc(100% + 0px);
 }
 
-/* A cobweb in the corner of every card. */
-.card::after {
+/* A cobweb in the corner of each page's main card (top left, clear of corner
+   ghosts), above the card's paper but under its words. */
+.card.webbed {
+  isolation: isolate;
+}
+
+.card.webbed::after {
+  z-index: -1;
   content: '';
   position: absolute;
   top: 10px;
-  right: 10px;
-  width: 58px;
-  height: 58px;
+  left: 10px;
+  width: 46px;
+  height: 46px;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M100 0 L0.0 0.0 M100 0 L4.9 30.9 M100 0 L19.1 58.8 M100 0 L41.2 80.9 M100 0 L69.1 95.1 M100 0 L100.0 100.0 M74.0 0.0 Q78.9 3.3 75.3 8.0 Q81.0 9.7 79.0 15.3 Q84.9 15.1 84.7 21.0 Q90.3 19.0 92.0 24.7 Q96.7 21.1 100.0 26.0 M54.0 0.0 Q62.7 5.9 56.3 14.2 Q66.4 17.1 62.8 27.0 Q73.3 26.7 73.0 37.2 Q82.9 33.6 85.8 43.7 Q94.1 37.3 100.0 46.0 M34.0 0.0 Q46.5 8.5 37.2 20.4 Q51.8 24.6 46.6 38.8 Q61.7 38.3 61.2 53.4 Q75.4 48.2 79.6 62.8 Q91.5 53.5 100.0 66.0 M14.0 0.0 Q30.3 11.0 18.2 26.6 Q37.2 32.0 30.4 50.5 Q50.1 49.9 49.5 69.6 Q68.0 62.8 73.4 81.8 Q89.0 69.7 100.0 86.0' fill='none' stroke='%237a40d6' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") right top / contain no-repeat;
-  opacity: 0.32;
+  opacity: 0.42;
   pointer-events: none;
+  transform: scaleX(-1);
 }
 
-[data-theme='night'] .card::after {
+[data-theme='night'] .card.webbed::after {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M100 0 L0.0 0.0 M100 0 L4.9 30.9 M100 0 L19.1 58.8 M100 0 L41.2 80.9 M100 0 L69.1 95.1 M100 0 L100.0 100.0 M74.0 0.0 Q78.9 3.3 75.3 8.0 Q81.0 9.7 79.0 15.3 Q84.9 15.1 84.7 21.0 Q90.3 19.0 92.0 24.7 Q96.7 21.1 100.0 26.0 M54.0 0.0 Q62.7 5.9 56.3 14.2 Q66.4 17.1 62.8 27.0 Q73.3 26.7 73.0 37.2 Q82.9 33.6 85.8 43.7 Q94.1 37.3 100.0 46.0 M34.0 0.0 Q46.5 8.5 37.2 20.4 Q51.8 24.6 46.6 38.8 Q61.7 38.3 61.2 53.4 Q75.4 48.2 79.6 62.8 Q91.5 53.5 100.0 66.0 M14.0 0.0 Q30.3 11.0 18.2 26.6 Q37.2 32.0 30.4 50.5 Q50.1 49.9 49.5 69.6 Q68.0 62.8 73.4 81.8 Q89.0 69.7 100.0 86.0' fill='none' stroke='%23cdb8ff' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
   opacity: 0.22;
 }
 
 @media print {
-  .card::after,
+  .card.webbed::after,
   .tag::before,
-  .btn.primary::after {
+  .btn.primary.drip::after {
     display: none;
   }
 }
@@ -1687,4 +1725,13 @@ select {
 /* The home page draws its own moon in the hero. */
 [data-route='home'] .scenery-moon {
   display: none;
+}
+
+@media (max-width: 640px) {
+  .card.webbed::after {
+    top: 6px;
+    left: 6px;
+    width: 34px;
+    height: 34px;
+  }
 }
