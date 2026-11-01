@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { Costume } from '../core/buddy.ts';
-import { Candle } from '../ui/art/Candle.tsx';
 import { EmblemIcon } from '../ui/art/Emblem.tsx';
 import { Ghost, GhostHand, type Mood } from '../ui/art/Ghost.tsx';
 import { Jar } from '../ui/art/Jar.tsx';
+import { HowItWorks } from './HowItWorks.tsx';
 import { sound } from '../ui/sound.ts';
 import { href, useAtmosphere } from '../ui/shell.tsx';
-import { Bat, Lantern, Moon, Pumpkin } from '../ui/art/Spooky.tsx';
+import { Bat, Moon, Pumpkin } from '../ui/art/Spooky.tsx';
 
 const d = (ms: number) => ({ '--d': `${ms}ms` }) as CSSProperties;
 
@@ -144,7 +144,7 @@ export function Home() {
               <a className="btn on-purple" href={href('seal')}>
                 Seal a jar
               </a>
-              <a className="btn ghosty" href={href('seance')}>
+              <a className="btn ghosty" href={`${href('seance')}?demo`}>
                 Try a séance
               </a>
             </div>
@@ -196,45 +196,7 @@ export function Home() {
         <HeroPeekers layer="hands" ducked={ducked} />
       </div>
 
-      <section className="acts wrap" aria-label="How it works">
-        <article className="act card rise" style={d(100)}>
-          <div className="act-art">
-            <div className="act-jar">
-              <Jar initials="ME" size={112} />
-            </div>
-            <Pumpkin size={40} className="act-pumpkin" />
-          </div>
-          <div>
-            <p className="tag">01 · seal</p>
-            <h3>Write it, seal it</h3>
-            <p className="muted">A note for everyone, your accounts, and a letter for anyone you like.</p>
-          </div>
-        </article>
-        <article className="act card rise" style={d(200)}>
-          <div className="act-art">
-            <div className="bubble">still here?</div>
-            <Ghost mood="curious" size={84} float phase={0.6} />
-            <Lantern size={30} className="act-lantern" />
-          </div>
-          <div>
-            <p className="tag">02 · watch</p>
-            <h3>We check in</h3>
-            <p className="muted">One gentle question now and then. Go quiet, and your friends look in on you.</p>
-          </div>
-        </article>
-        <article className="act card rise" style={d(300)}>
-          <div className="act-art candles">
-            <Candle lit size={42} phase={0.1} />
-            <Candle lit size={50} phase={0.7} />
-            <Candle lit size={42} phase={1.3} />
-          </div>
-          <div>
-            <p className="tag">03 · séance</p>
-            <h3>Friends gather</h3>
-            <p className="muted">Each card lights a candle. Enough candles, and the ghost hands over your words.</p>
-          </div>
-        </article>
-      </section>
+      <HowItWorks />
 
       <section className="promises wrap" aria-labelledby="promises-title">
         <h2 id="promises-title" className="center">

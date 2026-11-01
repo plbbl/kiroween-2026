@@ -112,7 +112,7 @@ await page.getByText(/^Checked:/).waitFor({ timeout: 10000 });
 await settle(2200);
 await shot('08-sealed');
 await audit(page, 'sealed');
-check(await page.getByText('Three cards were made. Any two of them open the jar.').isVisible(), 'sealing makes three cards');
+check(await page.getByText('Three cards were made; any two open the jar. Print them now: it’s the only time you can.').isVisible(), 'sealing makes three cards');
 check(await page.getByText('Checked: all 3 groups of two open it, and no one can alone.').isVisible(), 'the self-check proves every pair opens it');
 
 // Printed cards, then the key on its own (the print dialog itself is skipped)
@@ -219,7 +219,7 @@ try {
   await g.getByRole('button', { name: 'Seal the jar' }).click();
   await g.getByRole('heading', { name: /Sealed!/ }).waitFor({ timeout: 10000 });
   check(
-    (await g.getByText('Two cards were made. Any two of them open the jar.').isVisible()) && (await g.getByText(/replaces your earlier one/).isVisible()),
+    (await g.getByText('Two cards were made; any two open the jar. Print them now: it’s the only time you can.').isVisible()) && (await g.getByText(/replaces your earlier one/).isVisible()),
     'the new jar has the new circle, and says what to do about the old cards',
   );
 } catch (e) {
@@ -227,7 +227,16 @@ try {
 }
 await g.close();
 
+// One click from the home page: June's jar, and three friends gathered for you.
+await page.goto(`${app}#/seance?demo`);
+await settle(1200);
+await page.getByRole('button', { name: /^Gather three friends for me/ }).click();
+await page.getByText(/opened by/).waitFor({ timeout: 15000 });
+check(true, 'one click gathers the demo circle and opens June’s jar');
+
 // Demo séance
+await page.goto(`${app}#/`);
+await settle(300);
 await page.goto(`${app}#/seance`);
 await settle(1400);
 await shot('10-seance-choose');

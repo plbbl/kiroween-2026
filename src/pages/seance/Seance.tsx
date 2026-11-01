@@ -28,7 +28,8 @@ const REFUSALS: Record<string, string> = {
 export function Seance({ embedded, params }: { embedded: JarFile | null; params: URLSearchParams }) {
   useAtmosphere('night', null);
   const shell = useShell();
-  const [jar, setJar] = useState<JarFile | null>(embedded);
+  // "#/seance?demo" goes straight to June's jar, for anyone who wants to see it now.
+  const [jar, setJar] = useState<JarFile | null>(() => embedded ?? (params.has('demo') ? DEMO_JAR : null));
   // A friend's link from the watch's email: the jar the owner left with it.
   const token = embedded ? null : params.get('jar');
   const [fetching, setFetching] = useState(!!token);
@@ -483,14 +484,34 @@ function DemoTable({
 }) {
   const [note, setNote] = useState('');
   const [picked, setPicked] = useState<string | null>(null);
+  const [gathering, setGathering] = useState(false);
   const used = new Set(offered.map((o) => o.holder.name));
+  const table = useRef<HTMLDivElement>(null);
+  // For someone in a hurry: the friends come to the table one by one, by themselves.
+  const gatherForMe = async () => {
+    setGathering(true);
+    const left = DEMO_CARDS.filter((c) => !used.has(c.name)).slice(0, jar.threshold - offered.length);
+    for (const c of left) {
+      const el = table.current?.querySelector<HTMLElement>(`[data-card="${c.name}"]`);
+      onOffer(c.shard, el?.getBoundingClientRect());
+      setPicked(c.name);
+      await wait(1150);
+    }
+  };
   return (
     <div className="demo-table">
       <p className="faint center">
         The cards are on the table.{' '}
         {offered.length === 0 ? `Tap any ${numberWord(jar.threshold)}.` : `Tap ${numberWord(jar.threshold - offered.length)} more.`}
       </p>
-      <div className="demo-cards">
+      {!gathering && (
+        <p className="center gather-for-me">
+          <button type="button" className="btn small" onClick={() => void gatherForMe()}>
+            Gather {offered.length === 0 ? numberWord(jar.threshold) : 'the rest of the'} friends for me
+          </button>
+        </p>
+      )}
+      <div className="demo-cards" ref={table}>
         {DEMO_CARDS.map((c, i) => {
           const holder = jar.holders.find((h) => h.name === c.name)!;
           return (
@@ -501,7 +522,8 @@ function DemoTable({
               index={i}
               total={DEMO_CARDS.length}
               className={`demo-card${used.has(c.name) ? ' used' : ''}${picked === c.name ? ' picked' : ''}`}
-              disabled={used.has(c.name)}
+              disabled={used.has(c.name) || gathering}
+              data-card={c.name}
               style={{ '--rot': `${[-4, 3, -2, 4, -3][i]}deg` } as CSSProperties}
               onClick={(e) => {
                 const refused = onOffer(c.shard, e.currentTarget.getBoundingClientRect());

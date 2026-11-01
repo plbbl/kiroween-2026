@@ -76,7 +76,7 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
           Sealed!
         </h1>
         <p className="lede">
-          {capitalised(numberWord(n))} cards were made. Any {numberWord(k)} of them open the jar. This is the only time they can be printed.
+          {capitalised(numberWord(n))} cards were made; any {numberWord(k)} open the jar. Print them now: it’s the only time you can.
         </p>
         <p className={`proof${check ? (check.ok ? ' ok' : ' bad') : ''}`} role="status">
           <EmblemIcon name="spark" size={18} title="" />
@@ -128,8 +128,7 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
           <div>
             <h3>Print the cards, then your key</h3>
             <p className="muted">
-              One page per friend: cut along the line and give them both halves. Your key prints on its own page. It opens everything, letters
-              included, so keep it apart from the cards.
+              One page per friend: cut on the line and give both halves. Your key prints on its own: it opens everything, so keep it apart.
             </p>
             <div className="print-buttons">
               <button type="button" className={`btn${printed ? '' : ' primary drip'}`} onClick={() => print('cards')}>
@@ -159,8 +158,7 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
           <div>
             <h3>Give everyone their card and the jar file</h3>
             <p className="muted">
-              Tell each friend what the card is. Email them all the jar file: one file that holds your locked jar and opens in any browser, even
-              offline. It is safe to send.
+              Email everyone the jar file. It’s safe to send, and opens in any browser, even offline.
             </p>
             <button
               type="button"
@@ -180,7 +178,7 @@ export function Sealed({ result, onStartOver, replaces }: { result: SealResult; 
           <span className="todo-num">3</span>
           <div>
             <h3>Turn on the watch</h3>
-            <p className="muted">We ask now and then if you are still here, and only ask your friends to check on you if you go quiet.</p>
+            <p className="muted">We ask now and then if you’re still here. Go quiet, and your friends are asked to look in on you.</p>
             <a className="btn" href={href('watch')} onClick={() => jarHandoff.give(jar)}>
               Set the watch
             </a>

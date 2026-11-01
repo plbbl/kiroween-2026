@@ -34,8 +34,7 @@ export function StepName({ draft, setOwner }: { draft: Draft; setOwner: (s: stri
       <p className="note">
         <Ghost size={30} mood="wink" />
         <span>
-          What you write stays in this tab, on this device, until you seal it: a reload won’t lose it, but closing the tab will. Nothing is sent
-          anywhere. Have your logins at hand before you start.
+          Kept in this tab only until you seal it, and never sent anywhere. Have your logins at hand.
         </span>
       </p>
       <p className="faint update-link">
@@ -93,8 +92,7 @@ export function StepLeave({ content, setContent }: { content: JarContent; setCon
       <div className="sub-head">
         <h3>Accounts</h3>
         <span className="faint">
-          Start with your phone: most accounts send it a code. Passwords are safe here. Everyone who opens the jar together will see them; for one
-          person only, use a private letter.
+          Start with your phone: it gets most sign-in codes. Everyone who opens the jar sees these; for one person only, write them a letter.
         </span>
       </div>
       <div className="starters">
@@ -292,8 +290,8 @@ export function StepCircle({
           <Ghost size={30} mood="open" />
           <div>
             <p>
-              To add or remove someone, start a new jar from this one. Everything you wrote comes along, and everyone gets a new card. The old cards
-              still open the old jar file, so change any password in it that someone shouldn’t have.
+              To add or remove someone, start a new jar from this one: your words come along, and everyone gets a new card. Change any password the old
+              jar holds that someone shouldn’t have.
             </p>
             <button type="button" className="btn small" onClick={onNewJar}>
               Start a new jar from this one
@@ -305,7 +303,7 @@ export function StepCircle({
       <div className="threshold" data-theme="night">
         <h3>How many must gather?</h3>
         <p className="faint">
-          {locked ? 'Set when the jar was sealed, and printed on every card.' : 'Tap a candle. Fewer is easier to gather, even if a card is lost. More keeps a stolen card useless.'}
+          {locked ? 'Set when the jar was sealed, and printed on every card.' : 'Fewer is easier to gather. More keeps a stolen card useless.'}
         </p>
         <div className="threshold-candles" role="radiogroup" aria-label="Cards needed to open the jar">
           {draft.holders.map((_, i) => {

@@ -57,7 +57,8 @@ Motion marks a change of state, and is springy and small: night falls and a cand
 
 ## Try it
 
-- **June's jar.** Open *Séance* and choose *June's jar*. Click any three cards on the table, or type a card's 30 words. Then open a letter with that person's seal.
+- **June's jar.** On the home page press *Try a séance*, then *Gather three friends for me*: the candles light, the jar rattles, and the ghost jumps out. Or click any three cards on the table yourself, or type a card's 30 words. Then open a letter with that person's seal.
+- **The story in twenty seconds.** The home page plays it with the cast: write, seal, share the cards, keep watch, gather. Poke the jar in the hero, too.
 - **Seal your own.** Open *Seal*, write, choose your circle, seal, and print the cards (one page per friend; cut off the seal half) and then, on its own, your key.
 - **Change it later.** Open *Seal*, choose *Change what's inside*, give it your jar file and your key, edit, and seal again. The same cards open the new words.
 - **The watch.** Open *Watch* and press *Let time pass* to see the rhythm. Where the watch service runs, start a real watch below it.

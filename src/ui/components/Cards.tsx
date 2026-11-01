@@ -30,7 +30,9 @@ export function BuddyCard({
   onClick,
   disabled,
   className = '',
+  ...rest
 }: {
+  'data-card'?: string;
   name: string;
   buddy: Buddy;
   index: number;
@@ -59,7 +61,7 @@ export function BuddyCard({
     </>
   );
   return onClick ? (
-    <button type="button" className={`buddy-card ${className}`} style={style} onClick={onClick} disabled={disabled}>
+    <button type="button" className={`buddy-card ${className}`} style={style} onClick={onClick} disabled={disabled} data-card={rest['data-card']}>
       {body}
     </button>
   ) : (
