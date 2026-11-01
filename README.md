@@ -32,7 +32,7 @@ Phylactery joins the pieces, and makes a heavy subject gentle: death as a reunio
 
 ## The costume
 
-Kiroween purple and a cast of little ghosts drawn as SVG, shaded like soft vinyl toys. The rules are short: one character, one headline and one action per screen; the Halloween lives in the cast (eight costumes, one per friend), the candles, the jar and the night, never in props added for decoration. Every spooky element does a job:
+Kiroween purple and a cast of little ghosts drawn as SVG, shaded like soft vinyl toys: a sheet ghost with its curl, Frankenstein, a hooded skeleton, a pumpkin, a witch, a bat, a vampire and a mummy, one per friend. Around them is a Halloween world, drawn in the same soft style: by day a lilac afternoon with cobwebs in the corners, a spider on its thread, a faint wallpaper of bats, moons and pumpkins, and a hill with an old house far away; at night the moon, fog and lit windows. Bats cross the sky now and then. Labels fly a bat, primary buttons drip like wax, cards carry a cobweb, the seal steps are a row of jack-o'-lanterns that light as you go, and checklists light pumpkins. One headline and one action per screen still hold, and every spooky element that sits on the content does a job:
 
 ![The cast](docs/screenshots/cast.jpg)
 
@@ -43,10 +43,11 @@ Kiroween purple and a cast of little ghosts drawn as SVG, shaded like soft vinyl
 | The ghost in the jar | Awake while you write; asleep once corked and sealed; stirring as candles light; out and happy when open, with your words flying out as little notes |
 | The ring on the rug | Warms to amber as the circle gathers |
 | The wax seal | Pressed when the jar is encrypted, cracked when it opens |
-| The watch ghost's face | The watch state: happy, asking, worried, or holding up a sign for your friends |
+| The watch ghost's face | The watch state: happy, asking, worried, or holding up a sign for your friends. It carries a lantern, and grows faint while a hello goes unanswered |
+| Jack-o'-lanterns | Progress: each step of sealing lights one; each guide you've done lights one; each reminder on the watch's timeline is one |
 | Day and night | A starry night when you arrive; lilac paper while you write and keep watch; night falls when you seal, and again when friends gather. It falls from the top of the screen and lifts the same way |
 
-Motion marks a change of state, and is springy and small: night falls and a candle wakes, the cork drops in and the wax is stamped, a tapped card glows and its ghost flies to a candle, the candle wakes, the seal cracks and the cork spins away, envelopes open and letters slide out. Only the ghost in focus and lit flames move on their own. All sounds (a match, a flame, wax pressed and cracking, a bell) are synthesised live with the Web Audio API; there are no audio files, and sound is off until you turn it on. With *reduce motion* set, every state is kept and the movement is dropped. Printed cards are black-and-white line art.
+Motion marks a change of state, and is springy and small: night falls and a candle wakes, the cork drops in and the wax is stamped, a tapped card glows and its ghost flies to a candle, the candle wakes, the seal cracks, the cork spins away and the bats sleeping in the jar fly out, envelopes open and letters slide out. Besides the ghost in focus and lit flames, only the scenery moves on its own: a passing bat, the spider, the fog. All sounds (a match, a flame, wax pressed and cracking, a bell) are synthesised live with the Web Audio API; there are no audio files, and sound is off until you turn it on. With *reduce motion* set, every state is kept and the movement is dropped. Printed cards are black-and-white line art.
 
 ## Three promises
 
