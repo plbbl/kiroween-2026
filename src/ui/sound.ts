@@ -163,6 +163,61 @@ export const sound = {
     });
   },
 
+  /** A ghost's "booo": a wobbly tone that slides down, more silly than scary. */
+  boo() {
+    const a = audio();
+    if (!a) return;
+    const t = a.ctx.currentTime;
+    const o = a.ctx.createOscillator();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(420, t);
+    o.frequency.exponentialRampToValueAtTime(190, t + 0.75);
+    const lfo = a.ctx.createOscillator();
+    lfo.frequency.value = 7;
+    const depth = a.ctx.createGain();
+    depth.gain.value = 18;
+    lfo.connect(depth).connect(o.frequency);
+    const g = a.ctx.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.32, t + 0.08);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.85);
+    o.connect(g).connect(a.out);
+    o.start(t);
+    lfo.start(t);
+    o.stop(t + 0.9);
+    lfo.stop(t + 0.9);
+  },
+
+  /** A giggle: three quick little hops up in pitch. */
+  giggle() {
+    const a = audio();
+    if (!a) return;
+    const t = a.ctx.currentTime;
+    [0, 0.11, 0.22, 0.34].forEach((at, i) => {
+      const o = a.ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(700 + i * 90, t + at);
+      o.frequency.exponentialRampToValueAtTime(980 + i * 90, t + at + 0.06);
+      const g = a.ctx.createGain();
+      g.gain.setValueAtTime(0, t + at);
+      g.gain.linearRampToValueAtTime(0.16, t + at + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + at + 0.09);
+      o.connect(g).connect(a.out);
+      o.start(t + at);
+      o.stop(t + at + 0.1);
+    });
+  },
+
+  /** Thunder far away: a low rumble, soft enough to make someone smile. */
+  thunder() {
+    const a = audio();
+    if (!a) return;
+    const { f, t } = burst(a.ctx, a.out, { dur: 2.2, type: 'lowpass', freq: 160, q: 0.6, gain: 0.55, attack: 0.05 });
+    f.frequency.setValueAtTime(320, t);
+    f.frequency.exponentialRampToValueAtTime(90, t + 2);
+    burst(a.ctx, a.out, { at: 0.35, dur: 1.4, type: 'lowpass', freq: 120, q: 0.5, gain: 0.35, attack: 0.2 });
+  },
+
   /** A low room tone for the séance. */
   startDrone() {
     const a = audio();

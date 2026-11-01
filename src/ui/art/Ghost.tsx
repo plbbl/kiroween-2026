@@ -7,7 +7,7 @@ import { Emblem } from './Emblem.tsx';
 // Everything is gradients on plain shapes (no filters), so a page can hold
 // many ghosts. With `line`, the same shapes print as black-and-white line art.
 
-export type Mood = 'open' | 'curious' | 'happy' | 'sleep' | 'wow' | 'worried' | 'sad' | 'wink';
+export type Mood = 'open' | 'curious' | 'happy' | 'sleep' | 'wow' | 'worried' | 'sad' | 'wink' | 'boo' | 'laugh';
 
 export interface GhostProps {
   costume?: Costume;
@@ -24,6 +24,10 @@ export interface GhostProps {
   shadow?: boolean;
   /** How strongly a candle on the right warms the edge, 0 to 1. */
   rim?: number;
+  /** Where the ghost is looking, each from -1 to 1: its eyes follow. */
+  look?: { x: number; y: number };
+  /** A striped nightcap, for a ghost asleep in its jar. */
+  nightcap?: boolean;
   className?: string;
   title?: string;
 }
@@ -68,6 +72,12 @@ const EMBLEM_AT: Record<Costume, [number, number]> = {
 const ARMS: [number, number, number][] = [
   [17, 90, -24],
   [107, 90, 24],
+];
+
+// Arms thrown up for a "BOO!".
+const ARMS_UP: [number, number, number][] = [
+  [6, 42, -70],
+  [118, 42, 70],
 ];
 
 /** Gradient ids for one ghost: React ids are made safe for `url(#…)`. */
@@ -206,7 +216,9 @@ function Eye({ ids, cx, cy, ry = 10.2, line }: { ids: Ids; cx: number; cy: numbe
 
 const arc = (d: string, width = 2.5) => <path d={d} fill="none" stroke={INK} strokeWidth={width} strokeLinecap="round" strokeLinejoin="round" />;
 
-function Face({ ids, mood, line, mouthY, costume }: { ids: Ids; mood: Mood; line: boolean; mouthY: number; costume: Costume }) {
+function Face({ ids, mood, line, mouthY, costume, look }: { ids: Ids; mood: Mood; line: boolean; mouthY: number; costume: Costume; look?: { x: number; y: number } }) {
+  const lx = (look?.x ?? 0) * 3.6;
+  const ly = (look?.y ?? 0) * 2.6;
   const L = 43;
   const R = 81;
   const Y = 65;
@@ -214,10 +226,11 @@ function Face({ ids, mood, line, mouthY, costume }: { ids: Ids; mood: Mood; line
   let eyes: ReactNode;
   switch (mood) {
     case 'happy':
+    case 'laugh':
       eyes = (
         <>
-          {arc(`M${L - 7} ${Y + 2} Q${L} ${Y - 5} ${L + 7} ${Y + 2}`, 3)}
-          {arc(`M${R - 7} ${Y + 2} Q${R} ${Y - 5} ${R + 7} ${Y + 2}`, 3)}
+          {arc(`M${L - 7} ${Y + 2} Q${L} ${Y - 5} ${L + 7} ${Y + 2}`, mood === 'laugh' ? 3.6 : 3)}
+          {arc(`M${R - 7} ${Y + 2} Q${R} ${Y - 5} ${R + 7} ${Y + 2}`, mood === 'laugh' ? 3.6 : 3)}
         </>
       );
       break;
@@ -238,6 +251,7 @@ function Face({ ids, mood, line, mouthY, costume }: { ids: Ids; mood: Mood; line
       );
       break;
     case 'wow':
+    case 'boo':
       eyes = (
         <>
           <Eye ids={ids} cx={L} cy={Y - 1} ry={11.8} line={line} />
@@ -275,11 +289,30 @@ function Face({ ids, mood, line, mouthY, costume }: { ids: Ids; mood: Mood; line
     case 'sad':
       mouth = arc(`M57.5 ${m + 3} Q62 ${m - 1} 66.5 ${m + 3}`);
       break;
+    case 'boo':
+      // A great round "BOO!", tongue and all.
+      mouth = (
+        <g>
+          <path d={`M47 ${m - 5} Q62 ${m - 9} 77 ${m - 5} Q79 ${m + 15} 62 ${m + 18} Q45 ${m + 15} 47 ${m - 5} Z`} fill={INK} />
+          {!line && <ellipse cx="62" cy={m + 12} rx="8.5" ry="4.8" fill="#ff7d9e" />}
+        </g>
+      );
+      break;
+    case 'laugh':
+      mouth = (
+        <g>
+          <path d={`M52 ${m - 2} Q62 ${m} 72 ${m - 2} Q70 ${m + 10} 62 ${m + 10} Q54 ${m + 10} 52 ${m - 2} Z`} fill={INK} />
+          {!line && <ellipse cx="62" cy={m + 7} rx="5" ry="2.8" fill="#ff7d9e" />}
+        </g>
+      );
+      break;
     default:
       mouth = arc(`M57.5 ${m} Q62 ${m + 4} 66.5 ${m}`);
   }
 
   const brows = mood === 'worried' || mood === 'sad';
+  // A "BOO!" comes with mischievous brows.
+  const mischief = mood === 'boo';
   // Vampires and bats show two little fangs; a jack-o'-lantern has a carved, glowing nose.
   const fangs = costume === 'vampire' || costume === 'bat';
   return (
@@ -299,14 +332,22 @@ function Face({ ids, mood, line, mouthY, costume }: { ids: Ids; mood: Mood; line
           <path d={`M66.4 ${m + 1.2} L64.8 ${m + 5.6} L63.2 ${m + 1.8} Z`} />
         </g>
       )}
-      <g className="ghost-eyes">{eyes}</g>
+      <g className="ghost-eyes">
+        <g transform={lx || ly ? `translate(${lx} ${ly})` : undefined}>{eyes}</g>
+      </g>
+      {mischief && (
+        <>
+          {arc(`M${L - 8} ${Y - 13} L${L + 5} ${Y - 16}`, 2.8)}
+          {arc(`M${R + 8} ${Y - 13} L${R - 5} ${Y - 16}`, 2.8)}
+        </>
+      )}
       {brows && (
         <>
           {arc(`M${L - 7} ${Y - 10} L${L + 4} ${Y - 14}`, 2.6)}
           {arc(`M${R + 7} ${Y - 10} L${R - 4} ${Y - 14}`, 2.6)}
         </>
       )}
-      {mouth}
+      <g transform={lx || ly ? `translate(${lx / 2} ${ly / 2})` : undefined}>{mouth}</g>
       {!line && mood === 'worried' && (
         <path className="ghost-sweat" d="M101 38 C97 45 98 50 102 50 C106 50 107 45 101 38 Z" fill="#8fd0ff" stroke="#6fb6ec" strokeWidth="0.8" />
       )}
@@ -476,6 +517,24 @@ function Front({ costume, ids, line }: { costume: Costume; ids: Ids; line: boole
   }
 }
 
+/** A striped nightcap that flops to one side, with a pompom. */
+function Nightcap({ line }: { line: boolean }) {
+  return (
+    <g className="nightcap">
+      <path
+        d="M24 36 C26 18 44 6 64 4 C84 2 104 10 116 28 C110 26 104 27 101 31 C99 34 100 37 102 39 C78 30 46 30 24 36 Z"
+        fill={line ? '#fff' : '#cdb8ff'}
+        stroke={line ? INK : '#8e47ff'}
+        strokeWidth={line ? 2.2 : 1.2}
+        strokeLinejoin="round"
+      />
+      {!line && <path d="M40 16 C56 22 66 32 70 33 M70 7 C80 16 86 26 88 32 M96 12 C100 18 101 24 101 30" fill="none" stroke="#8e47ff" strokeWidth="4" strokeLinecap="round" opacity="0.75" />}
+      <path d="M22 38 C46 28 80 28 104 40 L104 46 C80 35 46 35 22 44 Z" fill="#fff" stroke={line ? INK : '#d9c8ff'} strokeWidth={line ? 2 : 1} strokeLinejoin="round" />
+      <circle cx="117" cy="30" r="7.5" fill="#fff" stroke={line ? INK : '#d9c8ff'} strokeWidth={line ? 2 : 1} />
+    </g>
+  );
+}
+
 /** The emblem, worn as a small round sticker on the belly. */
 function Sticker({ ids, emblem, at: [x, y], line }: { ids: Ids; emblem: EmblemName; at: [number, number]; line: boolean }) {
   return (
@@ -500,12 +559,15 @@ export function Ghost({
   tilt = 0,
   shadow = false,
   rim = 0.32,
+  look,
+  nightcap = false,
   className = '',
   title,
 }: GhostProps) {
   const ids = useIds();
-  const style = { '--phase': `${-phase}s`, width: size, height: (size * 172) / 136 } as CSSProperties;
   const arms = costume !== 'bat';
+  const armPose = mood === 'boo' ? ARMS_UP : ARMS;
+  const style = { '--phase': `${-phase}s`, width: size, height: (size * 172) / 136 } as CSSProperties;
   return (
     <svg
       className={`ghost${float ? ' float' : ''}${line ? ' line' : ''} ${className}`}
@@ -526,7 +588,7 @@ export function Ghost({
               <path d="M56 15 C51 3 59 -6 68 -3 C76 0 75 11 67 11 C63 11 62 7 65 5" fill="none" stroke={line ? INK : ids.url('arm')} strokeWidth={line ? 2.4 : 7} strokeLinecap="round" strokeLinejoin="round" />
             )}
             {/* Arms first in line art, so the body's outline crosses them. */}
-            {line && arms && ARMS.map(([x, y, r]) => <ellipse key={x} cx={x} cy={y} rx="9" ry="7.2" transform={`rotate(${r} ${x} ${y})`} fill="#fff" stroke={INK} strokeWidth="2.6" />)}
+            {line && arms && armPose.map(([x, y, r]) => <ellipse key={x} cx={x} cy={y} rx="9" ry="7.2" transform={`rotate(${r} ${x} ${y})`} fill="#fff" stroke={INK} strokeWidth="2.6" />)}
             {/* A soft edge keeps the body defined on a white card. */}
             <path
               d={bodyOf(costume)}
@@ -548,14 +610,15 @@ export function Ghost({
             )}
             {!line &&
               arms &&
-              ARMS.map(([x, y, r]) => (
+              armPose.map(([x, y, r]) => (
                 <g key={x}>
                   <ellipse cx={x + (x < 62 ? 5 : -5)} cy={y + 6} rx="9" ry="4.5" fill={TONES[costume][3]} opacity="0.4" clipPath={ids.url('clip')} />
                   <ellipse cx={x} cy={y} rx="9" ry="7.2" transform={`rotate(${r} ${x} ${y})`} fill={ids.url('arm')} />
                 </g>
               ))}
             <Front costume={costume} ids={ids} line={line} />
-            <Face ids={ids} mood={mood} line={line} mouthY={costume === 'skeleton' ? 84 : 75} costume={costume} />
+            <Face ids={ids} mood={mood} line={line} mouthY={costume === 'skeleton' ? 84 : 75} costume={costume} look={look} />
+            {nightcap && <Nightcap line={line} />}
             {emblem && <Sticker ids={ids} emblem={emblem} at={EMBLEM_AT[costume]} line={line} />}
           </g>
         </g>

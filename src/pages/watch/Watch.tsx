@@ -4,6 +4,7 @@ import { DEMO_JAR } from '../../demo/demo.ts';
 import { Ghost, type Mood } from '../../ui/art/Ghost.tsx';
 import { numberWord, plural } from '../../ui/text.ts';
 import { Lantern, Spider } from '../../ui/art/Spooky.tsx';
+import { WatchingGhost } from '../../ui/art/WatchingGhost.tsx';
 import { homeAddress, homeUrl } from '../../ui/grimoire.ts';
 import { useAtmosphere } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
@@ -123,7 +124,7 @@ export function Watch({ params }: { params: URLSearchParams }) {
               {face.say}
             </div>
             <span className="presence" style={{ opacity: presence }}>
-              <Ghost mood={face.mood} size={130} float shadow />
+              <WatchingGhost mood={face.mood} size={130} float shadow />
               {/* The ghost keeps watch with a lantern. */}
               <Lantern size={46} className="watch-lantern" />
             </span>

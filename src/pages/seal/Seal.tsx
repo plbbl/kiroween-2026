@@ -7,6 +7,7 @@ import { Candle } from '../../ui/art/Candle.tsx';
 import { Pumpkin } from '../../ui/art/Spooky.tsx';
 import { Sparkles } from '../../ui/art/Decor.tsx';
 import { Ghost } from '../../ui/art/Ghost.tsx';
+import { WatchingGhost } from '../../ui/art/WatchingGhost.tsx';
 import { Jar } from '../../ui/art/Jar.tsx';
 import { initialsOf, type WaxState } from '../../ui/art/WaxSeal.tsx';
 import { capitalised, numberWord, plural } from '../../ui/text.ts';
@@ -23,31 +24,31 @@ const STEPS: { label: string; title: (d: Draft) => string; sub: string; art: Rea
     label: 'You',
     title: () => 'Hi! Whose jar is this?',
     sub: 'A little ghost will keep what you write here, safe in a jar.',
-    art: <Ghost mood="happy" size={86} float />,
+    art: <WatchingGhost mood="open" size={86} float />,
   },
   {
     label: 'Note',
     title: () => 'A note for everyone',
     sub: 'Everyone in your circle will read this first.',
-    art: <Ghost mood="wink" costume="vampire" size={86} float />,
+    art: <WatchingGhost mood="curious" costume="vampire" size={86} float />,
   },
   {
     label: 'Things',
     title: () => 'The things only you know',
     sub: 'Accounts, how to get in, and where things are kept.',
-    art: <Ghost mood="open" costume="witch" size={86} float emblem="key" />,
+    art: <WatchingGhost mood="open" costume="witch" size={86} float emblem="key" />,
   },
   {
     label: 'Wishes',
     title: () => 'How you’d like things done',
     sub: 'Gentle instructions for the people left to do them.',
-    art: <Ghost mood="happy" costume="pumpkin" size={86} float />,
+    art: <WatchingGhost mood="open" costume="pumpkin" size={86} float />,
   },
   {
     label: 'Circle',
     title: () => 'Who keeps the cards?',
     sub: 'One card each, for people who would come if you needed them.',
-    art: <Ghost mood="happy" size={86} float emblem="heart" />,
+    art: <WatchingGhost mood="curious" size={86} float emblem="heart" />,
   },
   {
     label: 'Seal',
@@ -236,6 +237,8 @@ function Wizard({
   // You write by day. Sealing happens by candlelight, and the sealed jar sleeps under the night sky.
   const [dusk, setDusk] = useState(false);
   const [candleLit, setCandleLit] = useState(false);
+  // The ghost says goodnight before the cork goes in.
+  const [bedtime, setBedtime] = useState<'night' | 'zzz' | null>(null);
   useAtmosphere(dusk || result || updated ? 'night' : 'day', candleLit ? 0.9 : result || updated ? 0.5 : 0);
   useEffect(() => {
     if (updating) return;
@@ -307,10 +310,12 @@ function Wizard({
     await wait(520);
     setCandleLit(true);
     sound.ignite();
-    await wait(560);
+    setBedtime('night');
+    await wait(900);
+    setBedtime('zzz');
     setCorkIn(true);
     setTimeout(() => sound.cork(), 260);
-    await wait(380);
+    await wait(420);
     setWax('pressing');
     sound.thud();
     setTimeout(() => setBurst((b) => b + 1), 420);
@@ -322,6 +327,7 @@ function Wizard({
     } catch (e) {
       setCorked(false);
       setCorkIn(false);
+      setBedtime(null);
       setCandleLit(false);
       setDusk(false);
       setWax('none');
@@ -413,7 +419,20 @@ function Wizard({
                 </ul>
                 <div className="seal-altar">
                   <div className="seal-jar">
-                    <Jar initials={initialsOf(draft.owner)} wax={wax} corked={corkIn} state={wax === 'pressing' ? 'sealed' : 'stirring'} warmth={candleLit ? 0.9 : 0.5} size={180} />
+                    <Jar
+                      initials={initialsOf(draft.owner)}
+                      wax={wax}
+                      corked={corkIn}
+                      state={wax === 'pressing' ? 'sealed' : 'stirring'}
+                      warmth={candleLit ? 0.9 : 0.5}
+                      size={180}
+                      mood={bedtime === 'night' ? 'wink' : bedtime === 'zzz' ? 'sleep' : undefined}
+                    />
+                    {bedtime && (
+                      <span className={`boo-bubble ${bedtime}`} key={bedtime}>
+                        {bedtime === 'night' ? 'Night night!' : 'Zzz…'}
+                      </span>
+                    )}
                     <Sparkles burst={burst} radius={130} count={16} />
                   </div>
                   <div className="seal-candle">

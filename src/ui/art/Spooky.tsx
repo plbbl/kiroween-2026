@@ -1,4 +1,5 @@
 import { useId, type CSSProperties } from 'react';
+import { Ghost } from './Ghost.tsx';
 
 // The Halloween around the cast: the moon, bats, jack-o'-lanterns, cobwebs,
 // a spider, and the hill with the old house. Drawn in the same soft style,
@@ -271,6 +272,10 @@ export function Scenery() {
           <Bat size={30} color="rgba(106, 46, 224, 0.45)" className="flyer f1" />
           <Bat size={22} color="rgba(106, 46, 224, 0.35)" className="flyer f2" />
         </div>
+        {/* Now and then a shy ghost peeks up from the corner, looks at you, and hides. */}
+        <div className="corner-peeker">
+          <Ghost mood="curious" size={84} look={{ x: -0.8, y: -0.6 }} />
+        </div>
       </div>
       <div className="scenery-set night-set nightfall">
         <Moon size={190} className="scenery-moon" />
@@ -280,6 +285,11 @@ export function Scenery() {
           <Bat size={64} color="#0b0714" className="flyer f1" />
           <Bat size={46} color="#0b0714" className="flyer f2" />
           <Bat size={54} color="#0b0714" className="flyer f3" />
+        </div>
+        {/* A ghost with a lantern drifts across the night, slowly, minding its own business. */}
+        <div className="drifter">
+          <Ghost mood="happy" size={58} float />
+          <Lantern size={20} className="drifter-lantern" />
         </div>
       </div>
     </div>

@@ -1735,3 +1735,96 @@ select {
     height: 34px;
   }
 }
+
+/* At night the corners of the screen sink into shadow. */
+.night-set::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(6, 2, 14, 0.5) 100%);
+}
+
+/* A lantern-carrying ghost drifts across the night sky. */
+.drifter {
+  position: absolute;
+  top: 20vh;
+  left: -90px;
+  display: flex;
+  align-items: flex-end;
+  opacity: 0;
+  animation: drift 52s linear infinite;
+  animation-delay: 6s;
+}
+
+.drifter-lantern {
+  margin: 0 0 8px -8px;
+}
+
+@keyframes drift {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  3% {
+    opacity: 0.55;
+  }
+  45% {
+    opacity: 0.55;
+    transform: translate(60vw, -6vh);
+  }
+  50% {
+    opacity: 0;
+    transform: translate(70vw, -4vh);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(70vw, -4vh);
+  }
+}
+
+/* By day, on wide screens, a shy ghost peeks up from the bottom corner now and then. */
+.corner-peeker {
+  position: absolute;
+  right: 3vw;
+  bottom: -110px;
+  animation: corner-peek 26s var(--soft) infinite;
+  animation-delay: 9s;
+}
+
+@keyframes corner-peek {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  84%,
+  94% {
+    transform: translateY(-62px) rotate(-6deg);
+  }
+  97% {
+    transform: translateY(-20px);
+  }
+}
+
+@media (max-width: 1100px) {
+  .corner-peeker {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .drifter {
+    top: 26vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drifter,
+  .corner-peeker {
+    display: none;
+  }
+}
+
+.watching-ghost {
+  display: inline-flex;
+}

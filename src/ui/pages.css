@@ -3470,3 +3470,193 @@ html {
     transform: translate(var(--bx), var(--by)) scale(1);
   }
 }
+
+/* ── Soft, funny haunting ─────────────────────────────────── */
+
+/* The title floats, letter by letter, out of step. */
+.float-letter {
+  display: inline-block;
+  animation: letter-float 3.2s ease-in-out infinite alternate;
+  animation-delay: calc(var(--i) * -0.29s);
+}
+
+@keyframes letter-float {
+  from {
+    transform: translateY(2px) rotate(1deg);
+  }
+  to {
+    transform: translateY(-5px) rotate(-1.5deg);
+  }
+}
+
+/* Shy friends duck behind the hero's edge when the pointer comes near. */
+.edge-peeker {
+  transition: transform 420ms var(--spring);
+}
+
+.edge-peeker.top.ducked {
+  transform: translate(-50%, -18%) rotate(var(--tilt));
+}
+
+.edge-grip {
+  transition:
+    opacity 200ms var(--soft),
+    transform 300ms var(--spring);
+}
+
+.edge-grip.ducked {
+  opacity: 0;
+  transform: translate(-50%, -48%) scale(0.4);
+}
+
+/* The hero jar is a button: poke it. */
+button.hero-jar {
+  position: relative;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 40px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button.hero-jar:focus-visible {
+  outline: 3px solid #ffd25e;
+  outline-offset: 4px;
+}
+
+/* Something is trying to get out. */
+.jar.rattle {
+  animation: jar-rattle 110ms linear infinite;
+}
+
+@keyframes jar-rattle {
+  0% {
+    transform: rotate(0deg) translateX(0);
+  }
+  25% {
+    transform: rotate(-3deg) translateX(-2px);
+  }
+  75% {
+    transform: rotate(3deg) translateX(2px);
+  }
+  100% {
+    transform: rotate(0deg) translateX(0);
+  }
+}
+
+/* What a ghost says, in a speech bubble. */
+.boo-bubble {
+  position: absolute;
+  top: 2%;
+  right: -26%;
+  z-index: 5;
+  padding: 6px 16px 8px;
+  border-radius: 22px 22px 22px 6px;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  white-space: nowrap;
+  box-shadow: 0 10px 24px -10px rgba(20, 8, 50, 0.6);
+  animation: bubble-pop 420ms var(--spring) both;
+  pointer-events: none;
+}
+
+.boo-bubble.boo {
+  font-size: 2rem;
+  letter-spacing: 0.04em;
+  color: #6a2ee0;
+  transform-origin: 0 100%;
+}
+
+@keyframes bubble-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.3) rotate(-12deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .boo-bubble {
+    right: -10%;
+    top: -6%;
+  }
+
+  .boo-bubble.boo {
+    font-size: 1.5rem;
+  }
+}
+
+/* A soft flash of purple lightning as the wax cracks. */
+.lightning {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 30%, rgba(225, 210, 255, 0.55), rgba(142, 71, 255, 0.2) 60%, transparent);
+  opacity: 0;
+  animation: lightning 900ms ease-out forwards;
+}
+
+@keyframes lightning {
+  0% {
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  22% {
+    opacity: 0.15;
+  }
+  32% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lightning {
+    display: none;
+  }
+}
+
+/* Bubbles over the séance jar and the sealing jar. */
+.altar-jar .boo-bubble {
+  top: -4%;
+  right: -46%;
+}
+
+.altar-jar .boo-bubble.laugh {
+  right: -70%;
+  font-size: 1rem;
+  white-space: normal;
+  width: 190px;
+}
+
+.seal-jar .boo-bubble {
+  top: -2%;
+  right: -34%;
+  font-size: 1rem;
+}
+
+@media (max-width: 640px) {
+  .altar-jar .boo-bubble {
+    right: -20%;
+    top: -14%;
+  }
+
+  .altar-jar .boo-bubble.laugh {
+    right: -30%;
+    width: 150px;
+  }
+
+  .seal-jar .boo-bubble {
+    right: -6%;
+  }
+}

@@ -7,7 +7,7 @@ import { Jar, type JarState } from '../ui/art/Jar.tsx';
 import { WaxSeal, type WaxState } from '../ui/art/WaxSeal.tsx';
 import { useAtmosphere } from '../ui/shell.tsx';
 
-const MOODS: Mood[] = ['open', 'curious', 'happy', 'sleep', 'wow', 'worried', 'sad', 'wink'];
+const MOODS: Mood[] = ['open', 'curious', 'happy', 'sleep', 'wow', 'worried', 'sad', 'wink', 'boo', 'laugh'];
 
 /** The cast, for design review. Not linked from the app: open #/gallery. */
 export function Gallery() {
@@ -41,6 +41,15 @@ export function Gallery() {
               <p className="faint">{m}</p>
             </div>
           ))}
+        </div>
+        <div className="row" style={{ gap: 24 }}>
+          <Ghost mood="sleep" nightcap size={96} />
+          <Ghost look={{ x: -1, y: 0 }} size={96} />
+          <Ghost look={{ x: 1, y: 0 }} size={96} />
+          <Ghost look={{ x: 0, y: -1 }} size={96} />
+          <Ghost look={{ x: 0.7, y: 1 }} size={96} />
+          <Ghost mood="boo" costume="vampire" size={96} />
+          <Ghost mood="laugh" costume="pumpkin" size={96} />
         </div>
         <div className="row" style={{ gap: 24, background: '#fff', padding: 20, borderRadius: 24 }}>
           {COSTUMES.map((c, i) => (

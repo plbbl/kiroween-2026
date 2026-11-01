@@ -17,6 +17,12 @@ interface JarProps {
   notes?: boolean;
   size?: number;
   label?: string;
+  /** Overrides the ghost's mood, for a gag. */
+  mood?: Mood;
+  /** Where the ghost inside is looking. */
+  look?: { x: number; y: number };
+  /** Something is trying to get out: the jar rattles. */
+  rattle?: boolean;
 }
 
 // Where the little paper notes fly to when the jar opens: x and y (for a
@@ -39,15 +45,15 @@ const GLASS = 'M66 86 C36 94 22 122 22 156 C22 198 48 226 100 226 C152 226 178 1
  * cork pops, the seal falls away, the ghost floats out and the words fly
  * out with it.
  */
-export function Jar({ state = 'sealed', warmth = 0, initials, wax = 'whole', corked = true, notes = true, size = 220, label }: JarProps) {
+export function Jar({ state = 'sealed', warmth = 0, initials, wax = 'whole', corked = true, notes = true, size = 220, label, mood: given, look, rattle = false }: JarProps) {
   const id = useId().replace(/[^a-zA-Z0-9]/g, '');
-  const mood: Mood = state === 'open' || !corked ? 'happy' : state === 'stirring' ? 'open' : 'sleep';
+  const mood: Mood = given ?? (state === 'open' || !corked ? 'happy' : state === 'stirring' ? 'open' : 'sleep');
   const style = { width: size, height: (size * 240) / 200, '--warmth': warmth } as CSSProperties;
 
   const url = (n: string) => `url(#${n}${id})`;
 
   return (
-    <div className={`jar jar-${state}${corked ? '' : ' uncorked'}`} style={style} role="img" aria-label={label ?? (state === 'open' ? 'The jar is open and the ghost is free' : 'A sealed jar with a ghost asleep inside')}>
+    <div className={`jar jar-${state}${corked ? '' : ' uncorked'}${rattle ? ' rattle' : ''}`} style={style} role="img" aria-label={label ?? (state === 'open' ? 'The jar is open and the ghost is free' : 'A sealed jar with a ghost asleep inside')}>
       <svg className="jar-back" viewBox="0 0 200 240" aria-hidden="true">
         <defs>
           <radialGradient id={`inner${id}`} cx="50%" cy="62%" r="55%">
@@ -72,7 +78,7 @@ export function Jar({ state = 'sealed', warmth = 0, initials, wax = 'whole', cor
       </svg>
 
       <div className="jar-ghost">
-        <Ghost mood={mood} size={size * 0.5} float phase={1.3} rim={0.15 + warmth * 0.5} />
+        <Ghost mood={mood} size={size * 0.5} float phase={1.3} rim={0.15 + warmth * 0.5} look={look} nightcap={mood === 'sleep'} />
         {state === 'sealed' && (
           <span className="jar-zzz" aria-hidden="true">
             <i>z</i>

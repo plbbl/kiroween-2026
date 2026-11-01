@@ -1,8 +1,9 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import type { Costume } from '../core/buddy.ts';
-import { Ghost, type Mood } from '../ui/art/Ghost.tsx';
+import type { Mood } from '../ui/art/Ghost.tsx';
 import { useAtmosphere } from '../ui/shell.tsx';
 import { Pumpkin } from '../ui/art/Spooky.tsx';
+import { WatchingGhost } from '../ui/art/WatchingGhost.tsx';
 
 interface Item {
   title: string;
@@ -122,7 +123,7 @@ function GuideCard({ id, tag, title, sub, costume, mood, items }: { id: string; 
   return (
     <section className={`card guide${id === 'before' ? ' webbed' : ''}`} id={id} aria-labelledby={`${id}-title`}>
       <div className="guide-ghost">
-        <Ghost costume={costume} mood={mood} size={84} float />
+        <WatchingGhost costume={costume} mood={mood} size={84} float />
       </div>
       <p className="tag">{tag}</p>
       <h2 id={`${id}-title`}>{title}</h2>

@@ -203,6 +203,9 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
   const [failure, setFailure] = useState('');
   const [burst, setBurst] = useState(0);
   const [flight, setFlight] = useState<Flight | null>(null);
+  // The opening gag: the jar rattles, lightning, the ghost jumps out with a "BOO!", then laughs.
+  const [gag, setGag] = useState<'boo' | 'laugh' | null>(null);
+  const [flash, setFlash] = useState(0);
   const candleRefs = useRef<(HTMLDivElement | null)[]>([]);
   // The latest circle, readable from callbacks without re-creating them.
   const offeredRef = useRef<Offered[]>([]);
@@ -236,15 +239,22 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
         const [result] = await Promise.all([openJar(jar, circle.map((o) => o.shard)), wait(1500)]);
         setWax('cracking');
         sound.crack();
+        setFlash((f) => f + 1);
+        sound.thunder();
         await wait(600);
         setWax('broken');
         setOpened(result);
         setPhase('open');
+        setGag('boo');
         setBurst((b) => b + 1);
         sound.pop();
-        setTimeout(() => sound.chime(), 180);
+        setTimeout(() => sound.boo(), 120);
         setAnnounce('The seal is broken. The jar is open.');
-        await wait(2600);
+        await wait(1100);
+        setGag('laugh');
+        sound.giggle();
+        setTimeout(() => sound.chime(), 300);
+        await wait(2300);
         setPhase('revealed');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch (e) {
@@ -309,6 +319,7 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
         {announce}
       </p>
       {flight && <FlyingBuddy key={flight.id} flight={flight} onDone={endFlight} />}
+      {flash > 0 && <div className="lightning" key={flash} aria-hidden="true" />}
 
       <section className="narrow center circle-head">
         <p className="tag pop">
@@ -367,7 +378,20 @@ function Circle({ jar, onLeave }: { jar: JarFile; onLeave?: () => void }) {
         })}
 
         <div className="altar-jar" style={{ zIndex: 600 }}>
-          <Jar initials={initialsOf(jar.owner)} state={jarState} wax={wax} warmth={phase === 'gathering' ? offered.length / k : 1} size={210} />
+          <Jar
+            initials={initialsOf(jar.owner)}
+            state={jarState}
+            wax={wax}
+            warmth={phase === 'gathering' ? offered.length / k : 1}
+            size={210}
+            rattle={phase === 'waking'}
+            mood={gag ?? undefined}
+          />
+          {gag && (
+            <span className={`boo-bubble ${gag}`} key={gag} aria-hidden="true">
+              {gag === 'boo' ? 'BOO!' : 'Ha! Just kidding. Hello, friends.'}
+            </span>
+          )}
           <Sparkles burst={burst} radius={200} count={22} />
           {/* When the cork pops, a few bats that were sleeping in the jar fly out. */}
           {phase === 'open' && (
