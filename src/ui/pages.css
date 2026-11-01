@@ -712,6 +712,28 @@ input[aria-invalid='true'] {
   font-weight: 600;
 }
 
+/* The jar, and a candle that wakes for the sealing. */
+.seal-altar {
+  position: relative;
+}
+
+.seal-candle {
+  position: absolute;
+  right: -40px;
+  bottom: -4px;
+  z-index: 2;
+}
+
+.summary li {
+  transition:
+    background-color 900ms var(--soft),
+    color 900ms var(--soft);
+}
+
+[data-theme='night'] .summary li {
+  background: rgba(205, 184, 255, 0.12);
+}
+
 .seal-jar {
   position: relative;
   padding: 22px 36px 4px;

@@ -645,6 +645,10 @@ select {
   border-radius: var(--r-lg);
   padding: 30px;
   box-shadow: var(--shadow);
+  /* When night falls on a page (the sealing), its cards dim with it. */
+  transition:
+    background-color 900ms var(--soft),
+    border-color 900ms var(--soft);
 }
 
 /* At night, cards and notes are dense enough that no star shines through the words. */

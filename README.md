@@ -39,14 +39,14 @@ Kiroween purple and a cast of little ghosts drawn as SVG, shaded like soft vinyl
 | Element | What it tells you |
 |---|---|
 | A card's ghost buddy | A visual fingerprint. Each card in a circle gets its own costume and emblem, derived from the jar and the card, so the ghost on screen must match the ghost on paper |
-| Sleepy candles | Unlock progress: each card wakes one candle |
+| Sleepy candles | Unlock progress: each card wakes one candle. One candle also wakes for the sealing |
 | The ghost in the jar | Awake while you write; asleep once corked and sealed; stirring as candles light; out and happy when open, with your words flying out as little notes |
 | The ring on the rug | Warms to amber as the circle gathers |
 | The wax seal | Pressed when the jar is encrypted, cracked when it opens |
 | The watch ghost's face | The watch state: happy, asking, worried, or holding up a sign for your friends |
-| Day and night | A starry night when you arrive and when friends gather; lilac paper while you write and keep watch. Night falls from the top of the screen and lifts the same way |
+| Day and night | A starry night when you arrive; lilac paper while you write and keep watch; night falls when you seal, and again when friends gather. It falls from the top of the screen and lifts the same way |
 
-Motion marks a change of state, and is springy and small: the cork drops in and the wax is stamped, a tapped card glows and its ghost flies to a candle, the candle wakes, the seal cracks and the cork spins away, envelopes open and letters slide out. Only the ghost in focus and lit flames move on their own. All sounds (a match, a flame, wax pressed and cracking, a bell) are synthesised live with the Web Audio API; there are no audio files, and sound is off until you turn it on. With *reduce motion* set, every state is kept and the movement is dropped. Printed cards are black-and-white line art.
+Motion marks a change of state, and is springy and small: night falls and a candle wakes, the cork drops in and the wax is stamped, a tapped card glows and its ghost flies to a candle, the candle wakes, the seal cracks and the cork spins away, envelopes open and letters slide out. Only the ghost in focus and lit flames move on their own. All sounds (a match, a flame, wax pressed and cracking, a bell) are synthesised live with the Web Audio API; there are no audio files, and sound is off until you turn it on. With *reduce motion* set, every state is kept and the movement is dropped. Printed cards are black-and-white line art.
 
 ## Three promises
 

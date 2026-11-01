@@ -3,12 +3,13 @@ import { circleBuddies, circleCostumes } from '../../core/buddy.ts';
 import { randomBytes } from '../../core/bytes.ts';
 import { JAR_ID_LENGTH, type KeyCard } from '../../core/cards.ts';
 import { emptyContent, jarIdBytes, resealJar, sealJar, validateSealInput, type JarContent, type JarFile, type OwnedJar, type SealResult } from '../../core/jar.ts';
+import { Candle } from '../../ui/art/Candle.tsx';
 import { Sparkles } from '../../ui/art/Decor.tsx';
 import { Ghost } from '../../ui/art/Ghost.tsx';
 import { Jar } from '../../ui/art/Jar.tsx';
 import { initialsOf, type WaxState } from '../../ui/art/WaxSeal.tsx';
 import { capitalised, numberWord, plural } from '../../ui/text.ts';
-import { useAtmosphere, useLeaveWarning, wait } from '../../ui/shell.tsx';
+import { useAtmosphere, useLeaveWarning, useShell, wait } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
 import { Sealed, Updated } from './Sealed.tsx';
 import { OpenForUpdate } from './Update.tsx';
@@ -112,7 +113,6 @@ interface Kept {
 let kept: Kept | null = null;
 
 export function Seal({ params, embedded }: { params: URLSearchParams; embedded: JarFile | null }) {
-  useAtmosphere('day');
   const [existing, setExisting] = useState<Existing | null>(null);
   const [fresh, setFresh] = useState(0);
   if (params.has('update') && !existing) return <OpenForUpdate jar={embedded} onOpen={setExisting} />;
@@ -137,10 +137,20 @@ function Wizard({ existing, onStartOver }: { existing: Existing | null; onStartO
   const [reached, setReached] = useState(updating ? STEPS.length - 1 : (memory?.reached ?? 0));
   const [direction, setDirection] = useState<1 | -1>(1);
   const [wax, setWax] = useState<WaxState | 'none'>('none');
+  // Sealing has begun (the button waits); the cork is in.
   const [corked, setCorked] = useState(false);
+  const [corkIn, setCorkIn] = useState(false);
   const [burst, setBurst] = useState(0);
   const [result, setResult] = useState<SealResult | null>(memory?.result ?? null);
   const [updated, setUpdated] = useState<JarFile | null>(null);
+  // You write by day. Sealing happens by candlelight, and the sealed jar sleeps under the night sky.
+  const [dusk, setDusk] = useState(false);
+  const [candleLit, setCandleLit] = useState(false);
+  useAtmosphere(dusk || result || updated ? 'night' : 'day');
+  const shell = useShell();
+  useEffect(() => {
+    shell.setCandlelight(candleLit ? 0.9 : result || updated ? 0.5 : 0);
+  }, [shell, candleLit, result, updated]);
   useEffect(() => {
     if (!updating) kept = { jarId, draft, step, reached, result };
   }, [updating, jarId, draft, step, reached, result]);
@@ -192,9 +202,8 @@ function Wizard({ existing, onStartOver }: { existing: Existing | null; onStartO
       setError(problems[0]!);
       return;
     }
-    // The cork drops in, the wax is stamped, the ghost falls asleep.
-    setCorked(true);
-    setTimeout(() => sound.cork(), 260);
+    // Night falls and a candle wakes; then the cork drops in, the wax is
+    // stamped, and the ghost falls asleep. The jar is sealed meanwhile.
     const sealing: Promise<SealResult | JarFile> = existing
       ? resealJar(existing.jar, existing.key, {
           content: draft.content,
@@ -202,6 +211,15 @@ function Wizard({ existing, onStartOver }: { existing: Existing | null; onStartO
         })
       : sealJar(input);
     sealing.catch(() => undefined); // handled below, once the wax is down
+    setDusk(true);
+    setCorked(true);
+    sound.strike();
+    await wait(520);
+    setCandleLit(true);
+    sound.ignite();
+    await wait(560);
+    setCorkIn(true);
+    setTimeout(() => sound.cork(), 260);
     await wait(380);
     setWax('pressing');
     sound.thud();
@@ -213,6 +231,9 @@ function Wizard({ existing, onStartOver }: { existing: Existing | null; onStartO
       window.scrollTo({ top: 0 });
     } catch (e) {
       setCorked(false);
+      setCorkIn(false);
+      setCandleLit(false);
+      setDusk(false);
       setWax('none');
       setError(e instanceof Error ? e.message : 'The jar could not be sealed.');
     }
@@ -287,9 +308,14 @@ function Wizard({ existing, onStartOver }: { existing: Existing | null; onStartO
                     <b>{capitalised(numberWord(draft.threshold))}</b> of {numberWord(draft.holders.length)} to open
                   </li>
                 </ul>
-                <div className="seal-jar">
-                  <Jar initials={initialsOf(draft.owner)} wax={wax} corked={corked} state={wax === 'pressing' ? 'sealed' : 'stirring'} warmth={0.5} size={180} />
-                  <Sparkles burst={burst} radius={130} count={16} />
+                <div className="seal-altar">
+                  <div className="seal-jar">
+                    <Jar initials={initialsOf(draft.owner)} wax={wax} corked={corkIn} state={wax === 'pressing' ? 'sealed' : 'stirring'} warmth={candleLit ? 0.9 : 0.5} size={180} />
+                    <Sparkles burst={burst} radius={130} count={16} />
+                  </div>
+                  <div className="seal-candle">
+                    <Candle lit={candleLit} justLit={candleLit} size={64} label={candleLit ? 'A candle, lit for the sealing' : 'A candle, waiting to be lit'} />
+                  </div>
                 </div>
                 <button type="button" className="btn primary big" onClick={seal} disabled={corked}>
                   {corked ? 'Sealing…' : updating ? 'Seal the new words' : 'Seal the jar'}

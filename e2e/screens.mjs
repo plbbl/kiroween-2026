@@ -91,9 +91,13 @@ for (const which of sizes) {
     await wait(900);
     await shot('s6-ready');
     await p.getByRole('button', { name: 'Seal the jar' }).evaluate((el) => el.click());
-    await wait(300);
+    await wait(350);
+    await shot('s6-dusk');
+    await wait(500);
+    await shot('s6-candle');
+    await wait(600);
     await shot('s6-cork');
-    await wait(450);
+    await wait(500);
     await shot('s6-wax');
     await p.getByRole('heading', { name: /Sealed!/ }).waitFor({ timeout: 10000 });
     await wait(600);

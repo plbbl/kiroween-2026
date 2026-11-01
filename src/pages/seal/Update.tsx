@@ -6,7 +6,7 @@ import { Jar } from '../../ui/art/Jar.tsx';
 import { initialsOf } from '../../ui/art/WaxSeal.tsx';
 import { CardInput } from '../../ui/components/CardInput.tsx';
 import { jarFromText } from '../../ui/grimoire.ts';
-import { href } from '../../ui/shell.tsx';
+import { href, useAtmosphere } from '../../ui/shell.tsx';
 import { sound } from '../../ui/sound.ts';
 import type { Existing } from './Seal.tsx';
 
@@ -16,6 +16,7 @@ import type { Existing } from './Seal.tsx';
  * owner chooses the file first.
  */
 export function OpenForUpdate({ jar: given, onOpen }: { jar: JarFile | null; onOpen: (e: Existing) => void }) {
+  useAtmosphere('day');
   const [jar, setJar] = useState<JarFile | null>(given);
   const [fileError, setFileError] = useState('');
   const [over, setOver] = useState(false);
